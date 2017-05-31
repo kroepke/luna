@@ -52,10 +52,10 @@ public abstract class AbstractFunction4 extends LuaFunction {
 		switch (args.length) {
 			default:
 			case 4: d = args[3];
-			case 3: c = args[2];
-			case 2: b = args[1];
-			case 1: a = args[0];
-			case 0:
+			case 3: c = args[2]; // fall through
+			case 2: b = args[1]; // fall through
+			case 1: a = args[0]; // fall through
+			case 0:              // fall through
 		}
 		invoke(context, a, b, c, d);
 	}
