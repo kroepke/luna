@@ -149,14 +149,14 @@ public class ImmutableTable extends Table {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		ImmutableTable that = (ImmutableTable) o;
-		return this.entries.equals(that.entries)
-				&& this.initialKey.equals(that.initialKey);
+		return entries.equals(that.entries)
+				&& (initialKey != null ? initialKey.equals(that.initialKey) : that.initialKey == null);
 	}
 
 	@Override
 	public int hashCode() {
 		int result = entries.hashCode();
-		result = 31 * result + initialKey.hashCode();
+		result = 31 * result + (initialKey != null ? initialKey.hashCode() : 0);
 		return result;
 	}
 
