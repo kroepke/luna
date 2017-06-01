@@ -13,7 +13,7 @@
   </parent>
 
   <artifactId>rembulan-compiler</artifactId>
-  <version>${project.parent.version}</version>
+  <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Rembulan Compiler</name>
