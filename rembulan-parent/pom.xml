@@ -58,6 +58,31 @@
     </repository>
   </distributionManagement>
 
+  <repositories>
+    <repository>
+      <id>sonatype-nexus-snapshots</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>sonatype-nexus-releases</id>
+      <name>Sonatype Nexus Releases</name>
+      <url>https://oss.sonatype.org/content/repositories/releases</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
   <dependencies>
   </dependencies>
 
@@ -93,6 +118,9 @@
                only supports >=6 -->
           <source>8</source>
           <target>8</target>
+          <compilerArgs>
+            <arg>-XepDisableWarningsInGeneratedCode</arg>
+          </compilerArgs>
         </configuration>
         <dependencies>
           <dependency>
