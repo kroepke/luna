@@ -50,9 +50,9 @@ public abstract class AbstractFunction2 extends LuaFunction {
 	public void invoke(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
 		Object a = null, b = null;
 		switch (args.length) {
-			default:
-			case 2: b = args[1];
-			case 1: a = args[0];
+			default:             // fall through
+			case 2: b = args[1]; // fall through
+			case 1: a = args[0]; // fall through
 			case 0:
 		}
 		invoke(context, a, b);

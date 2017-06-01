@@ -875,16 +875,18 @@ public final class BasicLib {
 
 			switch (state) {
 
-				case 0:
+				case 0: // fall through
 					try {
 						Dispatch.index(context, envTable, ToString.KEY);
 					}
 					catch (UnresolvedControlThrowable ct) {
 						throw ct.resolve(this, new SuspendedState(1, null, args));
 					}
+				// fall through
 
 				case 1:
 					tostring = context.getReturnBuffer().get0();
+					// fall through
 
 				case 2:
 					try {

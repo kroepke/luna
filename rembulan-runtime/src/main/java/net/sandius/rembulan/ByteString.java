@@ -184,7 +184,7 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 */
 	@Override
 	public final boolean equals(Object o) {
-		return this == o || o instanceof ByteString && this.equals((ByteString) o);
+		return (this == o) || ((o instanceof ByteString) && this.equalsByteString((ByteString) o));
 	}
 
 	/**
@@ -206,7 +206,7 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 */
 	abstract int maybeHashCode();
 
-	abstract boolean equals(ByteString that);
+	abstract boolean equalsByteString(ByteString that);
 
 	/**
 	 * Returns a new byte array containing the bytes of this byte string.

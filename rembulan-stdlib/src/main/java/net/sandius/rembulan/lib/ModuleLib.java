@@ -361,6 +361,7 @@ public final class ModuleLib {
 							}
 							state = 1;
 							Dispatch.call(context, o, modName);
+							// fall through
 
 						case 1:
 							Object result = context.getReturnBuffer().get0();

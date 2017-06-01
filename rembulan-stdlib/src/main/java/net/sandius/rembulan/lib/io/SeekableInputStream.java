@@ -39,6 +39,12 @@ public class SeekableInputStream extends InputStream implements SeekableStream {
 		return result;
 	}
 
+	// TODO implement more efficient version
+	@Override
+	public int read(byte[] b, int off, int len) throws IOException {
+		return super.read(b, off, len);
+	}
+
 	@Override
 	public long getPosition() {
 		return position;

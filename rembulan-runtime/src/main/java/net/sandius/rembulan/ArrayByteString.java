@@ -42,7 +42,7 @@ class ArrayByteString extends ByteString {
 	}
 
 	@Override
-	protected boolean equals(ByteString that) {
+	protected boolean equalsByteString(ByteString that) {
 		if (this.length() != that.length()) return false;
 
 		int len = this.length();

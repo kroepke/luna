@@ -1001,7 +1001,7 @@ public final class MathLib {
 
 			double d = x.doubleValue();
 
-			if (d == d) {
+			if (!Double.isNaN(d)) {
 				double dd = d < 0 ? Math.ceil(d) : Math.floor(d);
 				long l = (long) dd;
 				if (dd == (double) l) {

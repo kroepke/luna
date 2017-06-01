@@ -380,12 +380,14 @@ public final class TableLib {
 					case STATE_LEN_PREPARE:
 						state = STATE_LEN_RESUME;
 						Dispatch.len(context, t);  // may suspend, will pass #obj through the stack
+						// fall through
 
 					// resume point #1
 					case STATE_LEN_RESUME: {
 						// pass length in k
 						k = getLength(context.getReturnBuffer());
 					}
+					// fall through
 
 					// entry point for t without __len; k == #t
 					case STATE_BEFORE_LOOP: {
@@ -427,6 +429,7 @@ public final class TableLib {
 							return;
 						}
 					}
+					// fall through
 
 					case STATE_LOOP: {
 						while (true) {
@@ -583,6 +586,7 @@ public final class TableLib {
 					case _LEN_PREPARE:
 						state = _LEN_RESUME;
 						Dispatch.len(context, t);
+						// fall through
 
 					case _LEN_RESUME: {
 						len = getLength(context.getReturnBuffer());
@@ -658,10 +662,12 @@ public final class TableLib {
 							if (k <= pos) {
 								break loop;  // end the loop
 							}
+							// fall through
 
 						case _LOOP_TABGET:
 							state = _LOOP_TABSET;
 							Dispatch.index(context, t, k - 1);
+							// fall through
 
 						case _LOOP_TABSET:
 							state = _LOOP_TEST;
@@ -692,6 +698,7 @@ public final class TableLib {
 					case _END_TABSET:
 						state = _END_RETURN;
 						Dispatch.setindex(context, t, pos, value);
+						// fall through
 
 					case _END_RETURN:
 						break;
@@ -820,13 +827,16 @@ public final class TableLib {
 								return;
 							}
 						}
+						// fall through
 						case 1:
 							state = 2;
 							Dispatch.index(context, a1, f + idx);
+							// fall through
 						case 2:
 							Object v = context.getReturnBuffer().get0();
 							state = 3;
 							Dispatch.setindex(context, a2, t + idx, v);
+							// fall through
 						case 3:
 							idx += (asc ? 1 : -1);
 							state = 0;
@@ -979,6 +989,7 @@ public final class TableLib {
 					case _LEN_PREPARE:
 						state = _LEN_RESUME;
 						Dispatch.len(context, t);
+						// fall through
 
 					case _LEN_RESUME: {
 						len = getLength(context.getReturnBuffer());
@@ -1043,6 +1054,7 @@ public final class TableLib {
 					case _GET_PREPARE:
 						state = _GET_RESUME;
 						Dispatch.index(context, t, pos);
+						// fall through
 
 					case _GET_RESUME:
 						result = context.getReturnBuffer().get0();
@@ -1081,10 +1093,12 @@ public final class TableLib {
 							if (k > len) {
 								break loop;  // end the loop
 							}
+							// fall through
 
 						case _LOOP_TABGET:
 							state = _LOOP_TABSET;
 							Dispatch.index(context, t, k);
+							// fall through
 
 						case _LOOP_TABSET:
 							state = _LOOP_TEST;
@@ -1114,6 +1128,7 @@ public final class TableLib {
 					case _ERASE_PREPARE:
 						state = _ERASE_RESUME;
 						Dispatch.setindex(context, t, idx, null);
+						// fall through
 
 					case _ERASE_RESUME:
 						// we're done
@@ -1215,6 +1230,7 @@ public final class TableLib {
 					case STATE_OFFSET_LEN:
 						state = STATE_OFFSET_LEN + 1;
 						Dispatch.len(context, t);
+						// fall through
 					case STATE_OFFSET_LEN + 1:
 						len = getLength(context.getReturnBuffer());
 						break;
@@ -1304,6 +1320,7 @@ public final class TableLib {
 						}
 						state = STATE_OFFSET_HEAPIFY + 1;
 						doSiftDown(context, state, t, comp, start, count);
+						// fall through
 
 					case STATE_OFFSET_HEAPIFY + 1:
 						state = STATE_OFFSET_HEAPIFY;
@@ -1330,11 +1347,13 @@ public final class TableLib {
 							}
 							state = STATE_OFFSET_SORT + 1;
 							Dispatch.index(context, t, 1);
+							// fall through
 
 						case STATE_OFFSET_SORT + 1:
 							beginValue = context.getReturnBuffer().get0();
 							state = STATE_OFFSET_SORT + 2;
 							Dispatch.index(context, t, end);
+							// fall through
 
 						case STATE_OFFSET_SORT + 2:
 							endValue = context.getReturnBuffer().get0();
@@ -1349,6 +1368,7 @@ public final class TableLib {
 
 							state = STATE_OFFSET_SORT + 3;
 							_lt(context, comp, beginValue, endValue);
+							// fall through
 
 						case STATE_OFFSET_SORT + 3:
 							if (Conversions.booleanValueOf(context.getReturnBuffer().get0())) {
@@ -1359,10 +1379,12 @@ public final class TableLib {
 							// next: swap begin and end values in the table
 							state = STATE_OFFSET_SORT + 4;
 							Dispatch.setindex(context, t, end, beginValue);
+							// fall through
 
 						case STATE_OFFSET_SORT + 4:
 							state = STATE_OFFSET_SORT + 5;
 							Dispatch.setindex(context, t, 1, endValue);
+							// fall through
 
 						case STATE_OFFSET_SORT + 5:
 							// we don't need beginValue or endValue any longer
@@ -1414,11 +1436,13 @@ public final class TableLib {
 							child = root * 2;
 							siftState = 1;
 							Dispatch.index(context, t, root);
+							// fall through
 
 						case 1:
 							rootValue = context.getReturnBuffer().get0();
 							siftState = 2;
 							Dispatch.index(context, t, child);
+							// fall through
 
 						case 2:
 							childValue = context.getReturnBuffer().get0();
@@ -1432,11 +1456,13 @@ public final class TableLib {
 								siftState = 3;
 								Dispatch.index(context, t, child + 1);
 							}
+							// fall through
 
 						case 3:
 							tmp = context.getReturnBuffer().get0();
 							siftState = 4;
 							_lt(context, comp, childValue, tmp);
+							// fall through
 
 						case 4:
 							if (Conversions.booleanValueOf(context.getReturnBuffer().get0())) {
@@ -1445,11 +1471,13 @@ public final class TableLib {
 								childValue = tmp;
 								tmp = null;
 							}
+							// fall through
 
 						case 5:
 							// childValue and child is up-to-date
 							siftState = 6;
 							_lt(context, comp, rootValue, childValue);
+							// fall through
 
 						case 6:
 							if (!Conversions.booleanValueOf(context.getReturnBuffer().get0())) {
@@ -1461,10 +1489,12 @@ public final class TableLib {
 
 							siftState = 7;
 							Dispatch.setindex(context, t, root, childValue);
+							// fall through
 
 						case 7:
 							siftState = 8;
 							Dispatch.setindex(context, t, child, rootValue);
+							// fall through
 
 						case 8:
 							root = child;
@@ -1606,10 +1636,12 @@ public final class TableLib {
 					case STATE_LEN_PREPARE:
 						state = STATE_LEN_RESUME;
 						Dispatch.len(context, obj);  // may suspend, will pass #obj through the stack
+						// fall through
 
 					case STATE_LEN_RESUME: {
 						j = getLength(context.getReturnBuffer());
 					}
+					// fall through
 
 					case STATE_BEFORE_LOOP:
 						// j is known;
@@ -1638,6 +1670,7 @@ public final class TableLib {
 							context.getReturnBuffer().setTo();
 							return;
 						}
+						// fall through
 
 					case STATE_LOOP: {
 						while (true) {

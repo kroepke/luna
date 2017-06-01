@@ -510,7 +510,7 @@ public final class LuaMathOperators {
 			return (double) a < b;
 		}
 		else {
-			return b == b && b > MIN_LONG_AS_DOUBLE && (b >= MAX_LONG_AS_DOUBLE || a < (long) b);
+			return !Double.isNaN(b) && b > MIN_LONG_AS_DOUBLE && (b >= MAX_LONG_AS_DOUBLE || a < (long) b);
 		}
 	}
 
@@ -526,7 +526,7 @@ public final class LuaMathOperators {
 	 *          would evaluate to (Lua) <b>true</b>
 	 */
 	public static boolean lt(double a, long b) {
-		return a == a && !le(b, a);
+		return !Double.isNaN(a) && !le(b, a);
 	}
 
 	/**
@@ -577,7 +577,7 @@ public final class LuaMathOperators {
 			return (double) a <= b;
 		}
 		else {
-			return b == b && b > MIN_LONG_AS_DOUBLE && (b >= MAX_LONG_AS_DOUBLE || a <= (long) b);
+			return !Double.isNaN(b) && b > MIN_LONG_AS_DOUBLE && (b >= MAX_LONG_AS_DOUBLE || a <= (long) b);
 		}
 	}
 
@@ -594,7 +594,7 @@ public final class LuaMathOperators {
 	 *          would evaluate to (Lua) <b>true</b>
 	 */
 	public static boolean le(double a, long b) {
-		return a == a && !lt(b, a);
+		return !Double.isNaN(a) && !lt(b, a);
 	}
 
 	/**

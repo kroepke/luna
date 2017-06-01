@@ -34,4 +34,9 @@ class ByteStringInputStream extends InputStream {
 		return !iterator.hasNext() ? -1 : iterator.nextByte() & 0xff;
 	}
 
+	// TODO implement more efficient version
+	@Override
+	public int read(byte[] b, int off, int len) throws IOException {
+		return super.read(b, off, len);
+	}
 }

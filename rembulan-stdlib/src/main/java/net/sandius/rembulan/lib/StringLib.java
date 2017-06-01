@@ -932,6 +932,7 @@ public final class StringLib {
 
 		private static final long L_1E18  = 1000000000000000000L;
 		private static final long L_9E18  =  9 * L_1E18;
+		@SuppressWarnings({"ConstantOverflow", "NumericOverflow"})
 		private static final long L_10E18 = 10 * L_1E18;  // overflows, and that's the point
 
 		public static String longToUnsignedString(long x) {

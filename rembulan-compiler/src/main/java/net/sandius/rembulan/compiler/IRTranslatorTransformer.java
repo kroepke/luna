@@ -935,18 +935,18 @@ class IRTranslatorTransformer extends Transformer {
 				// fill in the rest from the stack; note that the cases fall through
 				MultiVal mv = multis.pop();
 				switch (i) {
-					case 0: insns.add(new MultiGet(t_f, mv, 0));
-					case 1: insns.add(new MultiGet(t_s, mv, 1));
-					case 2: insns.add(new MultiGet(t_var0, mv, 2));
+					case 0: insns.add(new MultiGet(t_f, mv, 0)); // fall through
+					case 1: insns.add(new MultiGet(t_s, mv, 1)); // fall through
+					case 2: insns.add(new MultiGet(t_var0, mv, 2)); // fall through
 					default:
 				}
 			}
 			else {
 				// pad with nils if necessary; note that the cases fall through
 				switch (i) {
-					case 0: insns.add(new LoadConst.Nil(t_f));
-					case 1: insns.add(new LoadConst.Nil(t_s));
-					case 2: insns.add(new LoadConst.Nil(t_var0));
+					case 0: insns.add(new LoadConst.Nil(t_f)); // fall through
+					case 1: insns.add(new LoadConst.Nil(t_s)); // fall through
+					case 2: insns.add(new LoadConst.Nil(t_var0)); // fall through
 					default:
 				}
 			}

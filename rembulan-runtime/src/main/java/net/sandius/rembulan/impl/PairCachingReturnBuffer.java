@@ -135,8 +135,8 @@ class PairCachingReturnBuffer implements ReturnBuffer {
 		Object o0 = null, o1 = null;
 		switch (sz) {
 			default:
-			case 2: o1 = a[1];
-			case 1: o0 = a[0];
+			case 2: o1 = a[1]; // fall through
+			case 1: o0 = a[0]; // fall through
 			case 0:
 		}
 		_0 = o0;

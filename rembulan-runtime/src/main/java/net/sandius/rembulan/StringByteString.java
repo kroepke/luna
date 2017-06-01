@@ -48,7 +48,7 @@ class StringByteString extends ByteString {
 	}
 
 	@Override
-	protected boolean equals(ByteString that) {
+	protected boolean equalsByteString(ByteString that) {
 		if (this.isEmpty() && that.isEmpty()) return true;
 
 		// don't force hashCode computation, but use if already known

@@ -20,6 +20,7 @@ import net.sandius.rembulan.runtime.{IllegalOperationAttemptException, LuaFuncti
 import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations, OneLiners}
 import net.sandius.rembulan.{ConversionException, LuaRuntimeException, Table}
 
+//noinspection TypeAnnotation
 object BasicFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
   val JustX = fragment ("JustX") {
