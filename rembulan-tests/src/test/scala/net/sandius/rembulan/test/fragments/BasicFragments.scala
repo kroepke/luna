@@ -82,7 +82,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return x
     """
   }
-  LocalEnvResolution in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to index a nil value")
+  LocalEnvResolution in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to index a nil value")
 
   val LocalReassignResolve = fragment ("LocalReassignResolve") {
     """local f = function (i) return "f1" end
@@ -100,7 +100,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """return x + 1
     """
   }
-  JustAdd in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to perform arithmetic on a nil value")
+  JustAdd in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to perform arithmetic on a nil value")
 
   val AddNumbers = fragment ("AddNumbers") {
     """local a = 39
@@ -120,7 +120,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """if x >= 0 and x <= 10 then print(x) end
     """
   }
-  IfThenElse in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to compare number with nil")
+  IfThenElse in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to compare number with nil")
 
   val Or1 = fragment ("Or1") {
     """local assert = assert or function() return end
@@ -201,13 +201,13 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """return 1 < "1"
     """
   }
-  MixedCmp in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to compare number with string")
+  MixedCmp in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to compare number with string")
 
   val MixedCmpReverse = fragment ("MixedCmpReverse") {
     """return 1 > "1"
     """
   }
-  MixedCmpReverse in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to compare string with number")
+  MixedCmpReverse in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to compare string with number")
 
   val MultiReturn = fragment ("MultiReturn") {
     """local function f() end
@@ -308,25 +308,25 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """for i = "a", "b", "c" do end
     """
   }
-  IllegalForLoop1 in EmptyContext failsWith(classOf[ConversionException], "'for' limit must be a number")
+  IllegalForLoop1 in EmptyContext failsWith (classOf[ConversionException], ""<<"'for' limit must be a number")
 
   val IllegalForLoop2 = fragment ("IllegalForLoop2") {
     """for i = "a", 0, "c" do end
     """
   }
-  IllegalForLoop2 in EmptyContext failsWith(classOf[ConversionException], "'for' step must be a number")
+  IllegalForLoop2 in EmptyContext failsWith (classOf[ConversionException], ""<<"'for' step must be a number")
 
   val IllegalForLoop3 = fragment ("IllegalForLoop3") {
     """for i = "a", 0, 0 do end
     """
   }
-  IllegalForLoop3 in EmptyContext failsWith(classOf[ConversionException], "'for' initial value must be a number")
+  IllegalForLoop3 in EmptyContext failsWith (classOf[ConversionException], ""<<"'for' initial value must be a number")
 
   val IllegalForLoop4 = fragment ("IllegalForLoop4") {
     """for i = 1, "x" do end
     """
   }
-  IllegalForLoop4 in EmptyContext failsWith(classOf[ConversionException], "'for' limit must be a number")
+  IllegalForLoop4 in EmptyContext failsWith (classOf[ConversionException], ""<<"'for' limit must be a number")
 
   val NaNForLoop = fragment ("NaNForLoop") {
     """local n = 0
@@ -401,8 +401,8 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |for i = nt(0), 10 do assert(false) end
     """
   }
-  ForLoopMtAttempt in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
-  ForLoopMtAttempt in BasicContext failsWith (classOf[ConversionException], "'for' initial value must be a number")
+  ForLoopMtAttempt in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to call a nil value")
+  ForLoopMtAttempt in BasicContext failsWith (classOf[ConversionException], ""<<"'for' initial value must be a number")
 
   val ForLoopVarNameResolution = fragment ("ForLoopVarNameResolution") {
     """local count = 0
@@ -472,7 +472,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """return x & y
     """
   }
-  BitwiseAttemptError in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to perform bitwise operation on a nil value")
+  BitwiseAttemptError in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to perform bitwise operation on a nil value")
 
   val BitwiseRepresentationError = fragment ("BitwiseRepresentationError") {
     """local function int(x)
@@ -481,15 +481,15 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |int(3.1)
     """
   }
-  BitwiseRepresentationError in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "number has no integer representation")
+  BitwiseRepresentationError in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"number has no integer representation")
 
   val BitwiseError = fragment ("BitwiseError") {
     """local x = print or 1.2
       |return 10 & x
     """
   }
-  BitwiseError in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "number has no integer representation")
-  BitwiseError in BasicContext failsWith (classOf[IllegalOperationAttemptException], "attempt to perform bitwise operation on a function value")
+  BitwiseError in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"number has no integer representation")
+  BitwiseError in BasicContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to perform bitwise operation on a function value")
 
   val UnmOnNumbers = fragment ("UnmOnNumbers") {
     """local i = 42
@@ -519,13 +519,13 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return -s
     """
   }
-  UnmOnNonNumericString in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to perform arithmetic on a string value")
+  UnmOnNonNumericString in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to perform arithmetic on a string value")
 
   val UnmOnNil = fragment ("UnmOnNil") {
     """return -x
     """
   }
-  UnmOnNil in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to perform arithmetic on a nil value")
+  UnmOnNil in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to perform arithmetic on a nil value")
 
   val StringLength = fragment ("StringLength") {
     """local s = "hello"
@@ -571,7 +571,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """return #t
     """
   }
-  NilTableLength in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to get length of a nil value")
+  NilTableLength in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to get length of a nil value")
 
   val TableFloatKeys = fragment ("TableFloatKeys") {
     """local x = -1
@@ -609,7 +609,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """return "x = "..x
     """
   }
-  ConcatNil in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to concatenate a nil value")
+  ConcatNil in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to concatenate a nil value")
 
   val ConcatNumeric = fragment ("ConcatNumeric") {
     """local i = 1
@@ -757,7 +757,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return f(3),f(-2)
     """
   }
-  Tailcalls in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
+  Tailcalls in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to call a nil value")
 
   val YesTailcall = fragment ("YesTailcall") {
     """return (function () return 1, 2 end)()
@@ -798,7 +798,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |end
     """
   }
-  DeterminateVarargs in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to compare number with nil")
+  DeterminateVarargs in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to compare number with nil")
 
   val ReturnVarargs = fragment ("ReturnVarargs") {
     """return ...
@@ -865,7 +865,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return d(e, ...)
     """
   }
-  VarargDecomposition in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
+  VarargDecomposition in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to call a nil value")
 
   val VarargCallWithFixedPrefix = fragment ("VarargCallWithFixedPrefix") {
     """x = 10
@@ -1057,7 +1057,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |end
     """
   }
-  GotoLocalSlot_withX in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
+  GotoLocalSlot_withX in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to call a nil value")
 
   // test should fail, reported succeeding in Lua 5.2, 5.3
   val GotoLocalSlot_withoutX = fragment ("GotoLocalSlot_withoutX") {
@@ -1072,7 +1072,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |end
     """
   }
-  GotoLocalSlot_withoutX in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
+  GotoLocalSlot_withoutX in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to call a nil value")
 
   val GotoLastStatementWithLocals = fragment ("GotoLastStatementWithLocals") {
     """goto l
@@ -1186,7 +1186,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |setmetatable(t, {})
     """
   }
-  SetMetatableRefusesMetatableField in BasicContext failsWith (classOf[IllegalOperationAttemptException], "cannot change a protected metatable")
+  SetMetatableRefusesMetatableField in BasicContext failsWith (classOf[IllegalOperationAttemptException], ""<<"cannot change a protected metatable")
 
   val TypesOfValues = fragment ("TypesOfValues") {
     """return type(x), type(true), type(false), type(42), type(42.0), type("hello"), type({})
@@ -1261,7 +1261,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """error("boom!")
     """
   }
-  ErrorThrowsAnError in BasicContext failsWith (classOf[LuaRuntimeException], "boom!")
+  ErrorThrowsAnError in BasicContext failsWith (classOf[LuaRuntimeException], ""<<"boom!")
 
   val ErrorWithoutArguments = fragment ("ErrorWithoutArguments") {
     """local a, b = pcall(error)
@@ -1307,13 +1307,13 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """return rawequal()
     """
   }
-  RawEqualWithNoArgs in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'rawequal' (value expected)")
+  RawEqualWithNoArgs in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'rawequal' (value expected)")
 
   val RawEqualWithOneArg = fragment ("RawEqualWithOneArg") {
     """return rawequal(42)
     """
   }
-  RawEqualWithOneArg in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #2 to 'rawequal' (value expected)")
+  RawEqualWithOneArg in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #2 to 'rawequal' (value expected)")
 
   val BasicRawGet = fragment ("BasicRawGet") {
     """local t = {}
@@ -1327,25 +1327,25 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """return rawget(42, "something")
     """
   }
-  BasicRawGetFail in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'rawget' (table expected, got number)")
+  BasicRawGetFail in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'rawget' (table expected, got number)")
 
   val BasicRawGetFail2 = fragment ("BasicRawGetFail2") {
     """return rawget(42)
     """
   }
-  BasicRawGetFail2 in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'rawget' (table expected, got number)")
+  BasicRawGetFail2 in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'rawget' (table expected, got number)")
 
   val BasicRawGetArgCountFail = fragment ("BasicRawGetArgCountFail") {
     """return rawget({})
     """
   }
-  BasicRawGetArgCountFail in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #2 to 'rawget' (value expected)")
+  BasicRawGetArgCountFail in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #2 to 'rawget' (value expected)")
 
   val RawGetNoArg = fragment ("RawGetNoArg") {
     """return rawget()
     """
   }
-  RawGetNoArg in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'rawget' (table expected, got no value)")
+  RawGetNoArg in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'rawget' (table expected, got no value)")
 
   val BasicRawSet = fragment ("BasicRawSet") {
     """local t = {}
@@ -1362,31 +1362,31 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """rawset({}, uu, uu)
     """
   }
-  RawSetNilFail in BasicContext failsWith (classOf[IllegalArgumentException], "table index is nil")
+  RawSetNilFail in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"table index is nil")
 
   val RawSetNaNFail = fragment ("RawSetNaNFail") {
     """rawset({}, 0/0, uu)
     """
   }
-  RawSetNaNFail in BasicContext failsWith (classOf[IllegalArgumentException], "table index is NaN")
+  RawSetNaNFail in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"table index is NaN")
 
   val RawSetArgCountFail1 = fragment ("RawSetArgCountFail1") {
     """rawset({})
     """
   }
-  RawSetArgCountFail1 in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #2 to 'rawset' (value expected)")
+  RawSetArgCountFail1 in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #2 to 'rawset' (value expected)")
 
   val RawSetArgCountFail2 = fragment ("RawSetArgCountFail2") {
     """rawset({}, 0/0)
     """
   }
-  RawSetArgCountFail2 in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #3 to 'rawset' (value expected)")
+  RawSetArgCountFail2 in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #3 to 'rawset' (value expected)")
 
   val RawSetNoArg = fragment ("RawSetNoArg") {
     """rawset()
     """
   }
-  RawSetNoArg in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'rawset' (table expected, got no value)")
+  RawSetNoArg in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'rawset' (table expected, got no value)")
 
   val BasicRawLen = fragment ("BasicRawLen") {
     """return rawlen({3, 2, 1}), rawlen("hello")
@@ -1398,13 +1398,13 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """rawlen()
     """
   }
-  RawLenArgCountFail in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'rawlen' (table or string expected)")
+  RawLenArgCountFail in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'rawlen' (table or string expected)")
 
   val RawLenBadArgFail = fragment ("RawLenBadArgFail") {
     """rawlen(42)
     """
   }
-  RawLenBadArgFail in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'rawlen' (table or string expected)")
+  RawLenBadArgFail in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'rawlen' (table or string expected)")
 
   val NextOnEmptyTable = fragment ("NextOnEmptyTable") {
     """return next({})
@@ -1434,25 +1434,25 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """next(uu)
     """
   }
-  NextArgMustBeTable in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'next' (table expected, got nil)")
+  NextArgMustBeTable in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'next' (table expected, got nil)")
 
   val NextNoArg = fragment ("NextNoArg") {
     """next()
     """
   }
-  NextNoArg in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'next' (table expected, got no value)")
+  NextNoArg in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'next' (table expected, got no value)")
 
   val NextNonexistentKey = fragment ("NextNonexistentKey") {
     """next({}, "boom")
     """
   }
-  NextNonexistentKey in BasicContext failsWith (classOf[IllegalArgumentException], "invalid key to 'next'")
+  NextNonexistentKey in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"invalid key to 'next'")
 
   val NextNaNKey = fragment ("NextNaNKey") {
     """next({}, "0/0")
     """
   }
-  NextNaNKey in BasicContext failsWith (classOf[IllegalArgumentException], "invalid key to 'next'")
+  NextNaNKey in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"invalid key to 'next'")
 
   val PairsOnTable = fragment ("PairsOnTable") {
     """local t = {u = "hu"}
@@ -1483,13 +1483,13 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """pairs(42)
     """
   }
-  PairsNoTable in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'pairs' (table expected, got number)")
+  PairsNoTable in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'pairs' (table expected, got number)")
 
   val PairsNoArg = fragment ("PairsNoArg") {
     """pairs()
     """
   }
-  PairsNoArg in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'pairs' (table expected, got no value)")
+  PairsNoArg in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'pairs' (table expected, got no value)")
 
   val IPairsOnList = fragment ("IPairsOnList") {
     """local l = {5, 4, 3, 2}
@@ -1545,13 +1545,13 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """ipairs(42)
     """
   }
-  IPairsNoTable in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'ipairs' (table expected, got number)")
+  IPairsNoTable in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'ipairs' (table expected, got number)")
 
   val IPairsNoArg = fragment ("IPairsNoArg") {
     """ipairs()
     """
   }
-  IPairsNoArg in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'ipairs' (table expected, got no value)")
+  IPairsNoArg in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'ipairs' (table expected, got no value)")
 
   val SelectCount = fragment ("SelectCount") {
     """return select('#', 3, 2, x)

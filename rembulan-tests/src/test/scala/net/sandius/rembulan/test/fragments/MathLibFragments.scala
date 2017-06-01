@@ -51,14 +51,14 @@ object MathLibFragments extends FragmentBundle with FragmentExpectations with On
     }
 
     about ("random") {
-      program ("math.random(0)") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'random' (interval is empty)")
-      program ("math.random(1, 0)") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'random' (interval is empty)")
+      program ("math.random(0)") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'random' (interval is empty)")
+      program ("math.random(1, 0)") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'random' (interval is empty)")
 
       program ("return math.random(0, 0)") succeedsWith (0)
 
-      program ("return math.random(-10000000000000000000, 10000000000000000000)") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'random' (number has no integer representation)")
+      program ("return math.random(-10000000000000000000, 10000000000000000000)") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'random' (number has no integer representation)")
 
-      program ("math.random(1 << 63, (1 << 63) - 1)") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'random' (interval too large)")
+      program ("math.random(1 << 63, (1 << 63) - 1)") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'random' (interval too large)")
     }
 
     about ("randomseed") {
@@ -66,7 +66,7 @@ object MathLibFragments extends FragmentBundle with FragmentExpectations with On
       program ("math.randomseed(1.0)") succeedsWith ()
       program ("""math.randomseed("1")""") succeedsWith ()
 
-      program ("math.randomseed()") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'randomseed' (number expected, got no value)")
+      program ("math.randomseed()") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'randomseed' (number expected, got no value)")
 
       program (
         """math.randomseed(0)

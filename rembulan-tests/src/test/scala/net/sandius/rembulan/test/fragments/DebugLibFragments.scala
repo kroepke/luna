@@ -26,16 +26,16 @@ object DebugLibFragments extends FragmentBundle with FragmentExpectations with O
 
     about ("debug.getmetatable") {
 
-      program ("""return debug.getmetatable()""") failsWith "bad argument #1 to 'getmetatable' (value expected)"
+      program ("""return debug.getmetatable()""") failsWith ""<<"bad argument #1 to 'getmetatable' (value expected)"
       program ("""return debug.getmetatable(1)""") succeedsWith (null)
 
     }
 
     about ("debug.setmetatable") {
 
-      program ("""return debug.setmetatable()""") failsWith "bad argument #2 to 'setmetatable' (nil or table expected)"
-      program ("""return debug.setmetatable(1)""") failsWith "bad argument #2 to 'setmetatable' (nil or table expected)"
-      program ("""return debug.setmetatable(1, 2)""") failsWith "bad argument #2 to 'setmetatable' (nil or table expected)"
+      program ("""return debug.setmetatable()""") failsWith ""<<"bad argument #2 to 'setmetatable' (nil or table expected)"
+      program ("""return debug.setmetatable(1)""") failsWith ""<<"bad argument #2 to 'setmetatable' (nil or table expected)"
+      program ("""return debug.setmetatable(1, 2)""") failsWith ""<<"bad argument #2 to 'setmetatable' (nil or table expected)"
 
       program ("""local x; return debug.setmetatable(1, x)""") succeedsWith (1)
       program ("""return debug.setmetatable(1, {})""") succeedsWith (1)
@@ -44,10 +44,10 @@ object DebugLibFragments extends FragmentBundle with FragmentExpectations with O
 
     about ("debug.getupvalue") {
 
-      program ("""return debug.getupvalue()""") failsWith "bad argument #2 to 'getupvalue' (number expected, got no value)"
-      program ("""return debug.getupvalue(2)""") failsWith "bad argument #2 to 'getupvalue' (number expected, got no value)"
-      program ("""return debug.getupvalue(2, 1.2)""") failsWith "bad argument #2 to 'getupvalue' (number has no integer representation)"
-      program ("""return debug.getupvalue(1, 1)""") failsWith "bad argument #1 to 'getupvalue' (function expected, got number)"
+      program ("""return debug.getupvalue()""") failsWith ""<<"bad argument #2 to 'getupvalue' (number expected, got no value)"
+      program ("""return debug.getupvalue(2)""") failsWith ""<<"bad argument #2 to 'getupvalue' (number expected, got no value)"
+      program ("""return debug.getupvalue(2, 1.2)""") failsWith ""<<"bad argument #2 to 'getupvalue' (number has no integer representation)"
+      program ("""return debug.getupvalue(1, 1)""") failsWith ""<<"bad argument #1 to 'getupvalue' (function expected, got number)"
 
       program ("""return debug.getupvalue(function() return x end, 0)""") succeedsWith ()
       program ("""return debug.getupvalue(function() return x end, 1)""") succeedsWith ("_ENV", classOf[Table])
@@ -77,11 +77,11 @@ object DebugLibFragments extends FragmentBundle with FragmentExpectations with O
 
     about ("debug.setupvalue") {
 
-      program ("""return debug.setupvalue()""") failsWith "bad argument #3 to 'setupvalue' (value expected)"
-      program ("""return debug.setupvalue(2)""") failsWith "bad argument #3 to 'setupvalue' (value expected)"
-      program ("""return debug.setupvalue(2, 1.2)""") failsWith "bad argument #3 to 'setupvalue' (value expected)"
-      program ("""return debug.setupvalue(x, 1.2, x)""") failsWith "bad argument #2 to 'setupvalue' (number has no integer representation)"
-      program ("""return debug.setupvalue(1, 1, 1)""") failsWith "bad argument #1 to 'setupvalue' (function expected, got number)"
+      program ("""return debug.setupvalue()""") failsWith ""<<"bad argument #3 to 'setupvalue' (value expected)"
+      program ("""return debug.setupvalue(2)""") failsWith ""<<"bad argument #3 to 'setupvalue' (value expected)"
+      program ("""return debug.setupvalue(2, 1.2)""") failsWith ""<<"bad argument #3 to 'setupvalue' (value expected)"
+      program ("""return debug.setupvalue(x, 1.2, x)""") failsWith ""<<"bad argument #2 to 'setupvalue' (number has no integer representation)"
+      program ("""return debug.setupvalue(1, 1, 1)""") failsWith ""<<"bad argument #1 to 'setupvalue' (function expected, got number)"
 
       val UpdatesLocalVariableValue = fragment ("updates local variable value") {
         """local x = 42
@@ -106,12 +106,12 @@ object DebugLibFragments extends FragmentBundle with FragmentExpectations with O
 
     about ("debug.upvalueid") {
 
-      program ("""return debug.upvalueid()""") failsWith "bad argument #2 to 'upvalueid' (number expected, got no value)"
-      program ("""return debug.upvalueid(1)""") failsWith "bad argument #2 to 'upvalueid' (number expected, got no value)"
-      program ("""return debug.upvalueid(1, 1)""") failsWith "bad argument #1 to 'upvalueid' (function expected, got number)"
-      program ("""return debug.upvalueid(1, 1.2)""") failsWith "bad argument #2 to 'upvalueid' (number has no integer representation)"
+      program ("""return debug.upvalueid()""") failsWith ""<<"bad argument #2 to 'upvalueid' (number expected, got no value)"
+      program ("""return debug.upvalueid(1)""") failsWith ""<<"bad argument #2 to 'upvalueid' (number expected, got no value)"
+      program ("""return debug.upvalueid(1, 1)""") failsWith ""<<"bad argument #1 to 'upvalueid' (function expected, got number)"
+      program ("""return debug.upvalueid(1, 1.2)""") failsWith ""<<"bad argument #2 to 'upvalueid' (number has no integer representation)"
 
-      program ("""return debug.upvalueid(function() end, 1)""") failsWith "bad argument #2 to 'upvalueid' (invalid upvalue index)"
+      program ("""return debug.upvalueid(function() end, 1)""") failsWith ""<<"bad argument #2 to 'upvalueid' (invalid upvalue index)"
 
       val ReturnsLightUserdata = fragment ("returns light userdata") {
         """local id = debug.upvalueid(function() return x end, 1)
@@ -144,20 +144,20 @@ object DebugLibFragments extends FragmentBundle with FragmentExpectations with O
 
     about ("debug.upvaluejoin") {
 
-      program ("""return debug.upvaluejoin()""") failsWith "bad argument #2 to 'upvaluejoin' (number expected, got no value)"
-      program ("""return debug.upvaluejoin(1)""") failsWith "bad argument #2 to 'upvaluejoin' (number expected, got no value)"
-      program ("""return debug.upvaluejoin({}, 1)""") failsWith "bad argument #1 to 'upvaluejoin' (function expected, got table)"
-      program ("""return debug.upvaluejoin({}, 1.2)""") failsWith "bad argument #2 to 'upvaluejoin' (number has no integer representation)"
+      program ("""return debug.upvaluejoin()""") failsWith ""<<"bad argument #2 to 'upvaluejoin' (number expected, got no value)"
+      program ("""return debug.upvaluejoin(1)""") failsWith ""<<"bad argument #2 to 'upvaluejoin' (number expected, got no value)"
+      program ("""return debug.upvaluejoin({}, 1)""") failsWith ""<<"bad argument #1 to 'upvaluejoin' (function expected, got table)"
+      program ("""return debug.upvaluejoin({}, 1.2)""") failsWith ""<<"bad argument #2 to 'upvaluejoin' (number has no integer representation)"
 
-      program ("""return debug.upvaluejoin(function() end, 1)""") failsWith "bad argument #2 to 'upvaluejoin' (invalid upvalue index)"
+      program ("""return debug.upvaluejoin(function() end, 1)""") failsWith ""<<"bad argument #2 to 'upvaluejoin' (invalid upvalue index)"
 
-      program ("""return debug.upvaluejoin(function() return x end, 1)""") failsWith "bad argument #4 to 'upvaluejoin' (number expected, got no value)"
+      program ("""return debug.upvaluejoin(function() return x end, 1)""") failsWith ""<<"bad argument #4 to 'upvaluejoin' (number expected, got no value)"
 
       // this error report appears to be a bug in PUC-Lua (as of 5.3.2)
-      program ("""return debug.upvaluejoin(function() return x end, 1, {})""") failsWith "bad argument #4 to 'upvaluejoin' (number expected, got "<<"table">>")"
+      program ("""return debug.upvaluejoin(function() return x end, 1, {})""") failsWith ""<<"bad argument #4 to 'upvaluejoin' (number expected, got "<<"table">>")"
 
-      program ("""return debug.upvaluejoin(function() return x end, 1, {}, 1)""") failsWith "bad argument #3 to 'upvaluejoin' (function expected, got table)"
-      program ("""return debug.upvaluejoin(function() return x end, 1, {}, 1.2)""") failsWith "bad argument #4 to 'upvaluejoin' (number has no integer representation)"
+      program ("""return debug.upvaluejoin(function() return x end, 1, {}, 1)""") failsWith ""<<"bad argument #3 to 'upvaluejoin' (function expected, got table)"
+      program ("""return debug.upvaluejoin(function() return x end, 1, {}, 1.2)""") failsWith ""<<"bad argument #4 to 'upvaluejoin' (number has no integer representation)"
 
       program ("""local y
                  |return debug.upvaluejoin(function() return x end, 1, function() return y end, 1)
@@ -193,9 +193,9 @@ object DebugLibFragments extends FragmentBundle with FragmentExpectations with O
 
     about ("debug.setuservalue") {
 
-      program ("""return debug.setuservalue()""") failsWith "bad argument #1 to 'setuservalue' (userdata expected, got no value)"
-      program ("""return debug.setuservalue({})""") failsWith "bad argument #1 to 'setuservalue' (userdata expected, got table)"
-      program ("""return debug.setuservalue(debug.upvalueid(function() return debug end, 1), 1)""") failsWith "bad argument #1 to 'setuservalue' (userdata expected, got light userdata)"
+      program ("""return debug.setuservalue()""") failsWith ""<<"bad argument #1 to 'setuservalue' (userdata expected, got no value)"
+      program ("""return debug.setuservalue({})""") failsWith ""<<"bad argument #1 to 'setuservalue' (userdata expected, got table)"
+      program ("""return debug.setuservalue(debug.upvalueid(function() return debug end, 1), 1)""") failsWith ""<<"bad argument #1 to 'setuservalue' (userdata expected, got light userdata)"
 
     }
 
@@ -205,7 +205,7 @@ object DebugLibFragments extends FragmentBundle with FragmentExpectations with O
 
     about ("debug.{get|set}uservalue") {
 
-      program ("""return debug.setuservalue(io.output())""") failsWith "bad argument #2 to 'setuservalue' (value expected)"
+      program ("""return debug.setuservalue(io.output())""") failsWith ""<<"bad argument #2 to 'setuservalue' (value expected)"
       program (
         """local udata = io.output()
           |local uvalue = debug.getuservalue(debug.setuservalue(io.output(), "hello"))

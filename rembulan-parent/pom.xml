@@ -45,6 +45,7 @@
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
     <encoding>UTF-8</encoding>
+    <rembulan.version>0.1-SNAPSHOT</rembulan.version>
   </properties>
 
   <distributionManagement>

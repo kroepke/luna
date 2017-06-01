@@ -50,7 +50,7 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       def apply(invalidArg: String, tpe: String, codePrefix: String = null): Unit = {
         val err = expectedError(tpe)
         for (e <- exps(invalidArg)) {
-          program (testprogram (codePrefix, e)) failsWith err
+          program (testprogram (codePrefix, e)) failsWith ""<<err
         }
       }
 
@@ -103,7 +103,7 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
     about ("extreme ints") {
       program (minMaxPrefix + "return minint, maxint") succeedsWith (Long.MinValue, Long.MaxValue)
 
-      program (minMaxPrefix + "return (maxint + 0.0) >> 0") failsWith ("number has no integer representation")
+      program (minMaxPrefix + "return (maxint + 0.0) >> 0") failsWith ""<<"number has no integer representation"
       program (minMaxPrefix + "return (minint + 0.0) >> 0") succeedsWith (Long.MinValue)
       program (minMaxPrefix + "return (minint - 1.0) >> 0") succeedsWith (Long.MinValue)
 
@@ -160,7 +160,7 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       program ("return 3.0 // -0") succeedsWith Double.PositiveInfinity
       program ("return 3.0 // -0.0") succeedsWith Double.NegativeInfinity
 
-      program ("return 3 // 0") failsWith "attempt to divide by zero"
+      program ("return 3 // 0") failsWith ""<<"attempt to divide by zero"
 
       program (minMaxPrefix + "return (maxint - 1) // maxint") succeedsWith 0
 
@@ -186,7 +186,7 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       program ("return 3.0 % 2") succeedsWith 1.0
       program ("return 3.0 % -2") succeedsWith -1.0
 
-      program ("return 3 % 0") failsWith "attempt to perform 'n%0'"
+      program ("return 3 % 0") failsWith ""<<"attempt to perform 'n%0'"
 
       program ("return 3.0 % 0") succeedsWith NaN
 
@@ -225,8 +225,8 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       program ("return 3.0 << 1") succeedsWith 6
       program ("return \"3\" << 1") succeedsWith 6
 
-      program ("return 3 << 1.5") failsWith "number has no integer representation"
-      program ("return 3.5 << 0") failsWith "number has no integer representation"
+      program ("return 3 << 1.5") failsWith ""<<"number has no integer representation"
+      program ("return 3.5 << 0") failsWith ""<<"number has no integer representation"
 
       program ("return 5 << 2.0") succeedsWith 20
       program ("return 5.0 << 2.0") succeedsWith 20
@@ -243,8 +243,8 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       program ("return 0 >> 5") succeedsWith 0
       program ("return 1 >> 100000") succeedsWith 0
 
-      program ("return 1 >> 1.2") failsWith "number has no integer representation"
-      program ("return 10.1 >> 0") failsWith "number has no integer representation"
+      program ("return 1 >> 1.2") failsWith ""<<"number has no integer representation"
+      program ("return 10.1 >> 0") failsWith ""<<"number has no integer representation"
 
       program ("return 3.0 >> 0") succeedsWith 3
 
@@ -278,8 +278,8 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       program ("return \"13\" & 6") succeedsWith 4
       program ("return 13 & \"6\"") succeedsWith 4
 
-      program ("return 13 & 1.5") failsWith "number has no integer representation"
-      program ("return 1.2 & 255") failsWith "number has no integer representation"
+      program ("return 13 & 1.5") failsWith ""<<"number has no integer representation"
+      program ("return 1.2 & 255") failsWith ""<<"number has no integer representation"
 
       opArgErrors.binary("&", Bitwise)
 
@@ -301,8 +301,8 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       program ("return \"13\" | 6") succeedsWith 15
       program ("return 13 | \"6\"") succeedsWith 15
 
-      program ("return 13 | 1.5") failsWith "number has no integer representation"
-      program ("return 1.2 | 255") failsWith "number has no integer representation"
+      program ("return 13 | 1.5") failsWith ""<<"number has no integer representation"
+      program ("return 1.2 | 255") failsWith ""<<"number has no integer representation"
 
       opArgErrors.binary("|", Bitwise)
 
@@ -325,8 +325,8 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       program ("return \"13\" ~ 6") succeedsWith 11
       program ("return 13 ~ \"6\"") succeedsWith 11
 
-      program ("return 13 ~ 1.5") failsWith "number has no integer representation"
-      program ("return 1.2 ~ 255") failsWith "number has no integer representation"
+      program ("return 13 ~ 1.5") failsWith ""<<"number has no integer representation"
+      program ("return 1.2 ~ 255") failsWith ""<<"number has no integer representation"
 
       opArgErrors.binary("~", Bitwise)
 
@@ -340,7 +340,7 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       program ("return ~(-1 >> 1)") succeedsWith Long.MinValue
       program ("return ~(-1 << 63)") succeedsWith Long.MaxValue
 
-      program ("return ~3.6") failsWith "number has no integer representation"
+      program ("return ~3.6") failsWith ""<<"number has no integer representation"
       program ("return ~\"10\"") succeedsWith -11
       program ("return ~~35") succeedsWith 35
       program ("return ~~35.0") succeedsWith 35
@@ -412,15 +412,15 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       program ("return 0 < 0.0") succeedsWith false
       program ("return '0' < '0.0'") succeedsWith true
 
-      program ("return x < y") failsWith "attempt to compare two nil values"
-      program ("return 1 < x") failsWith "attempt to compare number with nil"
-      program ("return 1 < false") failsWith "attempt to compare number with boolean"
-      program ("return true < false") failsWith "attempt to compare two boolean values"
-      program ("return {} < 1") failsWith "attempt to compare table with number"
-      program ("return {} < {}") failsWith "attempt to compare two table values"
+      program ("return x < y") failsWith ""<<"attempt to compare two nil values"
+      program ("return 1 < x") failsWith ""<<"attempt to compare number with nil"
+      program ("return 1 < false") failsWith ""<<"attempt to compare number with boolean"
+      program ("return true < false") failsWith ""<<"attempt to compare two boolean values"
+      program ("return {} < 1") failsWith ""<<"attempt to compare table with number"
+      program ("return {} < {}") failsWith ""<<"attempt to compare two table values"
 
-      program ("return '0' < 1") failsWith "attempt to compare string with number"
-      program ("return '0' > 1") failsWith "attempt to compare number with string"
+      program ("return '0' < 1") failsWith ""<<"attempt to compare string with number"
+      program ("return '0' > 1") failsWith ""<<"attempt to compare number with string"
 
     }
 
@@ -436,15 +436,15 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       program ("return 0 <= 0.0") succeedsWith true
       program ("return '0' <= '0.0'") succeedsWith true
 
-      program ("return x <= y") failsWith "attempt to compare two nil values"
-      program ("return 1 <= x") failsWith "attempt to compare number with nil"
-      program ("return 1 <= false") failsWith "attempt to compare number with boolean"
-      program ("return true <= false") failsWith "attempt to compare two boolean values"
-      program ("return {} <= 1") failsWith "attempt to compare table with number"
-      program ("return {} <= {}") failsWith "attempt to compare two table values"
+      program ("return x <= y") failsWith ""<<"attempt to compare two nil values"
+      program ("return 1 <= x") failsWith ""<<"attempt to compare number with nil"
+      program ("return 1 <= false") failsWith ""<<"attempt to compare number with boolean"
+      program ("return true <= false") failsWith ""<<"attempt to compare two boolean values"
+      program ("return {} <= 1") failsWith ""<<"attempt to compare table with number"
+      program ("return {} <= {}") failsWith ""<<"attempt to compare two table values"
 
-      program ("return '0' <= 1") failsWith "attempt to compare string with number"
-      program ("return '0' >= 1") failsWith "attempt to compare number with string"
+      program ("return '0' <= 1") failsWith ""<<"attempt to compare string with number"
+      program ("return '0' >= 1") failsWith ""<<"attempt to compare number with string"
 
     }
 

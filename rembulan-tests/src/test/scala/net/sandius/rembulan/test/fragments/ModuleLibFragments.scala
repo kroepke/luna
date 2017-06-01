@@ -26,14 +26,14 @@ object ModuleLibFragments extends FragmentBundle with FragmentExpectations with 
 
     about ("require") {
 
-      program ("""require()""") failsWith "bad argument #1 to 'require' (string expected, got no value)"
-      program ("""require(nil)""") failsWith "bad argument #1 to 'require' (string expected, got nil)"
-      program ("""require(true)""") failsWith "bad argument #1 to 'require' (string expected, got boolean)"
-      program ("""require({})""") failsWith "bad argument #1 to 'require' (string expected, got table)"
+      program ("""require()""") failsWith ""<<"bad argument #1 to 'require' (string expected, got no value)"
+      program ("""require(nil)""") failsWith ""<<"bad argument #1 to 'require' (string expected, got nil)"
+      program ("""require(true)""") failsWith ""<<"bad argument #1 to 'require' (string expected, got boolean)"
+      program ("""require({})""") failsWith ""<<"bad argument #1 to 'require' (string expected, got table)"
 
-      program ("""require("x")""") failsWith "module 'x' not found:"<<""
-      program ("""require(12.0)""") failsWith "module '12.0' not found:"<<""
-      program ("""require(1/0)""") failsWith "module 'inf' not found:"<<""
+      program ("""require("x")""") failsWith ""<<"module 'x' not found:"<<""
+      program ("""require(12.0)""") failsWith ""<<"module '12.0' not found:"<<""
+      program ("""require(1/0)""") failsWith ""<<"module 'inf' not found:"<<""
 
       program (
         """-- caches package.loaded
@@ -49,7 +49,7 @@ object ModuleLibFragments extends FragmentBundle with FragmentExpectations with 
           |package = nil
           |return require "x"
         """
-      ) failsWith "module 'x' not found:\n\tno field package.preload['x']"<<""
+      ) failsWith ""<<"module 'x' not found:\n\tno field package.preload['x']"<<""
 
       program (
         """-- accesses package.searchers via the cached package table
@@ -58,7 +58,7 @@ object ModuleLibFragments extends FragmentBundle with FragmentExpectations with 
           |p.searchers = nil
           |return require "x"
         """
-      ) failsWith "'package.searchers' must be a table"
+      ) failsWith ""<<"'package.searchers' must be a table"
 
       program ("""package.loaded.hello = "world"; return require "hello"""") succeedsWith "world"
 

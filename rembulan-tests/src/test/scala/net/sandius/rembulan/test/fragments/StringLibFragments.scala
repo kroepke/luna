@@ -74,7 +74,7 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
       program ("""return ("hello"):byte(1.0)""") succeedsWith (104)
 
       program ("""local x; return ("Boom"):byte(x)""") succeedsWith (66)
-      program ("""return ("Boom"):byte(true)""") failsWith (classOf[IllegalArgumentException], "bad argument #"<<"1">>" to 'byte' (number expected, got boolean)")
+      program ("""return ("Boom"):byte(true)""") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #"<<"1">>" to 'byte' (number expected, got boolean)")
     }
 
     about ("char") {
@@ -90,8 +90,8 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
 
       program ("""return string.char("104", "105.0", 33.0)""") succeedsWith ("hi!")
 
-      program ("""string.char(-1)""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'char' (value out of range)")
-      program ("""string.char(256)""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'char' (value out of range)")
+      program ("""string.char(-1)""") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'char' (value out of range)")
+      program ("""string.char(256)""") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'char' (value out of range)")
     }
 
     about ("sub") {
@@ -147,13 +147,13 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
 
       program ("""return ("%%u%%"):format()""") succeedsWith ("%u%")
 
-      program ("""local x; return ("%"):format(x)""") failsWith (classOf[IllegalArgumentException], "invalid option '%<\\0>' to 'format'")
-      program ("""return ("%"):format()""") failsWith (classOf[IllegalArgumentException], "bad argument #"<<"1">>" to 'format' (no value)")
+      program ("""local x; return ("%"):format(x)""") failsWith (classOf[IllegalArgumentException], ""<<"invalid option '%<\\0>' to 'format'")
+      program ("""return ("%"):format()""") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #"<<"1">>" to 'format' (no value)")
 
-      program ("""return ("%d"):format()""") failsWith (classOf[IllegalArgumentException], "bad argument #"<<"1">>" to 'format' (no value)")
-      program ("""return ("%d"):format("hi")""") failsWith (classOf[IllegalArgumentException], "bad argument #"<<"1">>" to 'format' (number expected, got string)")
+      program ("""return ("%d"):format()""") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #"<<"1">>" to 'format' (no value)")
+      program ("""return ("%d"):format("hi")""") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #"<<"1">>" to 'format' (number expected, got string)")
       program ("""return ("%d"):format("1")""") succeedsWith ("1")
-      program ("""return ("%d"):format(1.2)""") failsWith (classOf[IllegalArgumentException], "bad argument #"<<"1">>" to 'format' (number has no integer representation)")
+      program ("""return ("%d"):format(1.2)""") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #"<<"1">>" to 'format' (number has no integer representation)")
 
       program ("""return ("%i"):format(42)""") succeedsWith ("42")
       program ("""return ("%i"):format(-15)""") succeedsWith ("-15")
@@ -217,7 +217,7 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
       program ("""return string.format("%q%q", true, false)""") succeedsWith ("truefalse")
       program ("""return string.format("%q", "hello")""") succeedsWith ("\"hello\"")
       program ("""return string.format("%q", 10)""") succeedsWith ("10")
-      program ("""return string.format("%q", {})""") failsWith "bad argument #2 to 'format' (value has no literal form)"
+      program ("""return string.format("%q", {})""") failsWith ""<<"bad argument #2 to 'format' (value has no literal form)"
 
     }
 
@@ -308,20 +308,20 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
 
       about ("gsub") {
 
-        program ("""return string.gsub()""") failsWith "bad argument #1 to 'gsub' (string expected, got no value)"
-        program ("""return string.gsub("")""") failsWith "bad argument #2 to 'gsub' (string expected, got no value)"
-        program ("""return string.gsub("", "")""") failsWith "bad argument #3 to 'gsub' (string/function/table expected)"
+        program ("""return string.gsub()""") failsWith ""<<"bad argument #1 to 'gsub' (string expected, got no value)"
+        program ("""return string.gsub("")""") failsWith ""<<"bad argument #2 to 'gsub' (string expected, got no value)"
+        program ("""return string.gsub("", "")""") failsWith ""<<"bad argument #3 to 'gsub' (string/function/table expected)"
 
         program ("""return string.gsub("", "", "")""") succeedsWith ("", 1)
         program ("""return string.gsub("", "", "", 0)""") succeedsWith ("", 0)
         program ("""return string.gsub("", "", "", -1)""") succeedsWith ("", 0)
 
-        program ("""return string.gsub("", "", "", {})""") failsWith "bad argument #4 to 'gsub' (number expected, got table)"
-        program ("""return string.gsub("", "", "", 2.1)""") failsWith "bad argument #4 to 'gsub' (number has no integer representation)"
+        program ("""return string.gsub("", "", "", {})""") failsWith ""<<"bad argument #4 to 'gsub' (number expected, got table)"
+        program ("""return string.gsub("", "", "", 2.1)""") failsWith ""<<"bad argument #4 to 'gsub' (number has no integer representation)"
 
         program ("""return string.gsub("", "", 3)""") succeedsWith ("3", 1)
 
-        program ("""return string.gsub("hello", "(..)", {'?', he='Eh', ll={}})""") failsWith "invalid replacement value (a table)"
+        program ("""return string.gsub("hello", "(..)", {'?', he='Eh', ll={}})""") failsWith ""<<"invalid replacement value (a table)"
         program ("""return string.gsub("hello", "(..)", {'?', he='Eh', ll=3})""") succeedsWith ("Eh3o", 2)
         program ("""return string.gsub("hello", "()(..)", {'?', he='Eh', ll=3})""") succeedsWith ("?llo", 2)
         program ("""return string.gsub("hello", "()(..)", {'A', 'B', 'C', 'D'})""") succeedsWith ("ACo", 2)

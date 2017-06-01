@@ -38,7 +38,7 @@ object CoroutineLibFragments extends FragmentBundle with FragmentExpectations  {
       |assert(false)
     """
   }
-  ResumeReturnsControlToCallerOnExit1 in CoroContext failsWith (classOf[AssertionFailedException], "assertion failed!")
+  ResumeReturnsControlToCallerOnExit1 in CoroContext failsWith (classOf[AssertionFailedException], ""<<"assertion failed!")
 
   val ResumeReturnsControlToCallerOnExit2 = fragment ("ResumeReturnsControlToCallerOnExit2") {
     """return coroutine.resume(coroutine.create(function() end))
@@ -141,7 +141,7 @@ object CoroutineLibFragments extends FragmentBundle with FragmentExpectations  {
       |return
     """
   }
-  YieldFromOutsideCoroutine in CoroContext failsWith (classOf[IllegalCoroutineStateException], "attempt to yield from outside a coroutine")
+  YieldFromOutsideCoroutine in CoroContext failsWith (classOf[IllegalCoroutineStateException], ""<<"attempt to yield from outside a coroutine")
 
   val WrapNormalFunctionCannotBeCalledTwice = fragment ("WrapNormalFunctionCannotBeCalledTwice") {
     """local f = coroutine.wrap(function() end)
@@ -149,7 +149,7 @@ object CoroutineLibFragments extends FragmentBundle with FragmentExpectations  {
       |f()
     """
   }
-  WrapNormalFunctionCannotBeCalledTwice in CoroContext failsWith (classOf[IllegalCoroutineStateException], "cannot resume dead coroutine")
+  WrapNormalFunctionCannotBeCalledTwice in CoroContext failsWith (classOf[IllegalCoroutineStateException], ""<<"cannot resume dead coroutine")
 
   val WrappedCoroutineRunning = fragment ("WrappedCoroutineRunning") {
     """return coroutine.wrap(coroutine.running)()

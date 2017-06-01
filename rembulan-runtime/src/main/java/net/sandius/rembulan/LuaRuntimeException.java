@@ -61,7 +61,7 @@ public class LuaRuntimeException extends RuntimeException {
 	 */
 	@Override
 	public String getMessage() {
-		return Conversions.toHumanReadableString(getErrorObject()).toString();
+		return getErrorLocation() + Conversions.toHumanReadableString(getErrorObject()).toString();
 	}
 
 	/**
@@ -77,6 +77,20 @@ public class LuaRuntimeException extends RuntimeException {
 		else {
 			return errorObject;
 		}
+	}
+
+	/**
+	 * Returns the closest location in the Lua code when this exception was triggered.
+	 *
+	 * @return the location of this error in the Lua code, @{code file:line} or @{code unknown:-1} if it could not be determined
+	 */
+	public String getErrorLocation() {
+		for (StackTraceElement stackTraceElement : getStackTrace()) {
+			if (stackTraceElement.getClassName().startsWith("rembulan_dynamic")) {
+				return stackTraceElement.getFileName() + ":" + stackTraceElement.getLineNumber() + ": ";
+			}
+		}
+		return "";
 	}
 
 }

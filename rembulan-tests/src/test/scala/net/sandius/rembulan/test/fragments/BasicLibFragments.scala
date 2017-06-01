@@ -39,7 +39,7 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("return type(type)") succeedsWith "function"
       program ("return type({})") succeedsWith "table"
 
-      program ("return type()") failsWith "bad argument #1 to 'type' (value expected)"
+      program ("return type()") failsWith ""<<"bad argument #1 to 'type' (value expected)"
 
     }
 
@@ -84,7 +84,7 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("return tostring(tostring)") succeedsWith (stringStartingWith("function: "))
       program ("return tostring({})") succeedsWith (stringStartingWith("table: "))
 
-      program ("return tostring()") failsWith "bad argument #1 to 'tostring' (value expected)"
+      program ("return tostring()") failsWith ""<<"bad argument #1 to 'tostring' (value expected)"
 
     }
 
@@ -105,14 +105,14 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("return tonumber(\"3.0\")") succeedsWith 3.0
       program ("return tonumber({})") succeedsWith null
 
-      program ("tonumber(1, \"x\")") failsWith "bad argument #2 to 'tonumber' (number expected, got string)"
+      program ("tonumber(1, \"x\")") failsWith ""<<"bad argument #2 to 'tonumber' (number expected, got string)"
 
-      program ("tonumber(\"1\", 1)") failsWith "bad argument #2 to 'tonumber' (base out of range)"
-      program ("tonumber(\"1\", 37)") failsWith "bad argument #2 to 'tonumber' (base out of range)"
+      program ("tonumber(\"1\", 1)") failsWith ""<<"bad argument #2 to 'tonumber' (base out of range)"
+      program ("tonumber(\"1\", 37)") failsWith ""<<"bad argument #2 to 'tonumber' (base out of range)"
 
-      program ("tonumber(1, 1)") failsWith "bad argument #1 to 'tonumber' (string expected, got number)"
-      program ("tonumber(nil, 10)") failsWith "bad argument #1 to 'tonumber' (string expected, got nil)"
-      program ("tonumber(nil, 1)") failsWith "bad argument #1 to 'tonumber' (string expected, got nil)"
+      program ("tonumber(1, 1)") failsWith ""<<"bad argument #1 to 'tonumber' (string expected, got number)"
+      program ("tonumber(nil, 10)") failsWith ""<<"bad argument #1 to 'tonumber' (string expected, got nil)"
+      program ("tonumber(nil, 1)") failsWith ""<<"bad argument #1 to 'tonumber' (string expected, got nil)"
 
       program ("return tonumber(\"-AbCd\", 14)") succeedsWith -29777
       program ("return tonumber(\"+Hello\", 36)") succeedsWith 29234652
@@ -122,11 +122,11 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("return tonumber(\"99\", 9)") succeedsWith null
       program ("return tonumber(\"zzz\", 36)") succeedsWith 46655
 
-      program ("return tonumber(1 / 0, 36)") failsWith "bad argument #1 to 'tonumber' (string expected, got number)"
-      program ("return tonumber(0 / 0, 36)") failsWith "bad argument #1 to 'tonumber' (string expected, got number)"
-      program ("return tonumber(0.2, 10)") failsWith "bad argument #1 to 'tonumber' (string expected, got number)"
+      program ("return tonumber(1 / 0, 36)") failsWith ""<<"bad argument #1 to 'tonumber' (string expected, got number)"
+      program ("return tonumber(0 / 0, 36)") failsWith ""<<"bad argument #1 to 'tonumber' (string expected, got number)"
+      program ("return tonumber(0.2, 10)") failsWith ""<<"bad argument #1 to 'tonumber' (string expected, got number)"
 
-      program ("return tonumber()") failsWith "bad argument #1 to 'tonumber' (value expected)"
+      program ("return tonumber()") failsWith ""<<"bad argument #1 to 'tonumber' (value expected)"
 
     }
 
@@ -137,15 +137,15 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("return getmetatable(0)") succeedsWith null
       program ("return getmetatable(\"hurray\")") succeedsWith null  // defined by the string library
 
-      program ("getmetatable()") failsWith "bad argument #1 to 'getmetatable' (value expected)"
+      program ("getmetatable()") failsWith ""<<"bad argument #1 to 'getmetatable' (value expected)"
 
     }
 
     about ("setmetatable") {
 
-      program ("setmetatable(0, nil)") failsWith "bad argument #1 to 'setmetatable' (table expected, got number)"
-      program ("setmetatable({}, 0)") failsWith "bad argument #2 to 'setmetatable' (nil or table expected)"
-      program ("setmetatable({})") failsWith "bad argument #2 to 'setmetatable' (nil or table expected)"
+      program ("setmetatable(0, nil)") failsWith ""<<"bad argument #1 to 'setmetatable' (table expected, got number)"
+      program ("setmetatable({}, 0)") failsWith ""<<"bad argument #2 to 'setmetatable' (nil or table expected)"
+      program ("setmetatable({})") failsWith ""<<"bad argument #2 to 'setmetatable' (nil or table expected)"
 
       val SetMetatableReturnsItsFirstArgument = fragment("setmetatable returns its first argument") {
           """local x = {}
@@ -185,7 +185,7 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("return pcall(pcall)") succeedsWith (false, "bad argument #1 to 'pcall' (value expected)")
       program ("return pcall(pcall, pcall, pcall)") succeedsWith (true, true, false, "bad argument #1 to 'pcall' (value expected)")
 
-      program ("pcall()") failsWith "bad argument #1 to 'pcall' (value expected)"
+      program ("pcall()") failsWith ""<<"bad argument #1 to 'pcall' (value expected)"
 
       val PCallHonoursTheCallMetamethod = fragment ("pcall honours the __call metamethod") {
         """function callable()
@@ -222,10 +222,10 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
 
     about ("xpcall") {
 
-      program ("xpcall()") failsWith "bad argument #2 to 'xpcall' (function expected, got no value)"
-      program ("return xpcall(nil)") failsWith "bad argument #2 to 'xpcall' (function expected, got no value)"
-      program ("return xpcall(function() end)") failsWith "bad argument #2 to 'xpcall' (function expected, got no value)"
-      program ("return xpcall(nil, nil)") failsWith "bad argument #2 to 'xpcall' (function expected, got nil)"
+      program ("xpcall()") failsWith ""<<"bad argument #2 to 'xpcall' (function expected, got no value)"
+      program ("return xpcall(nil)") failsWith ""<<"bad argument #2 to 'xpcall' (function expected, got no value)"
+      program ("return xpcall(function() end)") failsWith ""<<"bad argument #2 to 'xpcall' (function expected, got no value)"
+      program ("return xpcall(nil, nil)") failsWith ""<<"bad argument #2 to 'xpcall' (function expected, got nil)"
 
       program ("return xpcall(nil, function(...) return ... end)") succeedsWith (false, "attempt to call a nil value")
 
@@ -258,20 +258,20 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
     }
 
     about ("assert") {
-      program ("assert(nil)") failsWith "assertion failed!"
-      program ("assert(false, 'boom')") failsWith "boom"
+      program ("assert(nil)") failsWith ""<<"assertion failed!"
+      program ("assert(false, 'boom')") failsWith ""<<"boom"
 
       program ("return assert(true)") succeedsWith true
       program ("return assert(1, false, 'x')") succeedsWith (1, false, "x")
 
-      program ("assert()") failsWith "bad argument #1 to 'assert' (value expected)"
+      program ("assert()") failsWith ""<<"bad argument #1 to 'assert' (value expected)"
 
-      program ("assert(pcall(error, 'boom'))") failsWith "boom"
+      program ("assert(pcall(error, 'boom'))") failsWith ""<<"boom"
     }
 
     about ("rawequal") {
-      program ("return rawequal()") failsWith "bad argument #1 to 'rawequal' (value expected)"
-      program ("return rawequal(nil)") failsWith "bad argument #2 to 'rawequal' (value expected)"
+      program ("return rawequal()") failsWith ""<<"bad argument #1 to 'rawequal' (value expected)"
+      program ("return rawequal(nil)") failsWith ""<<"bad argument #2 to 'rawequal' (value expected)"
 
       program ("return rawequal(nil, nil)") succeedsWith true
       program ("return rawequal(0, 0)") succeedsWith true
@@ -281,9 +281,9 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
     }
 
     about ("rawget") {
-      program ("rawget()") failsWith "bad argument #1 to 'rawget' (table expected, got no value)"
-      program ("rawget(nil)") failsWith "bad argument #1 to 'rawget' (table expected, got nil)"
-      program ("rawget('x')") failsWith "bad argument #1 to 'rawget' (table expected, got string)"
+      program ("rawget()") failsWith ""<<"bad argument #1 to 'rawget' (table expected, got no value)"
+      program ("rawget(nil)") failsWith ""<<"bad argument #1 to 'rawget' (table expected, got nil)"
+      program ("rawget('x')") failsWith ""<<"bad argument #1 to 'rawget' (table expected, got string)"
 
       program (
         """x = {}
@@ -295,11 +295,11 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
     }
 
     about ("rawset") {
-      program ("rawset()") failsWith "bad argument #1 to 'rawset' (table expected, got no value)"
-      program ("rawset(nil)") failsWith "bad argument #1 to 'rawset' (table expected, got nil)"
-      program ("rawset('x')") failsWith "bad argument #1 to 'rawset' (table expected, got string)"
+      program ("rawset()") failsWith ""<<"bad argument #1 to 'rawset' (table expected, got no value)"
+      program ("rawset(nil)") failsWith ""<<"bad argument #1 to 'rawset' (table expected, got nil)"
+      program ("rawset('x')") failsWith ""<<"bad argument #1 to 'rawset' (table expected, got string)"
 
-      program ("rawset({}, nil)") failsWith "bad argument #3 to 'rawset' (value expected)"
+      program ("rawset({}, nil)") failsWith ""<<"bad argument #3 to 'rawset' (value expected)"
 
       program (
         """x = {}
@@ -307,8 +307,8 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
           |return x.hello
         """) succeedsWith "world"
 
-      program ("rawset({}, nil, 1)") failsWith "table index is nil"
-      program ("rawset({}, 0 / 0, 1)") failsWith "table index is NaN"
+      program ("rawset({}, nil, 1)") failsWith ""<<"table index is nil"
+      program ("rawset({}, 0 / 0, 1)") failsWith ""<<"table index is NaN"
 
       program (
         """x = {}
@@ -321,8 +321,8 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
 
     about ("rawlen") {
 
-      program ("rawlen()") failsWith "bad argument #1 to 'rawlen' (table or string expected)"
-      program ("rawlen(1)") failsWith "bad argument #1 to 'rawlen' (table or string expected)"
+      program ("rawlen()") failsWith ""<<"bad argument #1 to 'rawlen' (table or string expected)"
+      program ("rawlen(1)") failsWith ""<<"bad argument #1 to 'rawlen' (table or string expected)"
 
       program ("return rawlen('x')") succeedsWith 1
       program ("return rawlen({'x', 1, true})") succeedsWith 3
@@ -331,11 +331,11 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
     }
 
     about ("select") {
-      program ("select()") failsWith "bad argument #1 to 'select' (number expected, got no value)"
+      program ("select()") failsWith ""<<"bad argument #1 to 'select' (number expected, got no value)"
 
-      program ("select('x')") failsWith "bad argument #1 to 'select' (number expected, got string)"
-      program ("select(' #')") failsWith "bad argument #1 to 'select' (number expected, got string)"
-      program ("select(' # ')") failsWith "bad argument #1 to 'select' (number expected, got string)"
+      program ("select('x')") failsWith ""<<"bad argument #1 to 'select' (number expected, got string)"
+      program ("select(' #')") failsWith ""<<"bad argument #1 to 'select' (number expected, got string)"
+      program ("select(' # ')") failsWith ""<<"bad argument #1 to 'select' (number expected, got string)"
 
       program ("return select('#')") succeedsWith 0
       program ("return select('#', nil)") succeedsWith 1
@@ -345,10 +345,10 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("return select('-1', true, false)") succeedsWith (false)
 
       program ("return select(7, true, false)") succeedsWith ()
-      program ("select(0, true, false)") failsWith "bad argument #1 to 'select' (index out of range)"
-      program ("select(-3, true, false)") failsWith "bad argument #1 to 'select' (index out of range)"
+      program ("select(0, true, false)") failsWith ""<<"bad argument #1 to 'select' (index out of range)"
+      program ("select(-3, true, false)") failsWith ""<<"bad argument #1 to 'select' (index out of range)"
 
-      program ("select(1.5, true, false)") failsWith "bad argument #1 to 'select' (number has no integer representation)"
+      program ("select(1.5, true, false)") failsWith ""<<"bad argument #1 to 'select' (number has no integer representation)"
 
       program ("return select(1, 1, 2, 3, 4, 5)") succeedsWith (1, 2, 3, 4, 5)
       program ("return select(-1, 1, 2, 3, 4, 5)") succeedsWith (5)
@@ -360,9 +360,9 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
 
     about ("load") {
 
-      program ("load()") failsWith "bad argument #1 to 'load' (function expected, got no value)"
-      program ("load({})") failsWith "bad argument #1 to 'load' (function expected, got table)"
-      program ("load(nil)") failsWith "bad argument #1 to 'load' (function expected, got nil)"
+      program ("load()") failsWith ""<<"bad argument #1 to 'load' (function expected, got no value)"
+      program ("load({})") failsWith ""<<"bad argument #1 to 'load' (function expected, got table)"
+      program ("load(nil)") failsWith ""<<"bad argument #1 to 'load' (function expected, got nil)"
 
       program ("return load(42)") succeedsWith (null, classOf[String])
       program ("return load(42, 42, 42)") succeedsWith (null, "attempt to load a text chunk (mode is '42')")
