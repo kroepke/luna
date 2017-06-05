@@ -86,6 +86,7 @@ trait FragmentExpectations {
   protected val CoroContext = Env.Coro
   protected val MathContext = Env.Math
   protected val StringLibContext = Env.Str  // must not be called StringContext -- messes up with string interpolation
+  protected val OsContext = Env.Os
   protected val IOContext = Env.IO
   protected val TableContext = Env.Tab
   protected val DebugContext = Env.Debug
@@ -152,6 +153,7 @@ object FragmentExpectations {
     case object Coro extends Env
     case object Math extends Env
     case object Str extends Env
+    case object Os extends Env
     case object IO extends Env
     case object Tab extends Env
     case object Debug extends Env

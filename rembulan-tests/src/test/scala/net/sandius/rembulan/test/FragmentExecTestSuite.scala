@@ -47,6 +47,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
   protected val Coro = FragmentExpectations.Env.Coro
   protected val Math = FragmentExpectations.Env.Math
   protected val Str = FragmentExpectations.Env.Str
+  protected val Os = FragmentExpectations.Env.Os
   protected val IO = FragmentExpectations.Env.IO
   protected val Tab = FragmentExpectations.Env.Tab
   protected val Debug = FragmentExpectations.Env.Debug
@@ -79,6 +80,10 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
       case Str =>
         BasicLib.installInto(state, env, runtimeEnv, ldr)
         StringLib.installInto(state, env)
+
+      case Os =>
+        BasicLib.installInto(state, env, runtimeEnv, ldr)
+        OsLib.installInto(state, env, runtimeEnv)
 
       case IO =>
         BasicLib.installInto(state, env, runtimeEnv, ldr)

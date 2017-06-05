@@ -100,7 +100,7 @@ public final class OsLib {
 	 * string format.</p>
 	 *
 	 * <p>If the time argument is present, this is the time to be formatted (see the
-	 * {@link #time(RuntimeEnvironment) <code>os.time</code>} function for a description of this value).
+	 * {@link #time() <code>os.time</code>} function for a description of this value).
 	 * Otherwise, {@code date} formats the current time.</p>
 	 *
 	 * <p>If format starts with '{@code !}', then the date is formatted in Coordinated Universal
@@ -371,7 +371,6 @@ public final class OsLib {
 	 * and {@link DiffTime) <code>os.difftime</code>}.</p>
 	 * </blockquote>
 	 *
-	 * @param runtimeEnvironment  the runtime environment, must not be {@code null}
 	 * @return  the {@code os.time} function
 	 *
 	 * @throws NullPointerException  if {@code runtimeEnvironment} is {@code null}
@@ -380,8 +379,8 @@ public final class OsLib {
 	 *     the Lua 5.3 Reference Manual entry for <code>os.time</code></a>
 	 */
 	// TODO: make public once implemented
-	static LuaFunction time(RuntimeEnvironment runtimeEnvironment) {
-		return new Time(runtimeEnvironment);
+	static LuaFunction time() {
+		return new Time();
 	}
 
 	/**
@@ -457,7 +456,7 @@ public final class OsLib {
 			t.rawset("remove", remove(runtimeEnvironment));
 			t.rawset("rename", rename(runtimeEnvironment));
 			t.rawset("setlocale", setlocale(runtimeEnvironment));
-			t.rawset("time", time(runtimeEnvironment));
+			t.rawset("time", time());
 			t.rawset("tmpname", tmpname(runtimeEnvironment));
 		}
 
@@ -561,11 +560,19 @@ public final class OsLib {
 		}
 	}
 
-	static class Time extends UnimplementedFunction {
-		// TODO
-		public Time(RuntimeEnvironment runtimeEnvironment) {
-			super("os.time");
-			Objects.requireNonNull(runtimeEnvironment);
+	static class Time extends AbstractLibFunction {
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
+			if (args.hasNext()) {
+				throw new UnsupportedOperationException("os.time does not support passing a date table yet");
+			}
+			context.getReturnBuffer().setTo(System.currentTimeMillis()/1000);
+		}
+
+		@Override
+		protected String name() {
+			return "os.time";
 		}
 	}
 
