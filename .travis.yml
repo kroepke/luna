@@ -5,4 +5,4 @@ install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -Dgpg.skip=true 
 script: mvn test -e
 
 jdk:
-  - openjdk7
+  - openjdk8
