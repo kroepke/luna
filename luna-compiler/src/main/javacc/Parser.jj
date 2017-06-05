@@ -1,0 +1,754 @@
+options {
+	STATIC = false;
+	JDK_VERSION = "1.7";
+	ERROR_REPORTING = true;
+	UNICODE_INPUT = true;
+	DEBUG_LOOKAHEAD = false;
+	DEBUG_PARSER = false;
+//	DEBUG_LOOKAHEAD = true;
+//	DEBUG_PARSER = true;
+	DEBUG_TOKEN_MANAGER = false;
+
+	// FIXME: remove when done
+//	FORCE_LA_CHECK = true;
+}
+
+PARSER_BEGIN(Parser)
+package org.classdump.luna.parser;
+
+import org.classdump.luna.parser.ast.*;
+
+import java.util.*;
+
+import static java.util.Collections.*;
+
+public class Parser {
+
+	private static SourceInfo src(Token t) {
+		return new SourceInfo(t.beginLine, t.beginColumn);
+	}
+
+	private static Attributes attr(Token t) {
+		return Attributes.of(src(t));
+	}
+
+	private static List<BodyStatement> none() {
+		return Collections.<BodyStatement>emptyList();
+	}
+
+	private static List<BodyStatement> one(BodyStatement v) {
+		return Collections.<BodyStatement>singletonList(v);
+	}
+
+	private static List<BodyStatement> pair(BodyStatement u, BodyStatement v) {
+		List<BodyStatement> l = new ArrayList<BodyStatement>();
+		l.add(u);
+		l.add(v);
+		return Collections.<BodyStatement>unmodifiableList(l);
+	}
+
+	private static List<Name> toNameList(List<SourceElement<Name>> names) {
+		List<Name> ns = new ArrayList<Name>();
+		for (SourceElement<Name> sn : names) {
+			ns.add(sn.element());
+		}
+		return Collections.unmodifiableList(ns);
+	}
+
+	private static List<Name> prependName(Name n, List<Name> names) {
+		List<Name> ns = new ArrayList<Name>();
+		ns.add(Objects.requireNonNull(n));
+		ns.addAll(Objects.requireNonNull(names));
+		return Collections.unmodifiableList(ns);
+	}
+
+}
+
+PARSER_END(Parser)
+
+TOKEN_MGR_DECLS: {
+
+	int longLiteralLevel;
+
+}
+
+/* Whitespace */
+
+SKIP :
+{
+	" " | "\t" | "\n" | "\r" | "\f"
+}
+
+/* Long literals */
+
+// States once a long opening bracket has been found:
+//   IN_LL_BODY ... no ']' has been encountered, looking for the first one
+//   IN_LL_END  ... a single ']' has been encountered, i.e. looking for the second one
+
+TOKEN :
+{
+	<LL_BEGIN: "[" ("=")* "["> { longLiteralLevel = lengthOfMatch - 2; } : IN_LL_BODY
+}
+
+<IN_LL_BODY>
+MORE :
+{
+	<LL_BODY_BODY: (~["]"])+>
+|	"]" : IN_LL_END
+}
+
+<IN_LL_END>
+MORE :
+{
+	<LL_END_BODY: (~["]","="])+> : IN_LL_BODY
+}
+
+<IN_LL_END>
+TOKEN :
+{
+	<LL_TAIL: ("=")* "]">
+		{
+			if (longLiteralLevel == lengthOfMatch - 1) {
+				longLiteralLevel = -1;
+				SwitchTo(DEFAULT);
+			}
+		}
+}
+
+<IN_LL_END>
+MORE :
+{
+	<LL_END_NOTAIL: ("=")+> : IN_LL_BODY
+}
+
+
+/* Comments */
+
+MORE :
+{
+	<LONG_COMMENT: "--[" ("=")* "["> { longLiteralLevel = lengthOfMatch - 4; } : IN_LC_BODY
+|	"--" : IN_LINE_COMMENT
+}
+
+<IN_LINE_COMMENT>
+SPECIAL_TOKEN :
+{
+	<LINE_COMMENT: (~["\n","\r"])* ("\n"|"\r"|"\r\n")?> : DEFAULT
+}
+
+// Long comment states once a long opening bracket has been found:
+//   IN_LC_BODY ... no ']' has been encountered, looking for the first one
+//   IN_LC_END  ... a single ']' has been encountered, i.e. looking for the second one
+
+<IN_LC_BODY>
+MORE :
+{
+	<LC_BODY_BODY: (~["]"])+>
+|	"]" : IN_LC_END
+}
+
+<IN_LC_END>
+MORE :
+{
+	<LC_END_BODY: (~["]","="])+> : IN_LC_BODY
+}
+
+<IN_LC_END>
+SPECIAL_TOKEN :
+{
+	<LC_END_TAIL: ("=")* "]">
+		{
+			if (longLiteralLevel == lengthOfMatch - 1) {
+				longLiteralLevel = -1;
+				SwitchTo(DEFAULT);
+			}
+		}
+}
+
+<IN_LC_END>
+MORE :
+{
+	<LC_END_NOTAIL: ("=")+> : IN_LC_BODY
+}
+
+
+/* Keywords */
+
+TOKEN :
+{
+	<AND: "and">
+|	<BREAK: "break">
+|	<DO: "do">
+|	<ELSE: "else">
+|	<ELSEIF: "elseif">
+|	<END: "end">
+|	<FALSE: "false">
+|	<FOR: "for">
+|	<FUNCTION: "function">
+|	<GOTO: "goto">
+|	<IF: "if">
+|	<IN: "in">
+|	<LOCAL: "local">
+|	<NIL: "nil">
+|	<NOT: "not">
+|	<OR: "or">
+|	<REPEAT: "repeat">
+|	<RETURN: "return">
+|	<THEN: "then">
+|	<TRUE: "true">
+|	<UNTIL: "until">
+|	<WHILE: "while">
+}
+
+/* Literals */
+TOKEN :
+{
+	<NAME: ["a"-"z", "A"-"Z", "_"] (["a"-"z", "A"-"Z", "_", "0"-"9"])*>
+}
+
+/* Numerals and strings */
+TOKEN :
+{
+	// Numerals
+	<NUMERAL: <DEC_NUMERAL> | <HEX_NUMERAL>>
+
+|	<#DECDIGIT: ["0"-"9"]>
+|	<#HEXDIGIT: ["0"-"9", "a"-"f", "A"-"F"]>
+|	<#SIGN: ["+","-"]>
+|	<#DECEXP: ["e","E"]>
+|	<#HEX: "0" ["x","X"]>
+|	<#HEXEXP: ["p","P"]>
+
+|	<#DEC_NUMERAL: ((<DECDIGIT>)+ ("." (<DECDIGIT>)*)? | "." (<DECDIGIT>)+) (<DECEXP> (<SIGN>)? (<DECDIGIT>)+)?>
+|	<#HEX_NUMERAL: <HEX> ((<HEXDIGIT>)+ ("." (<HEXDIGIT>)*)? | "." (<HEXDIGIT>)+) (<HEXEXP> (<SIGN>)? (<DECDIGIT>)+)?>
+
+	// String literals
+|	<LITERAL_STRING: <DOUBLE_QUOTED_STRING> | <SINGLE_QUOTED_STRING>>
+|	<#DOUBLE_QUOTED_STRING: "\"" (<ESCAPED> | ~["\"", "\\", "\n", "\r"])* "\"">
+|	<#SINGLE_QUOTED_STRING: "'" (<ESCAPED> | ~["'", "\\", "\n", "\r"])* "'">
+
+|	<#ESCAPED: <HEXCHAR> | <DECCHAR> | <UNICODE> | <CHAR> | <NEWLINE> | <SKIP_WHITESPACE>>
+|	<#HEXCHAR: "\\" "x" (<HEXDIGIT>){2}>
+|	<#DECCHAR: "\\" (<DECDIGIT>){1,3}>
+|	<#UNICODE: "\\" "u" "{" (<HEXDIGIT>)+ "}">
+|	<#CHAR: "\\" ("'" | "\"" | "\\" | "a" | "b" | "f" | "n" | "r" | "t" | "v")>
+|	<#NEWLINE: "\\" ("\n" | "\r\n")>
+|	<#SKIP_WHITESPACE: "\\z" (" " | "\t" | "\n" | "\r" | "\f" )*>
+
+}
+
+/* Other tokens */
+TOKEN :
+{
+	// operators
+	<PLUS: "+">
+|	<MINUS: "-">
+|	<MUL: "*">
+|	<DIV: "/">
+|	<MOD: "%">
+|	<POW: "^">
+|	<LEN: "#">
+|	<BAND: "&">
+|	<BNOT: "~">  // FIXME: this is a BNOT and BXOR
+|	<BOR: "|">
+|	<SHL: "<<">
+|	<SHR: ">>">
+|	<IDIV: "//">
+|	<DBL_DOT: "..">  // string concatenation
+
+	// comparison operators
+|	<EQ: "==">
+|	<NEQ: "~=">
+|	<LE: "<=">
+|	<GE: ">=">
+|	<LT: "<">
+|	<GT: ">">
+
+	// other
+|	<ASSIGN: "=">
+|	<PAREN_OPEN: "(">
+|	<PAREN_CLOSE: ")">
+|	<CURLY_OPEN: "{">
+|	<CURLY_CLOSE: "}">
+|	<SQUARE_OPEN: "[">
+|	<SQUARE_CLOSE: "]">
+|	<DOUBLE_COLON: "::">
+|	<SEMICOLON: ";">
+|	<COLON: ":">
+|	<COMMA: ",">
+|	<DOT: ".">
+|	<VARARGS: "...">
+}
+
+SourceElement<Name> SrcName() :
+{
+	Token t;
+}
+{
+	t=<NAME>  { return new SourceElement(src(t), Name.fromString(t.image)); }
+}
+
+Name Name() :
+{
+	SourceElement<Name> sn;
+}
+{
+	sn=SrcName()  { return sn.element(); }
+}
+
+SourceElement<StringLiteral> Str() :
+{
+	Token t, u;
+	StringBuilder bld;
+}
+{
+	t=<LITERAL_STRING>  { return new SourceElement(src(t), StringLiteral.fromString(t.image)); }
+|	t=<LL_BEGIN> { bld = new StringBuilder(); } (u=<LL_TAIL> { bld.append(u.image); })+
+		{
+			// skip the closing bracket
+			bld.setLength(bld.length() - t.image.length());
+
+			return new SourceElement(
+					src(t),
+					// skip the leading newline if there is one
+					StringLiteral.verbatim(bld.length() > 0 && bld.charAt(0) == '\n'
+							? bld.substring(1)
+							: bld.toString()));
+		}
+}
+
+SourceElement<Numeral> Num() :
+{
+	Token t;
+}
+{
+	t=<NUMERAL>  { return new SourceElement(src(t), Numeral.fromString(t.image)); }
+}
+
+// FIXME: remove when done?
+void Eof() :
+{ }
+{
+	<EOF>
+}
+
+Chunk Chunk() :
+{
+	Block b;
+}
+{
+	b=Block() <EOF> { return new Chunk(b); }
+}
+
+Block Block() :
+{
+	List<BodyStatement> ss;
+	List<BodyStatement> stats = new ArrayList<BodyStatement>();
+	ReturnStatement ret = null;
+}
+{
+	(ss=BodyStatement() { stats.addAll(ss); })* (ret=ReturnStatement())? { return new Block(Collections.unmodifiableList(stats), ret); }
+}
+
+List<BodyStatement> BodyStatement() :
+{
+	Token t, u;
+
+	Name n, m = null;
+	Expr e, f;
+	Expr g = null;
+	Block b;
+
+	FunctionDefExpr fb;
+
+	List<LValueExpr> vars;
+	List<SourceElement<Name>> names = new ArrayList<SourceElement<Name>>();
+	List<Expr> exprs = Collections.emptyList();
+
+	BodyStatement s;
+	List<BodyStatement> ss = new ArrayList<BodyStatement>();
+
+	SourceElement<Name> sn;
+
+	FunctionNameBuilder fnb = null;
+}
+{
+	// empty statement
+	<SEMICOLON>  { return none(); }
+
+	// assignment or function call statement
+|	s=AssignOrCall()  { return one(s); }
+
+	// label
+|   t=<DOUBLE_COLON> n=Name() <DOUBLE_COLON> { return one(Statements.labelStatement(src(t), n)); }
+
+	// break
+|	t=<BREAK>  { return one(Statements.breakStatement(src(t))); }
+
+	// goto
+|	t=<GOTO> n=Name()  { return one(Statements.gotoStatement(src(t), n)); }
+
+	// nested block
+|	t=<DO> b=Block() <END>  { return one(Statements.doStatement(src(t), b)); }
+
+	// while loop
+|	t=<WHILE> e=Expr() <DO> b=Block() <END>  { return one(Statements.whileStatement(src(t), e, b)); }
+
+	// repeat-until loop
+|	t=<REPEAT> b=Block() <UNTIL> e=Expr()  { return one(Statements.repeatUntilStatement(src(t), e, b)); }
+
+	// if-then-else
+|	s=IfStatement()  { return one(s); }
+
+	// numeric for
+|	LOOKAHEAD(3) t=<FOR> n=Name() <ASSIGN> e=Expr() <COMMA> f=Expr() (<COMMA> g=Expr())? <DO> b=Block() <END>  { return one(Statements.numericForStatement(src(t), n, e, f, g, b)); }
+
+	// generic for
+|	t=<FOR> names=NameList() <IN> exprs=ExprList() <DO> b=Block() <END>  {
+		return one(Statements.genericForStatement(src(t), toNameList(names), exprs, b));
+	}
+
+	// function definition
+|	t=<FUNCTION> sn=SrcName() { fnb = new FunctionNameBuilder(sn); }
+			(u=<DOT> sn=SrcName() { fnb.addDotName(src(u), sn); })*
+			(u=<COLON> sn=SrcName() { fnb.addColonName(src(u), sn); })?
+			fb=FunctionBody()  {
+
+		{
+			FunctionDefExpr.Params params = fb.params();
+			Block blk = fb.block();
+
+			if (fnb.isMethod()) {
+				// defining a method: change fb's signature by prepending a "self" field
+				params = params.update(prependName(Name.fromString("self"), params.names()), params.isVararg());
+			}
+
+			// re-instantiate with adjusted param list and source information
+			fb = Exprs.functionDef(src(t), params, blk);
+		}
+
+		return one(Statements.assignStatement(src(t), fnb.get(), fb));
+	}
+
+	// local function definition
+|	LOOKAHEAD(2) t=<LOCAL> u=<FUNCTION> sn=SrcName() fb=FunctionBody()  {
+		return pair(
+				Statements.localDeclStatement(src(t), sn.element()),
+				Statements.assignStatement(src(t),
+						Collections.<LValueExpr>singletonList(Exprs.var(sn.sourceInfo(), sn.element())),
+						Collections.<Expr>singletonList(Exprs.functionDef(src(u), fb.params(), fb.block()))));
+	}
+
+	// locals declaration
+|	t=<LOCAL> names=NameList() (<ASSIGN> exprs=ExprList())?  {
+		return one(Statements.localDeclStatement(src(t), toNameList(names), exprs));
+	}
+}
+
+Expr Expr() :
+{
+	SourceElement<Operator.Unary> uop;
+	SourceElement<Operator.Binary> bop;
+	Expr e;
+
+	ExprBuilder bld = new ExprBuilder();
+}
+{
+	(uop=UnOp() { bld.addOp(uop.sourceInfo(), uop.element()); })*
+			e=SimpleExpr() { bld.addExpr(e); }
+			(LOOKAHEAD(2) bop=BinOp() { bld.addOp(bop.sourceInfo(), bop.element()); }
+					(uop=UnOp() { bld.addOp(uop.sourceInfo(), uop.element()); })*
+					e=SimpleExpr() { bld.addExpr(e); })*
+			{ return bld.build(); }
+}
+
+Expr SimpleExpr() :
+{
+	Token t;
+	SourceElement<StringLiteral> ss;
+	SourceElement<Numeral> sn;
+	Expr e;
+	FunctionDefExpr fn;
+}
+{
+	t=<NIL>    { return Exprs.literal(src(t), NilLiteral.INSTANCE); }
+|	t=<FALSE>  { return Exprs.literal(src(t), BooleanLiteral.FALSE); }
+|	t=<TRUE>   { return Exprs.literal(src(t), BooleanLiteral.TRUE); }
+|	sn=Num()  { return Exprs.literal(sn.sourceInfo(), sn.element()); }
+|	ss=Str()  {return Exprs.literal(ss.sourceInfo(), ss.element()); }
+|	t=<VARARGS>  { return Exprs.varargs(src(t)); }
+|	t=<FUNCTION> fn=FunctionBody()  { return Exprs.functionDef(src(t), fn.params(), fn.block()); }
+|	e=PrefixExpr()  { return e; }
+|	e=TableConstructor()  { return e; }
+}
+
+Expr PrefixExpr() :
+{
+	Expr e;
+	PostfixOp op;
+}
+{
+	e=VarExpr() (LOOKAHEAD(2) op=__PostfixOp() { e=op.on(e); })*  { return e; }
+}
+
+Expr VarExpr() :
+{
+	SourceElement<Name> sn;
+	Expr e;
+}
+{
+	sn=SrcName()  { return Exprs.var(sn.sourceInfo(), sn.element()); }
+|	<PAREN_OPEN> e=Expr() <PAREN_CLOSE>  { return Exprs.paren(e); }
+}
+
+PostfixOp __PostfixOp() :
+{
+	PostfixOp op;
+}
+{
+	op=__FieldAccessOp()  { return op; }
+|	op=__InvokeOp()  { return op; }
+}
+
+BodyStatement AssignOrCall() :
+{
+	Expr e;
+	AssignRest ar;
+}
+{
+	e=PrefixExpr()
+	(ar=AssignOrCallRest()
+		{
+			if (e instanceof LValueExpr) {
+				return ar.prepend((LValueExpr) e);
+			}
+			else {
+				throw new ParseException("lvalue expected at line " + e.line());
+			}
+		}
+	)?
+
+	{
+		if (e instanceof CallExpr) {
+			CallExpr ce = (CallExpr) e;
+			return Statements.callStatement(ce.sourceInfo(), ce);
+		}
+		else {
+			throw new ParseException("function call expected at line " + e.line());
+		}
+	}
+}
+
+AssignRest AssignOrCallRest() :
+{
+	Token t;
+	LValueExpr v;
+	List<LValueExpr> vs = new ArrayList<LValueExpr>();
+	List<Expr> es;
+}
+{
+	// single assignment
+	t=<ASSIGN> es=ExprList()  { return new AssignRest(src(t), es); }
+
+	// multiple assignments
+|	(<COMMA> v=LValue() { vs.add(v); })+ t=<ASSIGN> es=ExprList()  { return new AssignRest(src(t), Collections.unmodifiableList(vs), es); }
+}
+
+LValueExpr LValue() :
+{
+	SourceElement<Name> sn;
+	Expr e;
+//	PostfixOp.FieldAccess fa;
+}
+{
+//	LOOKAHEAD(2) sn=SrcName()  { return Exprs.var(sn.sourceInfo(), sn.element()); }
+//|	e=PrefixExpr() fa=__FieldAccessOp()  { return fa.on(e); }
+
+	// FIXME: restrict this using syntactic rule instead
+	e=PrefixExpr()  { if (e instanceof LValueExpr) return (LValueExpr) e; else throw new ParseException("lvalue expected"); }
+}
+
+SourceElement<List<Expr>> Args() :
+{
+	Token t;
+	Expr e;
+	SourceElement<StringLiteral> ss;
+	List<Expr> es = Collections.emptyList();
+}
+{
+	t=<PAREN_OPEN> (es=ExprList())? <PAREN_CLOSE>  { return new SourceElement<List<Expr>>(src(t), es); }
+|	e=TableConstructor()  { return new SourceElement<List<Expr>>(e.sourceInfo(), Collections.<Expr>singletonList(e)); }
+|	ss=Str()  { return new SourceElement<List<Expr>>(ss.sourceInfo(), Collections.<Expr>singletonList(Exprs.literal(ss.sourceInfo(), ss.element()))); }
+}
+
+IfStatement IfStatement() :
+{
+	Token t;
+	Expr e;
+	Block b;
+	ConditionalBlock ift;
+	ArrayList<ConditionalBlock> elifs = new ArrayList<ConditionalBlock>();
+	Block els = null;
+}
+{
+	t=<IF> e=Expr() <THEN> b=Block() { ift = new ConditionalBlock(e, b); }
+			(<ELSEIF> e=Expr() <THEN> b=Block() { elifs.add(new ConditionalBlock(e, b)); } )*
+			(<ELSE> els=Block())?
+			<END>  { return Statements.ifStatement(src(t), ift, elifs, els); }
+}
+
+/*
+	retstat ::= return [explist] [‘;’]
+*/
+ReturnStatement ReturnStatement() :
+{
+	Token t;
+	List<Expr> exprs = Collections.emptyList();
+}
+{
+	t=<RETURN> (exprs=ExprList())? (<SEMICOLON>)? { return Statements.returnStatement(src(t), exprs); }
+}
+
+PostfixOp.FieldAccess __FieldAccessOp() :
+{
+	Token t;
+	Expr e;
+	SourceElement<Name> sn;
+}
+{
+	t=<SQUARE_OPEN> e=Expr() <SQUARE_CLOSE>  { return new PostfixOp.FieldAccess(src(t), e); }
+|	t=<DOT> sn=SrcName()  { return new PostfixOp.FieldAccess(src(t), Exprs.literal(sn.sourceInfo(), StringLiteral.fromName(sn.element()))); }
+}
+
+PostfixOp.Invoke __InvokeOp() :
+{
+	Name n;
+	SourceElement<List<Expr>> args;
+}
+{	args=Args()  { return new PostfixOp.Invoke(args, null); }
+|	<COLON> n=Name() args=Args()  { return new PostfixOp.Invoke(args, n); }
+}
+
+
+List<SourceElement<Name>> NameList() :
+{
+	SourceElement<Name> n;
+	ArrayList<SourceElement<Name>> ns = new ArrayList<SourceElement<Name>>();
+}
+{
+	n=SrcName() { ns.add(n); } (LOOKAHEAD(2) <COMMA> n=SrcName() { ns.add(n); })*  { return Collections.unmodifiableList(ns); }
+}
+
+List<Expr> ExprList() :
+{
+	Expr e;
+	ArrayList<Expr> es = new ArrayList<Expr>();
+}
+{
+	e=Expr() { es.add(e); } (<COMMA> e=Expr() { es.add(e); })* { return Collections.unmodifiableList(es); }
+}
+
+FunctionDefExpr FunctionBody() :
+{
+	Token t;
+	FunctionDefExpr.Params params = FunctionDefExpr.Params.empty();
+	Block block;
+}
+{
+	t=<PAREN_OPEN> (params=FunctionParams())? <PAREN_CLOSE> block=Block() <END>  { return Exprs.functionDef(src(t), params, block); }
+}
+
+FunctionDefExpr.Params FunctionParams() :
+{
+	List<SourceElement<Name>> params;
+	boolean vararg = false;
+}
+{
+	params=NameList() (<COMMA> <VARARGS> { vararg = true; })?  { return new FunctionDefExpr.Params(toNameList(params), vararg); }
+|	<VARARGS>  { return new FunctionDefExpr.Params(Collections.<Name>emptyList(), true); }
+}
+
+TableConstructorExpr TableConstructor() :
+{
+	Token t;
+	TableConstructorExpr.FieldInitialiser fi;
+	List<TableConstructorExpr.FieldInitialiser> fields = new ArrayList<TableConstructorExpr.FieldInitialiser>();
+}
+{
+	t=<CURLY_OPEN> (fields=FieldInitialiserList())? <CURLY_CLOSE>  { return Exprs.tableConstructor(src(t), fields); }
+}
+
+void FieldSeparator() :
+{ }
+{
+	<COMMA>
+|	<SEMICOLON>
+}
+
+List<TableConstructorExpr.FieldInitialiser> FieldInitialiserList() :
+{
+	TableConstructorExpr.FieldInitialiser f;
+	ArrayList<TableConstructorExpr.FieldInitialiser> fs = new ArrayList<TableConstructorExpr.FieldInitialiser>();
+}
+{
+	f=FieldInitialiser() { fs.add(f); } (LOOKAHEAD(2) FieldSeparator() f=FieldInitialiser() { fs.add(f); })* (FieldSeparator())?  { return Collections.unmodifiableList(fs); }
+}
+
+TableConstructorExpr.FieldInitialiser FieldInitialiser() :
+{
+	Expr e, f;
+	SourceElement<Name> sn;
+}
+{
+	<SQUARE_OPEN> e=Expr() <SQUARE_CLOSE> <ASSIGN> f=Expr()  { return Exprs.fieldInitialiser(e, f); }
+|	LOOKAHEAD(2) sn=SrcName() <ASSIGN> e=Expr()  { return Exprs.fieldInitialiser(Exprs.literal(sn.sourceInfo(), StringLiteral.fromName(sn.element())), e); }
+|	e=Expr()  { return Exprs.fieldInitialiser(null, e); }
+}
+
+/*
+	binop ::=  ‘+’ | ‘-’ | ‘*’ | ‘/’ | ‘//’ | ‘^’ | ‘%’ |
+		 ‘&’ | ‘~’ | ‘|’ | ‘>>’ | ‘<<’ | ‘..’ |
+		 ‘<’ | ‘<=’ | ‘>’ | ‘>=’ | ‘==’ | ‘~=’ |
+		 and | or
+*/
+SourceElement<Operator.Binary> BinOp() :
+{
+	Token t;
+}
+{
+	t=<PLUS>     { return SourceElement.of(src(t), Operator.Binary.ADD); }
+|	t=<MINUS>    { return SourceElement.of(src(t), Operator.Binary.SUB); }
+|	t=<MUL>      { return SourceElement.of(src(t), Operator.Binary.MUL); }
+|	t=<DIV>      { return SourceElement.of(src(t), Operator.Binary.DIV); }
+|	t=<IDIV>     { return SourceElement.of(src(t), Operator.Binary.IDIV); }
+|	t=<POW>      { return SourceElement.of(src(t), Operator.Binary.POW); }
+|	t=<MOD>      { return SourceElement.of(src(t), Operator.Binary.MOD); }
+|	t=<BAND>     { return SourceElement.of(src(t), Operator.Binary.BAND); }
+|	t=<BNOT>     { return SourceElement.of(src(t), Operator.Binary.BXOR); }
+|	t=<BOR>      { return SourceElement.of(src(t), Operator.Binary.BOR); }
+|	t=<SHR>      { return SourceElement.of(src(t), Operator.Binary.SHR); }
+|	t=<SHL>      { return SourceElement.of(src(t), Operator.Binary.SHL); }
+|	t=<DBL_DOT>  { return SourceElement.of(src(t), Operator.Binary.CONCAT); }
+|	t=<LT>       { return SourceElement.of(src(t), Operator.Binary.LT); }
+|	t=<LE>       { return SourceElement.of(src(t), Operator.Binary.LE); }
+|	t=<GT>       { return SourceElement.of(src(t), Operator.Binary.GT); }
+|	t=<GE>       { return SourceElement.of(src(t), Operator.Binary.GE); }
+|	t=<EQ>       { return SourceElement.of(src(t), Operator.Binary.EQ); }
+|	t=<NEQ>      { return SourceElement.of(src(t), Operator.Binary.NEQ); }
+|	t=<AND>      { return SourceElement.of(src(t), Operator.Binary.AND); }
+|	t=<OR>       { return SourceElement.of(src(t), Operator.Binary.OR); }
+}
+
+/*
+	unop ::= ‘-’ | not | ‘#’ | ‘~’
+*/
+SourceElement<Operator.Unary> UnOp() :
+{
+	Token t;
+}
+{
+	t=<MINUS>  { return SourceElement.of(src(t), Operator.Unary.UNM); }
+|	t=<NOT>    { return SourceElement.of(src(t), Operator.Unary.NOT); }
+|	t=<LEN>    { return SourceElement.of(src(t), Operator.Unary.LEN); }
+|	t=<BNOT>   { return SourceElement.of(src(t), Operator.Unary.BNOT); }
+}

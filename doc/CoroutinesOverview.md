@@ -1,10 +1,10 @@
 # Overview of the coroutine implementation
 
-The way coroutines are handled in Rembulan permeates through the entire implementation
+The way coroutines are handled in Luna permeates through the entire implementation
 strategy. The main obstacle to overcome is the lack of native support for coroutines
 or continuations on the JVM -- at this point, any pure Java implementation of this runtime
 feature must either simulate coroutines using Java threads (which are heavyweight),
-or implement them entirely in user code. Rembulan chooses the latter approach.
+or implement them entirely in user code. Luna chooses the latter approach.
 
 The main idea is to use exceptions for switching coroutines, and attach
 call stack information to them.
@@ -13,7 +13,7 @@ What follows is a short overview of how coroutine switching is achieved in Java 
 terms. For Lua programs, this process is entirely transparent.
 
 Every Lua function is an instance of (a subtype of) the Java class
-[`LuaFunction`](https://mjanicek.github.io/rembulan/apidocs/rembulan-runtime/net/sandius/rembulan/runtime/LuaFunction.html)
+[`LuaFunction`](https://mjanicek.github.io/luna/apidocs/luna-runtime/net/sandius/luna/runtime/LuaFunction.html)
 with two methods (entry points): `invoke` and `resume`.
 `invoke` is called when the function is called; `resume` is called when it is being resumed
 having been previously paused in an `invoke` or `resume`. Every operation that may involve
@@ -34,9 +34,9 @@ catch (UnresolvedControlThrowable ct) {
 ```
 
 (For more details, see
-[`Dispatch`](https://mjanicek.github.io/rembulan/apidocs/rembulan-runtime/net/sandius/rembulan/runtime/Dispatch.html),
-[`UnresolvedControlThrowable`](https://mjanicek.github.io/rembulan/apidocs/rembulan-runtime/net/sandius/rembulan/runtime/UnresolvedControlThrowable.html)
-and [`ResolvedControlThrowable`](https://mjanicek.github.io/rembulan/apidocs/rembulan-runtime/net/sandius/rembulan/runtime/ResolvedControlThrowable.html).)
+[`Dispatch`](https://mjanicek.github.io/luna/apidocs/luna-runtime/net/sandius/luna/runtime/Dispatch.html),
+[`UnresolvedControlThrowable`](https://mjanicek.github.io/luna/apidocs/luna-runtime/net/sandius/luna/runtime/UnresolvedControlThrowable.html)
+and [`ResolvedControlThrowable`](https://mjanicek.github.io/luna/apidocs/luna-runtime/net/sandius/luna/runtime/ResolvedControlThrowable.html).)
 
 Adding call frame information to that exception and rethrowing serves two purposes:
 
@@ -53,14 +53,14 @@ Essentially, then, every function's control state is exposed by the two methods 
 and `resume`), `invoke` being the initial entry point, `resume` are all others.
 
 The good news is that if you assume this being in place, you get what is called 
-“CPU accounting” in Rembulan (i.e., running Lua programs for a given number of ticks,
+“CPU accounting” in Luna (i.e., running Lua programs for a given number of ticks,
 automatically pausing them once the ticks have been spent) practically for free, as all functions
 that call Lua functions are ready to be paused. This is especially important for sandboxing
 applications.
 
 All of the above is done in a single thread, with no multi-threading involved, allowing
 the application to choose an appropriate threading strategy. In other words, coroutines
-in Rembulan are entirely decoupled from threads.
+in Luna are entirely decoupled from threads.
 
 ## Caveats
 
@@ -72,9 +72,9 @@ The resulting code is very complex and hard to maintain.
 
 The only way out of that would involve bytecode rewriting (at compile or class load time)
 of Java code written in "non-resumable" way. At the moment, there is no such functionality
-included in Rembulan, and it is probably a better idea to write complex Lua functions that
+included in Luna, and it is probably a better idea to write complex Lua functions that
 perform Lua operations following the semantics of Lua in Lua and have them compiled into
-Java bytecode by the Rembulan compiler.
+Java bytecode by the Luna compiler.
 
-For Lua functions, the control flow graph maintenance is entirely handled by the Rembulan
+For Lua functions, the control flow graph maintenance is entirely handled by the Luna
 compiler.

@@ -1,4 +1,4 @@
-# Rembulan completeness table
+# Luna completeness table
 
 ### Missing language/runtime features
 
@@ -54,9 +54,9 @@ Statuses:
 | [`coroutine.yield`](http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.yield) | ![complete](img/complete.png) | |
 | [`require`](http://www.lua.org/manual/5.3/manual.html#pdf-require) | ![complete](img/complete.png) | |
 | [`package.config`](http://www.lua.org/manual/5.3/manual.html#pdf-package.config) | ![complete](img/complete.png) | |
-| [`package.cpath`](http://www.lua.org/manual/5.3/manual.html#pdf-package.cpath) | ![missing](img/missing.png) | incompatible with Rembulan |
+| [`package.cpath`](http://www.lua.org/manual/5.3/manual.html#pdf-package.cpath) | ![missing](img/missing.png) | incompatible with Luna |
 | [`package.loaded`](http://www.lua.org/manual/5.3/manual.html#pdf-package.loaded) | ![complete](img/complete.png) | |
-| [`package.loadlib`](http://www.lua.org/manual/5.3/manual.html#pdf-package.loadlib) | ![not implemented](img/not-implemented.png) | incompatible with Rembulan |
+| [`package.loadlib`](http://www.lua.org/manual/5.3/manual.html#pdf-package.loadlib) | ![not implemented](img/not-implemented.png) | incompatible with Luna |
 | [`package.path`](http://www.lua.org/manual/5.3/manual.html#pdf-package.path) | ![partial](img/partial.png) | default path assumes a Unix-like environment |
 | [`package.preload`](http://www.lua.org/manual/5.3/manual.html#pdf-package.preload) | ![complete](img/complete.png) | |
 | [`package.searchers`](http://www.lua.org/manual/5.3/manual.html#pdf-package.searchers) | ![partial](img/partial.png) | the `cpath` searcher and the all-in-one searcher not implemented |

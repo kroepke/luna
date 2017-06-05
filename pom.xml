@@ -5,14 +5,14 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>net.sandius.rembulan</groupId>
-  <artifactId>rembulan</artifactId>
+  <groupId>org.classdump.luna</groupId>
+  <artifactId>luna</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Rembulan</name>
-  <description>The Rembulan project</description>
-  <url>https://github.com/mjanicek/rembulan/</url>
+  <name>Luna</name>
+  <description>The Luna project</description>
+  <url>https://github.com/kroepke/luna/</url>
   <inceptionYear>2016</inceptionYear>
 
   <licenses>
@@ -29,23 +29,23 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git://github.com/mjanicek/rembulan.git</connection>
-    <url>https://github.com/mjanicek/rembulan/tree/master</url>
+    <connection>scm:git:git://github.com/kroepke/luna.git</connection>
+    <url>https://github.com/kroepke/luna/tree/master</url>
   </scm>
 
   <modules>
-    <module>rembulan-parent</module>
-    <module>rembulan-runtime</module>
-    <module>rembulan-compiler</module>
-    <module>rembulan-stdlib</module>
+    <module>luna-parent</module>
+    <module>luna-runtime</module>
+    <module>luna-compiler</module>
+    <module>luna-stdlib</module>
 
-    <module>rembulan-luajava-compat</module>
+    <module>luna-luajava-compat</module>
 
-    <module>rembulan-tests</module>
-    <module>rembulan-examples</module>
+    <module>luna-tests</module>
+    <module>luna-examples</module>
 
     <!-- the last module must be deployed -->
-    <module>rembulan-standalone</module>
+    <module>luna-standalone</module>
   </modules>
 
   <distributionManagement>

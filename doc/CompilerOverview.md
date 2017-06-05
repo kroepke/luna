@@ -1,35 +1,35 @@
-# Overview of the Rembulan compiler
+# Overview of the Luna compiler
 
-Rembulan compiles Lua sources directly to Java bytecode. In contrast to PUC-Lua,
+Luna compiles Lua sources directly to Java bytecode. In contrast to PUC-Lua,
 which first compiles Lua sources to the Lua bytecode (that is then interpreted),
-the intermediate representation used in the Rembulan compiler is not exposed to
+the intermediate representation used in the Luna compiler is not exposed to
 the users, and has no serialisable format.
 
-This means that on the binary level, Rembulan is not compatible with PUC-Lua. On the
+This means that on the binary level, Luna is not compatible with PUC-Lua. On the
 other hand, however, it allows the compiler to perform some optimisations static
 analysis more easily.
 
 The main class of the compiler is
-[`net.sandius.rembulan.compiler.LuaCompiler`](https://github.com/mjanicek/rembulan/blob/master/rembulan-compiler/src/main/java/net/sandius/rembulan/compiler/LuaCompiler.java)
-in the `rembulan-compiler` module.
+[`org.classdump.luna.compiler.LuaCompiler`](https://github.com/kroepke/luna/blob/master/luna-compiler/src/main/java/net/sandius/luna/compiler/LuaCompiler.java)
+in the `luna-compiler` module.
 
 ## Basics
 
 Every Lua chunk is compiled to one or more classes that extend
-[`LuaFunction`](https://mjanicek.github.io/rembulan/apidocs/rembulan-runtime/net/sandius/rembulan/runtime/LuaFunction.html),
+[`LuaFunction`](https://mjanicek.github.io/luna/apidocs/luna-runtime/net/sandius/luna/runtime/LuaFunction.html),
 i.e., every resulting class corresponds to a Lua function in the source. Nested functions
 are treated analogously to static nested classes in Java.
 
 Function upvalues are represented as *fields* of the type
-[`Variable`](https://mjanicek.github.io/rembulan/apidocs/rembulan-runtime/net/sandius/rembulan/Variable.html); the number
+[`Variable`](https://mjanicek.github.io/luna/apidocs/luna-runtime/net/sandius/luna/Variable.html); the number
 of upvalues a function has determines the form of its constructor.
 
 ## Optimisations
 
-Rembulan performs basic static analysis of the Lua programs in order to simplify the
+Luna performs basic static analysis of the Lua programs in order to simplify the
 generated code, and eliminate unnecessary guards against possible metamethod calls.
 This is important since the [coroutine implementation](HowAreCoroutinesImplemented.md)
-used in Rembulan requires Lua functions that perform calls to be ready to be paused,
+used in Luna requires Lua functions that perform calls to be ready to be paused,
 and generating such code makes the bytecode longer and makes its control flow graph more
 complex. This in turn makes the JVM less likely to optimise the JIT-ed bytecode.  
 
@@ -82,7 +82,7 @@ additional entry point. Additionally, in the first case, we even have enough inf
 `a`, `b` and `x` unboxed.
 (**Note:** this step is not done yet.)
 
-Relevant class: [`net.sandius.rembulan.compiler.analysis.Typer`](https://github.com/mjanicek/rembulan/blob/master/rembulan-compiler/src/main/java/net/sandius/rembulan/compiler/analysis/Typer.java)
+Relevant class: [`org.classdump.luna.compiler.analysis.Typer`](https://github.com/kroepke/luna/blob/master/luna-compiler/src/main/java/net/sandius/luna/compiler/analysis/Typer.java)
 
 #### Branch inlining
 
@@ -90,7 +90,7 @@ Now, suppose that `condition` is always `false` or `nil`. In that case, we can s
 the `then`-branch entirely, and know that the type of `x` after the `if` statement
 is `integer` (with the value `0`).
 
-Relevant class: [`net.sandius.rembulan.compiler.tf.BranchInliner`](https://github.com/mjanicek/rembulan/blob/master/rembulan-compiler/src/main/java/net/sandius/rembulan/compiler/tf/BranchInliner.java)
+Relevant class: [`org.classdump.luna.compiler.tf.BranchInliner`](https://github.com/kroepke/luna/blob/master/luna-compiler/src/main/java/net/sandius/luna/compiler/tf/BranchInliner.java)
 
 #### Const folding
 
@@ -102,7 +102,7 @@ the result of `(a + b)` at compile-time, and use it as the type of the expressio
 The actual "addition" can then be safely removed from the IR representation of the function.
 (This is only true for operations that do not have any side-effects.)
 
-Relevant class: [`net.sandius.rembulan.compiler.tf.ConstFolder`](https://github.com/mjanicek/rembulan/blob/master/rembulan-compiler/src/main/java/net/sandius/rembulan/compiler/tf/ConstFolder.java)
+Relevant class: [`org.classdump.luna.compiler.tf.ConstFolder`](https://github.com/kroepke/luna/blob/master/luna-compiler/src/main/java/net/sandius/luna/compiler/tf/ConstFolder.java)
 
 #### Dead code elimination
 
@@ -113,8 +113,8 @@ This is done by computing the liveness of all variables (and temporary values),
 and pruning out dead code based on this information.
 
 Relevant classes:
-* [`net.sandius.rembulan.compiler.analysis.LivenessAnalyser`](https://github.com/mjanicek/rembulan/blob/master/rembulan-compiler/src/main/java/net/sandius/rembulan/compiler/analysis/LivenessAnalyser.java)
-* [`net.sandius.rembulan.compiler.tf.DeadCodePruner`](https://github.com/mjanicek/rembulan/blob/master/rembulan-compiler/src/main/java/net/sandius/rembulan/compiler/tf/DeadCodePruner.java)
+* [`org.classdump.luna.compiler.analysis.LivenessAnalyser`](https://github.com/kroepke/luna/blob/master/luna-compiler/src/main/java/net/sandius/luna/compiler/analysis/LivenessAnalyser.java)
+* [`org.classdump.luna.compiler.tf.DeadCodePruner`](https://github.com/kroepke/luna/blob/master/luna-compiler/src/main/java/net/sandius/luna/compiler/tf/DeadCodePruner.java)
 
 ## Code generation
 
@@ -134,7 +134,7 @@ need to be boxed.
 **Note:** this is likely to change in future versions, since boxing is a significant
 performance drag, and can in fact be removed rather easily at this point.
 
-Relevant class: [`net.sandius.rembulan.compiler.analysis.SlotAllocator`](https://github.com/mjanicek/rembulan/blob/master/rembulan-compiler/src/main/java/net/sandius/rembulan/compiler/analysis/SlotAllocator.java)
+Relevant class: [`org.classdump.luna.compiler.analysis.SlotAllocator`](https://github.com/kroepke/luna/blob/master/luna-compiler/src/main/java/net/sandius/luna/compiler/analysis/SlotAllocator.java)
 
 #### Code generation
 
@@ -147,5 +147,5 @@ resulting Java classfile as a byte array.
 This step uses the ASM framework.
 
 Relevant classes: 
-* [`net.sandius.rembulan.compiler.gen.CodeSegmenter`](https://github.com/mjanicek/rembulan/blob/master/rembulan-compiler/src/main/java/net/sandius/rembulan/compiler/gen/CodeSegmenter.java)
-* [`net.sandius.rembulan.compiler.gen.asm.ASMBytecodeEmitter`](https://github.com/mjanicek/rembulan/blob/master/rembulan-compiler/src/main/java/net/sandius/rembulan/compiler/gen/asm/ASMBytecodeEmitter.java)
+* [`org.classdump.luna.compiler.gen.CodeSegmenter`](https://github.com/kroepke/luna/blob/master/luna-compiler/src/main/java/net/sandius/luna/compiler/gen/CodeSegmenter.java)
+* [`org.classdump.luna.compiler.gen.asm.ASMBytecodeEmitter`](https://github.com/kroepke/luna/blob/master/luna-compiler/src/main/java/net/sandius/luna/compiler/gen/asm/ASMBytecodeEmitter.java)
