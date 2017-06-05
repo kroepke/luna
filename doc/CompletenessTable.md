@@ -147,7 +147,7 @@ Statuses:
 | [`os.remove`](http://www.lua.org/manual/5.3/manual.html#pdf-os.remove) | ![not implemented](img/not-implemented.png) | |
 | [`os.rename`](http://www.lua.org/manual/5.3/manual.html#pdf-os.rename) | ![not implemented](img/not-implemented.png) | |
 | [`os.setlocale`](http://www.lua.org/manual/5.3/manual.html#pdf-os.setlocale) | ![not implemented](img/not-implemented.png) | |
-| [`os.time`](http://www.lua.org/manual/5.3/manual.html#pdf-os.time) | ![not implemented](img/not-implemented.png) | |
+| [`os.time`](http://www.lua.org/manual/5.3/manual.html#pdf-os.time) | ![not implemented](img/partial.png) | only parameter-less version implemented |
 | [`os.tmpname`](http://www.lua.org/manual/5.3/manual.html#pdf-os.tmpname) | ![not implemented](img/not-implemented.png) | |
 | [`debug.debug`](http://www.lua.org/manual/5.3/manual.html#pdf-debug.debug) | ![not implemented](img/not-implemented.png) | unlikely to be implemented |
 | [`debug.gethook`](http://www.lua.org/manual/5.3/manual.html#pdf-debug.gethook) | ![not implemented](img/not-implemented.png) | instruction hooks incompatible |
