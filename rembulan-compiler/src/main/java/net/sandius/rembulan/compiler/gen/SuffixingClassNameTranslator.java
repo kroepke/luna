@@ -23,12 +23,12 @@ public class SuffixingClassNameTranslator implements ClassNameTranslator {
 	private final String base;
 
 	public SuffixingClassNameTranslator(String base) {
-		this.base = "rembulan_dynamic." + Objects.requireNonNull(base);
+		this.base = Objects.requireNonNull(base);
 	}
 
 	@Override
 	public String className() {
-		return base;
+		return "rembulan_dynamic." + base;
 	}
 
 	@Override
