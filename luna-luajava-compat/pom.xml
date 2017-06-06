@@ -17,26 +17,6 @@
 
   <name>Luna LuaJava compatibility library</name>
   <description>Luna LuaJava compatibility library</description>
-  <url>https://github.com/kroepke/luna/</url>
-  <inceptionYear>2016</inceptionYear>
-
-  <licenses>
-    <license>
-      <name>The Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-    </license>
-  </licenses>
-
-  <developers>
-    <developer>
-      <name>Miroslav Janíček</name>
-    </developer>
-  </developers>
-
-  <scm>
-    <connection>scm:git:git://github.com/kroepke/luna.git</connection>
-    <url>https://github.com/kroepke/luna/tree/master</url>
-  </scm>
 
   <dependencies>
 

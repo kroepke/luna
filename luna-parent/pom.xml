@@ -12,7 +12,7 @@
 
   <name>Luna parent POM</name>
   <description>The parent POM for Luna modules</description>
-  <url>https://github.com/kroepke/luna/</url>
+  <url>https://github.com/kroepke/luna</url>
   <inceptionYear>2016</inceptionYear>
 
   <licenses>
@@ -26,10 +26,14 @@
     <developer>
       <name>Miroslav Janíček</name>
     </developer>
+    <developer>
+      <name>Kay Roepke</name>
+    </developer>
   </developers>
 
   <scm>
-    <connection>scm:git:git://github.com/kroepke/luna.git</connection>
+    <developerConnection>scm:git:git://github.com/kroepke/luna.git</developerConnection>
+    <connection>scm:git:https://github.com/kroepke/luna.git</connection>
     <url>https://github.com/kroepke/luna/tree/master</url>
   </scm>
 
@@ -75,11 +79,7 @@
     </repository>
   </repositories>
 
-  <dependencies>
-  </dependencies>
-
   <build>
-
     <pluginManagement>
       <plugins>
         <plugin>
@@ -169,7 +169,6 @@
       </plugin>
 
     </plugins>
-
   </build>
 
   <profiles>
