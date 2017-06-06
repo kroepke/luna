@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.classdump.luna</groupId>
     <artifactId>luna-parent</artifactId>
-    <version>0.1</version>
+    <version>0.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>luna-examples</artifactId>
