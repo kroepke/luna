@@ -49,19 +49,19 @@
     <dependency>
       <groupId>org.classdump.luna</groupId>
       <artifactId>luna-runtime</artifactId>
-      <version>${luna.version}</version>
+      <version>${project.parent.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.classdump.luna</groupId>
       <artifactId>luna-compiler</artifactId>
-      <version>${luna.version}</version>
+      <version>${project.parent.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.classdump.luna</groupId>
       <artifactId>luna-stdlib</artifactId>
-      <version>${luna.version}</version>
+      <version>${project.parent.version}</version>
     </dependency>
 
     <dependency>
