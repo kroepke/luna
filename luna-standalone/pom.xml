@@ -13,7 +13,6 @@
   </parent>
 
   <artifactId>luna-standalone</artifactId>
-  <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Luna Standalone</name>

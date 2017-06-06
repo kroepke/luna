@@ -13,7 +13,6 @@
   </parent>
 
   <artifactId>luna-luajava-compat</artifactId>
-  <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Luna LuaJava compatibility library</name>
