@@ -32,8 +32,8 @@
   </developers>
 
   <scm>
-    <developerConnection>scm:git:git://github.com/kroepke/luna.git</developerConnection>
-    <connection>scm:git:https://github.com/kroepke/luna.git</connection>
+    <developerConnection>scm:git:git@github.com:kroepke/luna.git</developerConnection>
+    <connection>scm:git:git@github.com:kroepke/luna.git</connection>
     <url>https://github.com/kroepke/luna/tree/master</url>
   </scm>
 
