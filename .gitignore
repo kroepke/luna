@@ -32,6 +32,7 @@ target
 
 # IntelliJ
 /out/
+/.idea/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
@@ -68,8 +69,3 @@ buildNumber.properties
 
 # Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
 !/.mvn/wrapper/maven-wrapper.jar
-/.idea/scala_compiler.xml
-/.idea/compiler.xml
-/.idea/misc.xml
-/.idea/modules.xml
-/.idea/vcs.xml
