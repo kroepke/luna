@@ -9,7 +9,6 @@
     <groupId>org.classdump.luna</groupId>
     <artifactId>luna-parent</artifactId>
     <version>0.1-SNAPSHOT</version>
-    <relativePath>../luna-parent</relativePath>
   </parent>
 
   <artifactId>luna-compiler</artifactId>
