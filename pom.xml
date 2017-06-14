@@ -233,6 +233,8 @@
     <module>luna-examples</module>
 
     <module>luna-standalone</module>
+
+    <module>luna-all-shaded</module>
   </modules>
 
 </project>
