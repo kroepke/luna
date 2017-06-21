@@ -53,42 +53,49 @@ public final class Dispatch {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	static void mt_invoke(ExecutionContext context, Object target) throws ResolvedControlThrowable {
 		LuaFunction fn = callTarget(context, target);
 		if (fn == target) fn.invoke(context);
 		else fn.invoke(context, target);
 	}
 
+	@SuppressWarnings("unchecked")
 	static void mt_invoke(ExecutionContext context, Object target, Object arg1) throws ResolvedControlThrowable {
 		LuaFunction fn = callTarget(context, target);
 		if (fn == target) fn.invoke(context, arg1);
 		else fn.invoke(context, target, arg1);
 	}
 
+	@SuppressWarnings("unchecked")
 	static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2) throws ResolvedControlThrowable {
 		LuaFunction fn = callTarget(context, target);
 		if (fn == target) fn.invoke(context, arg1, arg2);
 		else fn.invoke(context, target, arg1, arg2);
 	}
 
+	@SuppressWarnings("unchecked")
 	static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3) throws ResolvedControlThrowable {
 		LuaFunction fn = callTarget(context, target);
 		if (fn == target) fn.invoke(context, arg1, arg2, arg3);
 		else fn.invoke(context, target, arg1, arg2, arg3);
 	}
 
+	@SuppressWarnings("unchecked")
 	static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws ResolvedControlThrowable {
 		LuaFunction fn = callTarget(context, target);
 		if (fn == target) fn.invoke(context, arg1, arg2, arg3, arg4);
 		else fn.invoke(context, target, arg1, arg2, arg3, arg4);
 	}
 
+	@SuppressWarnings("unchecked")
 	static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ResolvedControlThrowable {
 		LuaFunction fn = callTarget(context, target);
 		if (fn == target) fn.invoke(context, arg1, arg2, arg3, arg4, arg5);
 		else fn.invoke(context, new Object[] { target, arg1, arg2, arg3, arg4, arg5 });
 	}
 
+	@SuppressWarnings("unchecked")
 	static void mt_invoke(ExecutionContext context, Object target, Object[] args) throws ResolvedControlThrowable {
 		LuaFunction fn = callTarget(context, target);
 		if (fn == target) {
@@ -1383,7 +1390,7 @@ public final class Dispatch {
 	 * @throws IllegalOperationAttemptException  if {@code table} is not a table and does
 	 *                                           not have the {@code __index} metamethod
 	 */
-	@SuppressWarnings("unused")
+	@SuppressWarnings("unchecked")
 	public static void index(ExecutionContext context, Object table, Object key) throws UnresolvedControlThrowable {
 		if (table instanceof Table) {
 			Table t = (Table) table;
@@ -1444,7 +1451,6 @@ public final class Dispatch {
 	 *
 	 * @throws NullPointerException  if {@code context} or {@code table} is {@code null}
 	 */
-	@SuppressWarnings("unused")
 	public static void index(ExecutionContext context, Table table, Object key) throws UnresolvedControlThrowable {
 		// TODO: don't just delegate to the generic case
 		index(context, (Object) Objects.requireNonNull(table), key);
@@ -1493,7 +1499,7 @@ public final class Dispatch {
 	 * @throws IllegalOperationAttemptException  if {@code table} is not a table and does
 	 *                                           not have the {@code __newindex} metamethod
 	 */
-	@SuppressWarnings("unused")
+	@SuppressWarnings("unchecked")
 	public static void setindex(ExecutionContext context, Object table, Object key, Object value) throws UnresolvedControlThrowable {
 		if (table instanceof Table) {
 			Table t = (Table) table;
