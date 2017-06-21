@@ -17,8 +17,6 @@
 package org.classdump.luna.compiler;
 
 import org.classdump.luna.Variable;
-import org.classdump.luna.compiler.CompiledModule;
-import org.classdump.luna.compiler.CompilerSettings;
 import org.classdump.luna.load.ChunkClassLoader;
 import org.classdump.luna.load.ChunkLoader;
 import org.classdump.luna.load.LoaderException;
@@ -161,7 +159,7 @@ public class CompilerChunkLoader implements ChunkLoader {
 	}
 
 	@Override
-	public LuaFunction loadTextChunk(Variable env, String chunkName, String sourceText) throws LoaderException {
+	public LuaFunction<?, ?, ?, ?, ?> loadTextChunk(Variable env, String chunkName, String sourceText) throws LoaderException {
 		Objects.requireNonNull(env);
 		Objects.requireNonNull(chunkName);
 		Objects.requireNonNull(sourceText);

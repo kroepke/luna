@@ -24,13 +24,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
-public class InputStreamIoFile extends IoFile {
+public class InputStreamIoFile extends IoFile<SeekableInputStream> {
 
-	private final SeekableInputStream in;
-
-	public InputStreamIoFile(InputStream in, Table metatable, Object userValue) {
-		super(metatable, userValue);
-		this.in = new SeekableInputStream(Objects.requireNonNull(in));
+	public InputStreamIoFile(InputStream in, Table metatable) {
+		super(metatable, new SeekableInputStream(Objects.requireNonNull(in)));
 	}
 
 	@Override
@@ -58,13 +55,17 @@ public class InputStreamIoFile extends IoFile {
 		switch (whence) {
 			case BEGINNING:
 			case END:
-				return in.setPosition(offset);
+				return inputStream().setPosition(offset);
 
 			case CURRENT_POSITION:
-				return in.addPosition(offset);
+				return inputStream().addPosition(offset);
 
 			default: throw new IllegalArgumentException("Illegal whence: " + whence);
 		}
+	}
+
+	private SeekableInputStream inputStream() {
+		return getUserValue();
 	}
 
 }

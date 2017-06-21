@@ -22,10 +22,10 @@ import org.classdump.luna.Userdata;
 /**
  * Default implementation of full userdata.
  */
-public abstract class DefaultUserdata extends Userdata {
+public abstract class DefaultUserdata<T> extends Userdata<T> {
 
 	private Table mt;
-	private Object userValue;
+	private T userValue;
 
 	/**
 	 * Constructs a new instance of this userdata with the specified initial {@code metatable}
@@ -34,7 +34,7 @@ public abstract class DefaultUserdata extends Userdata {
 	 * @param metatable  initial metatable, may be {@code null}
 	 * @param userValue  initial user value, may be {@code null}
 	 */
-	public DefaultUserdata(Table metatable, Object userValue) {
+	public DefaultUserdata(Table metatable, T userValue) {
 		this.mt = metatable;
 		this.userValue = userValue;
 	}
@@ -52,13 +52,13 @@ public abstract class DefaultUserdata extends Userdata {
 	}
 
 	@Override
-	public Object getUserValue() {
+	public T getUserValue() {
 		return userValue;
 	}
 
 	@Override
-	public Object setUserValue(Object value) {
-		Object oldValue = userValue;
+	public T setUserValue(T value) {
+		T oldValue = userValue;
 		this.userValue = value;
 		return oldValue;
 	}

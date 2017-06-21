@@ -25,7 +25,7 @@ object IOLibFragments extends FragmentBundle with FragmentExpectations with OneL
 
     about ("io.output") {
 
-      program ("return io.output()") succeedsWith (classOf[Userdata])
+      program ("return io.output()") succeedsWith (classOf[Userdata[Object]])
 
     }
 
@@ -39,7 +39,7 @@ object IOLibFragments extends FragmentBundle with FragmentExpectations with OneL
 
       // TODO: check what is written to the output
 
-      program ("return io.write(1, 2)") succeedsWith (classOf[Userdata])
+      program ("return io.write(1, 2)") succeedsWith (classOf[Userdata[Object]])
       program ("""return io.write({})""") failsWith "bad argument #"<<"1">>" to 'write' (string expected, got table)"
 
     }

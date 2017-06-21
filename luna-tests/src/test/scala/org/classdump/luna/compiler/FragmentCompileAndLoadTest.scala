@@ -82,7 +82,7 @@ class FragmentCompileAndLoadTest extends FunSpec with MustMatchers {
             }
 
             val name = classLoader.install(cm)
-            val clazz = classLoader.loadClass(name).asInstanceOf[Class[LuaFunction]]
+            val clazz = classLoader.loadClass(name).asInstanceOf[Class[LuaFunction[_, _, _, _, _]]]
 
             val f = try {
               clazz.getConstructor(classOf[Variable]).newInstance(new Variable(null))

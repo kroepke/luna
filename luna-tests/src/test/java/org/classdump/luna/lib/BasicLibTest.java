@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class BasicLibTest {
 
-    private static class PairsList extends DefaultUserdata {
+    private static class PairsList extends DefaultUserdata<List<String>> {
         private static final ImmutableTable META_TABLE = new ImmutableTable.Builder()
                 .add(BasicLib.MT_PAIRS, new Pairs())
                 .add(Metatables.MT_INDEX, new Index())
@@ -55,10 +55,6 @@ public class BasicLibTest {
             }});
         }
 
-        private List getList() {
-            return (List) getUserValue();
-        }
-
         private static class Pairs extends AbstractLibFunction {
             @Override
             protected String name() {
@@ -67,7 +63,7 @@ public class BasicLibTest {
 
             @Override
             protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-                final List list = args.nextOfClass(PairsList.class).getList();
+                final List<String> list = args.nextOfClass(PairsList.class).getUserValue();
                 context.getReturnBuffer().setTo(new Next(), list.listIterator(), null);
             }
         }
@@ -80,7 +76,7 @@ public class BasicLibTest {
 
             @Override
             protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-                final List list = args.nextOfClass(PairsList.class).getList();
+                final List<String> list = args.nextOfClass(PairsList.class).getUserValue();
                 final int index = args.nextInt() - 1;
                 if (index == list.size()) {
                     context.getReturnBuffer().setTo(null);

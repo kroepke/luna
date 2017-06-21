@@ -367,7 +367,7 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("return load(42)") succeedsWith (null, classOf[String])
       program ("return load(42, 42, 42)") succeedsWith (null, "attempt to load a text chunk (mode is '42')")
 
-      program ("return load('return nil', nil)") succeedsWith (classOf[LuaFunction])
+      program ("return load('return nil', nil)") succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
 
       program ("return load('return 1 + 2')()") succeedsWith (3)
 

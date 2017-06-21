@@ -16,12 +16,10 @@
 
 package org.classdump.luna.runtime;
 
-import org.classdump.luna.runtime.ResolvedControlThrowable;
-
 /**
  * Abstract function of four arguments.
  */
-public abstract class AbstractFunction4 extends LuaFunction {
+public abstract class AbstractFunction4<T1, T2, T3, T4> extends LuaFunction<T1, T2, T3, T4, Object> {
 
 	@Override
 	public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
@@ -29,34 +27,38 @@ public abstract class AbstractFunction4 extends LuaFunction {
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg1) throws ResolvedControlThrowable {
+	public void invoke(ExecutionContext context, T1 arg1) throws ResolvedControlThrowable {
 		invoke(context, arg1, null, null, null);
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ResolvedControlThrowable {
+	public void invoke(ExecutionContext context, T1 arg1, T2 arg2) throws ResolvedControlThrowable {
 		invoke(context, arg1, arg2, null, null);
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ResolvedControlThrowable {
+	public void invoke(ExecutionContext context, T1 arg1, T2 arg2, T3 arg3) throws ResolvedControlThrowable {
 		invoke(context, arg1, arg2, arg3, null);
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ResolvedControlThrowable {
+	public void invoke(ExecutionContext context, T1 arg1, T2 arg2, T3 arg3, T4 arg4, Object arg5) throws ResolvedControlThrowable {
 		invoke(context, arg1, arg2, arg3, arg4);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void invoke(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
-		Object a = null, b = null, c = null, d = null;
+		T1 a = null;
+		T2 b = null;
+		T3 c = null;
+		T4 d = null;
 		switch (args.length) {
 			default:             // fall through
-			case 4: d = args[3]; // fall through
-			case 3: c = args[2]; // fall through
-			case 2: b = args[1]; // fall through
-			case 1: a = args[0]; // fall through
+			case 4: d = (T4) args[3]; // fall through
+			case 3: c = (T3) args[2]; // fall through
+			case 2: b = (T2) args[1]; // fall through
+			case 1: a = (T1) args[0]; // fall through
 			case 0:
 		}
 		invoke(context, a, b, c, d);

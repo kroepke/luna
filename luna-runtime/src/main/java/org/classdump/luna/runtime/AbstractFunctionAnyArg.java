@@ -16,12 +16,10 @@
 
 package org.classdump.luna.runtime;
 
-import org.classdump.luna.runtime.ResolvedControlThrowable;
-
 /**
  * Abstract function of an arbitrary number of arguments.
  */
-public abstract class AbstractFunctionAnyArg extends LuaFunction {
+public abstract class AbstractFunctionAnyArg extends LuaFunction<Object, Object, Object, Object, Object> {
 
 	@Override
 	public void invoke(ExecutionContext context) throws ResolvedControlThrowable {

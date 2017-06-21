@@ -16,9 +16,6 @@
 
 package org.classdump.luna;
 
-import org.classdump.luna.LuaObject;
-import org.classdump.luna.Ordering;
-
 /**
  * Full userdata.
  *
@@ -31,14 +28,14 @@ import org.classdump.luna.Ordering;
  * userdata using {@link Object#equals(Object)}. <b>Exercise caution when overriding
  * {@code equals()}.</b></p>
  */
-public abstract class Userdata extends LuaObject {
+public abstract class Userdata<T> extends LuaObject {
 
 	/**
 	 * Returns the user value attached to this full userdata.
 	 *
 	 * @return  the user value attached to this full userdata
 	 */
-	public abstract Object getUserValue();
+	public abstract T getUserValue();
 
 	/**
 	 * Sets the user value attached to this full userdata to {@code value}, returning
@@ -47,6 +44,6 @@ public abstract class Userdata extends LuaObject {
 	 * @param value  new user value, may be {@code null}
 	 * @return  old user value
 	 */
-	public abstract Object setUserValue(Object value);
+	public abstract T setUserValue(T value);
 
 }

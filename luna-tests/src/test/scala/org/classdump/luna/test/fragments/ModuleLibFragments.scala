@@ -90,7 +90,7 @@ object ModuleLibFragments extends FragmentBundle with FragmentExpectations with 
 
       program ("return package.searchers") succeedsWith (classOf[Table])
 
-      program ("return package.searchers[1]") succeedsWith (classOf[LuaFunction])
+      program ("return package.searchers[1]") succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
 
     }
 

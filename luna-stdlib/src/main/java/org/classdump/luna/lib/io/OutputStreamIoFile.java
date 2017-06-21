@@ -19,19 +19,15 @@ package org.classdump.luna.lib.io;
 import org.classdump.luna.ByteString;
 import org.classdump.luna.Table;
 import org.classdump.luna.lib.IoFile;
-import org.classdump.luna.lib.io.SeekableOutputStream;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Objects;
 
-public class OutputStreamIoFile extends IoFile {
+public class OutputStreamIoFile extends IoFile<SeekableOutputStream> {
 
-	private final SeekableOutputStream out;
-
-	public OutputStreamIoFile(OutputStream out, Table metatable, Object userValue) {
-		super(metatable, userValue);
-		this.out = new SeekableOutputStream(Objects.requireNonNull(out));
+	public OutputStreamIoFile(OutputStream out, Table metatable) {
+		super(metatable, new SeekableOutputStream(Objects.requireNonNull(out)));
 	}
 
 	@Override
@@ -46,12 +42,12 @@ public class OutputStreamIoFile extends IoFile {
 
 	@Override
 	public void flush() throws IOException {
-		out.flush();
+		outputStream().flush();
 	}
 
 	@Override
 	public void write(ByteString s) throws IOException {
-		s.writeTo(out);
+		s.writeTo(outputStream());
 	}
 
 	@Override
@@ -59,13 +55,17 @@ public class OutputStreamIoFile extends IoFile {
 		switch (whence) {
 			case BEGINNING:
 			case END:
-				return out.setPosition(offset);
+				return outputStream().setPosition(offset);
 
 			case CURRENT_POSITION:
-				return out.addPosition(offset);
+				return outputStream().addPosition(offset);
 
 			default: throw new IllegalArgumentException("Illegal whence: " + whence);
 		}
+	}
+
+	private SeekableOutputStream outputStream() {
+		return getUserValue();
 	}
 
 }

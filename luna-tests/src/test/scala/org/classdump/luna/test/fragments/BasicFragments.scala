@@ -127,8 +127,8 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return assert
     """
   }
-  Or1 in EmptyContext succeedsWith (classOf[LuaFunction])
-  Or1 in BasicContext succeedsWith (classOf[LuaFunction])
+  Or1 in EmptyContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
+  Or1 in BasicContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
 
   val Or2 = fragment ("Or2") {
     """local assert = assert or function() return end
@@ -152,8 +152,8 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return x
     """
   }
-  IfOr1 in EmptyContext succeedsWith (classOf[LuaFunction])
-  IfOr1 in BasicContext succeedsWith (classOf[LuaFunction])
+  IfOr1 in EmptyContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
+  IfOr1 in BasicContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
 
   val IfOr2 = fragment ("IfOr2") {
     """local x
@@ -429,19 +429,19 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """return function() while true do local a = -1 end end
     """
   }
-  InfiniteWhileLoop1 in EmptyContext succeedsWith (classOf[LuaFunction])
+  InfiniteWhileLoop1 in EmptyContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
 
   val InfiniteWhileLoop2 = fragment ("InfiniteWhileLoop2") {
     """return function() while 1 do local a = -1 end end
     """
   }
-  InfiniteWhileLoop2 in EmptyContext succeedsWith (classOf[LuaFunction])
+  InfiniteWhileLoop2 in EmptyContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
 
   val InfiniteWhileLoop3 = fragment ("InfiniteWhileLoop3") {
     """return function () repeat local x = 1 until true end
     """
   }
-  InfiniteWhileLoop3 in EmptyContext succeedsWith (classOf[LuaFunction])
+  InfiniteWhileLoop3 in EmptyContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
 
   val BitwiseOps = fragment ("BitwiseOps") {
     """local x = 3
@@ -655,7 +655,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return x or y
     """
   }
-  Upvalues3 in EmptyContext succeedsWith (classOf[LuaFunction])
+  Upvalues3 in EmptyContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
 
   val Upvalues4 = fragment ("Upvalues4") {
     """local n = 0
@@ -1539,7 +1539,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return ipairs(t)
     """
   }
-  IPairsWithPairsMetatable in BasicContext succeedsWith (classOf[LuaFunction], classOf[Table], 0)
+  IPairsWithPairsMetatable in BasicContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]], classOf[Table], 0)
 
   val IPairsNoTable = fragment ("IPairsNoTable") {
     """ipairs(42)
