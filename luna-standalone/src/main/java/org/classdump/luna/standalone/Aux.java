@@ -18,9 +18,9 @@ package org.classdump.luna.standalone;
 
 import org.classdump.luna.impl.NonsuspendableFunctionException;
 import org.classdump.luna.runtime.AbstractFunction0;
-import org.classdump.luna.runtime.AbstractFunction2;
-import org.classdump.luna.runtime.AbstractFunction3;
 import org.classdump.luna.runtime.AbstractFunctionAnyArg;
+import org.classdump.luna.runtime.AbstractUntypedFunction2;
+import org.classdump.luna.runtime.AbstractUntypedFunction3;
 import org.classdump.luna.runtime.Dispatch;
 import org.classdump.luna.runtime.ExecutionContext;
 import org.classdump.luna.runtime.LuaFunction;
@@ -325,7 +325,7 @@ public final class Aux {
 
 	}
 
-	static class Index extends AbstractFunction2 {
+	static class Index extends AbstractUntypedFunction2 {
 
 		static final Index INSTANCE = new Index();
 
@@ -349,7 +349,7 @@ public final class Aux {
 
 	}
 
-	static class SetIndex extends AbstractFunction3 {
+	static class SetIndex extends AbstractUntypedFunction3 {
 
 		static final SetIndex INSTANCE = new SetIndex();
 

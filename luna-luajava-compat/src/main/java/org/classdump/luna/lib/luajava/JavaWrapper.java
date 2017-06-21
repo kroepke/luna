@@ -23,12 +23,12 @@ import org.classdump.luna.Userdata;
 import org.classdump.luna.impl.NonsuspendableFunctionException;
 import org.classdump.luna.lib.NameMetamethodValueTypeNamer;
 import org.classdump.luna.runtime.AbstractFunction1;
-import org.classdump.luna.runtime.AbstractFunction2;
+import org.classdump.luna.runtime.AbstractUntypedFunction2;
 import org.classdump.luna.runtime.ExecutionContext;
 import org.classdump.luna.runtime.LuaFunction;
 import org.classdump.luna.runtime.ResolvedControlThrowable;
 
-abstract class JavaWrapper<T> extends Userdata {
+abstract class JavaWrapper<T> extends Userdata<Object> {
 
 	abstract String typeName();
 
@@ -54,19 +54,18 @@ abstract class JavaWrapper<T> extends Userdata {
 		throw new UnsupportedOperationException("cannot wrapper metatable");
 	}
 
-	static class ToString extends AbstractFunction1 {
+	static class ToString extends AbstractFunction1<JavaWrapper> {
 
 		public static final ToString INSTANCE = new ToString();
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg1) throws ResolvedControlThrowable {
-			if (arg1 instanceof JavaWrapper) {
-				JavaWrapper wrapper = (JavaWrapper) arg1;
+		public void invoke(ExecutionContext context, JavaWrapper wrapper) throws ResolvedControlThrowable {
+			if (wrapper != null) {
 				context.getReturnBuffer().setTo(wrapper.typeName() + " (" + wrapper.get().toString() + ")");
 			}
 			else {
 				throw new IllegalArgumentException("invalid argument to toString: expecting Java wrapper, got "
-						+ NameMetamethodValueTypeNamer.typeNameOf(arg1, context));
+						+ NameMetamethodValueTypeNamer.typeNameOf(wrapper, context));
 			}
 		}
 
@@ -77,7 +76,7 @@ abstract class JavaWrapper<T> extends Userdata {
 
 	}
 
-	static abstract class AbstractGetMemberAccessor extends AbstractFunction2 {
+	static abstract class AbstractGetMemberAccessor extends AbstractUntypedFunction2 {
 
 		protected abstract LuaFunction methodAccessorForName(String methodName);
 

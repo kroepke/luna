@@ -648,7 +648,8 @@ public class ArgumentIterator implements Iterator<Object> {
 	 * @throws BadArgumentException  if there is no argument at current position,
 	 *                               or the argument at current position is not a userdata
 	 */
-	public Userdata nextUserdata() {
+	@SuppressWarnings("unchecked")
+	public Userdata<Object> nextUserdata() {
 		return nextUserdata(TYPENAME_USERDATA.toString(), Userdata.class);
 	}
 

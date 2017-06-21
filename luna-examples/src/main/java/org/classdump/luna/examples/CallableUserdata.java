@@ -41,7 +41,7 @@ import java.util.Arrays;
 
 public class CallableUserdata {
 
-	abstract static class AbstractCallableObject extends Userdata {
+	abstract static class AbstractCallableObject extends Userdata<Object> {
 
 		private static final Table mt = new ImmutableTable.Builder()
 				.add(Metatables.MT_CALL, new Call())

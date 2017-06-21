@@ -25,7 +25,7 @@ import org.classdump.luna.exec.DirectCallExecutor;
 import org.classdump.luna.impl.StateContexts;
 import org.classdump.luna.lib.StandardLibrary;
 import org.classdump.luna.load.LoaderException;
-import org.classdump.luna.runtime.AbstractFunction3;
+import org.classdump.luna.runtime.AbstractUntypedFunction3;
 import org.classdump.luna.runtime.Dispatch;
 import org.classdump.luna.runtime.ExecutionContext;
 import org.classdump.luna.runtime.ResolvedControlThrowable;
@@ -35,7 +35,7 @@ public class TailCall {
 
 	// equivalent to:
 	//   function (a, b, c) return a(b + c) end
-	static class ExampleFunction extends AbstractFunction3 {
+	static class ExampleFunction extends AbstractUntypedFunction3 {
 
 		@Override
 		public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ResolvedControlThrowable {
