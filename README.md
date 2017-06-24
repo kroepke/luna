@@ -1,4 +1,8 @@
 [![Build Status](https://travis-ci.org/kroepke/luna.svg?branch=master)](https://travis-ci.org/kroepke/luna)
+[![Runtime Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-runtime.svg)](https://javadoc.io/doc/org.classdump.luna/luna-runtime)
+[![Stdlib Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-stdlib.svg)](https://javadoc.io/doc/org.classdump.luna/luna-stdlib)
+[![Compiler Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-compiler.svg)](https://javadoc.io/doc/org.classdump.luna/luna-compiler)
+
 
 # Luna
 
@@ -64,15 +68,15 @@ See [How are coroutines implemented?](doc/CoroutinesOverview.md)
 
 ## Using Luna
 
-Luna requires a Java Runtime Environment (JRE) version 7 or higher.
+Luna requires a Java Runtime Environment (JRE) version 8 or higher.
 
 ### Documentation
 
 Generated JavaDocs are available online:
 
- * [Runtime module](https://mjanicek.github.io/luna/apidocs/luna-runtime/index.html)
- * [Compiler](https://mjanicek.github.io/luna/apidocs/luna-compiler/index.html)
- * [Standard Library](https://mjanicek.github.io/luna/apidocs/luna-stdlib/index.html)
+ * [![Runtime Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-runtime.svg)](https://javadoc.io/doc/org.classdump.luna/luna-runtime)
+ * [![Stdlib Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-stdlib.svg)](https://javadoc.io/doc/org.classdump.luna/luna-stdlib)
+ * [![Compiler Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-compiler.svg)](https://javadoc.io/doc/org.classdump.luna/luna-compiler)
 
 There are also a few short texts in the `doc` folder:
 
@@ -84,7 +88,7 @@ There are also a few short texts in the `doc` folder:
 
 To build Luna, you will need the following:
 
- * Java Development Kit (JDK) version 7 or higher
+ * Java Development Kit (JDK) version 8 or higher
  * Maven version 3 or higher
 
 Maven will pull in the remaining dependencies as part of the build process.
@@ -124,26 +128,31 @@ used as its drop-in replacement.
 
 ```
 $ ./luna-capsule.x
-Luna 0.1-SNAPSHOT (Java HotSpot(TM) 64-Bit Server VM, Java 1.8.0_60)
+Luna 0.3-SNAPSHOT (Java HotSpot(TM) 64-Bit Server VM, Java 1.8.0_60)
 > print("hello world!")
 hello world!
 ```
 
 ### Using Luna from Maven
 
-There are no releases yet, but snapshot artifacts are published to the Sonatype OSSRH Snapshot
-Repository. To use the snapshot artifacts, add the following configuration to your `pom.xml`:
+[![Maven Central](https://img.shields.io/maven-central/v/org.classdump.luna/luna-all-shaded.svg)]()
+
+Release are published to [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.classdump.luna%22).
+
+Typically, if you plan to embed Luna, the safest way of doing so is to use the **luna-all-shaded** module. It renames
+the ASM library, which is often required by other projects in incompatible versions, leading to problems.
+This module combines **runtime**, **compiler** and **stdlib**, because those are all typically required.
+
+To include the **luna-all-shaded** as a dependency:
 
 ```xml
-<repositories>
-  <repository>
-    <id>sonatype-ossrh-snapshots</id>
-    <name>Sonatype OSSRH (Snapshots)</name>
-    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-    <snapshots />
-  </repository>
-</repositories>
+<dependency>
+  <groupId>org.classdump.luna</groupId>
+  <artifactId>luna-all-shaded</artifactId>
+  <version>0.2</version>
+</dependency>
 ```
+
 
 To include the **runtime** as a dependency:
 
@@ -151,7 +160,7 @@ To include the **runtime** as a dependency:
 <dependency>
   <groupId>org.classdump.luna</groupId>
   <artifactId>luna-runtime</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.2</version>
 </dependency>
 ```
 
@@ -161,7 +170,7 @@ To include the **compiler** as a dependency:
 <dependency>
   <groupId>org.classdump.luna</groupId>
   <artifactId>luna-compiler</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.2</version>
 </dependency>
 ```
 
@@ -171,7 +180,7 @@ To include the **standard library** as a dependency:
 <dependency>
   <groupId>org.classdump.luna</groupId>
   <artifactId>luna-stdlib</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.2</version>
 </dependency>
 ```
 
@@ -196,21 +205,26 @@ to implement CPU accounting and scheduling of asynchronous operations.
 The following snippet loads the Lua program `print('hello world!')`, compiles it, loads
 it into a (non-sandboxed) state, and runs it:
 
-(From [`luna-examples/.../HelloWorld.java`](luna-examples/src/main/java/net/sandius/luna/examples/HelloWorld.java))
+(From [`luna-examples/.../HelloWorld.java`](luna-examples/src/main/java/org/classdump/luna/examples/HelloWorld.java))
 
 ```java
-String program = "print('hello world!')";
-
-// initialise state
-StateContext state = StateContexts.newDefaultInstance();
-Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
-
-// compile
-ChunkLoader loader = CompilerChunkLoader.of("hello_world");
-LuaFunction main = loader.loadTextChunk(new Variable(env), "hello", program);
-
-// execute
-DirectCallExecutor.newExecutor().call(state, main);
+public class Main {
+    public static void main(String[] args) {
+  
+        String program = "print('hello world!')";
+    
+        // initialise state
+        StateContext state = StateContexts.newDefaultInstance();
+        Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
+        
+        // compile
+        ChunkLoader loader = CompilerChunkLoader.of("hello_world");
+        LuaFunction main = loader.loadTextChunk(new Variable(env), "hello", program);
+        
+        // execute
+        DirectCallExecutor.newExecutor().call(state, main);
+    }
+}
 ```
 
 The output (printed to `System.out`) is:
@@ -224,28 +238,33 @@ hello world!
 Lua functions can be called in a mode that automatically pauses their execution once the
 given number of operations has been performed:
 
-(From [`luna-examples/.../InfiniteLoop.java`](luna-examples/src/main/java/net/sandius/luna/examples/InfiniteLoop.java))
+(From [`luna-examples/.../InfiniteLoop.java`](luna-examples/src/main/java/org/classdump/luna/examples/InfiniteLoop.java))
 
 ```java
-String program = "n = 0; while true do n = n + 1 end";
+public class Main {
+    public static void main(String[] args) {
 
-// initialise state
-StateContext state = StateContexts.newDefaultInstance();
-Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
-
-// compile
-ChunkLoader loader = CompilerChunkLoader.of("infinite_loop");
-LuaFunction main = loader.loadTextChunk(new Variable(env), "loop", program);
-
-// execute at most one million ops
-DirectCallExecutor executor = DirectCallExecutor.newExecutorWithTickLimit(1000000);
-
-try {
-    executor.call(state, main);
-    throw new AssertionError();  // never reaches this point!
-}
-catch (CallPausedException ex) {
-    System.out.println("n = " + env.rawget("n"));
+        String program = "n = 0; while true do n = n + 1 end";
+        
+        // initialise state
+        StateContext state = StateContexts.newDefaultInstance();
+        Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
+        
+        // compile
+        ChunkLoader loader = CompilerChunkLoader.of("infinite_loop");
+        LuaFunction main = loader.loadTextChunk(new Variable(env), "loop", program);
+        
+        // execute at most one million ops
+        DirectCallExecutor executor = DirectCallExecutor.newExecutorWithTickLimit(1000000);
+        
+        try {
+            executor.call(state, main);
+            throw new AssertionError();  // never reaches this point!
+        }
+        catch (CallPausedException ex) {
+            System.out.println("n = " + env.rawget("n"));
+        }
+    }
 }
 ```
 
@@ -255,14 +274,14 @@ Prints:
 n = 199999
 ```
 
-The [`CallPausedException`](https://mjanicek.github.io/luna/apidocs/luna-runtime/net/sandius/luna/exec/CallPausedException.html) contains a *continuation* of the call. The call can be resumed:
+The [`CallPausedException`](https://static.javadoc.io/org.classdump.luna/luna-runtime/0.2/org/classdump/luna/exec/Continuation.html) contains a *continuation* of the call. The call can be resumed:
 the pause is transparent to the Lua code, and the loop does not end with an error (it is merely
 paused).
 
 #### Further examples
 
 For further examples, see the classes in
-[`luna-examples/src/main/java/net/sandius/luna/examples`](luna-examples/src/main/java/net/sandius/luna/examples).
+[`luna-examples/src/main/java/org/classdump/luna/examples`](luna-examples/src/main/java/org/classdump/luna/examples).
 
 ### Project structure
 
