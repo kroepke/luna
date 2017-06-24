@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/kroepke/luna.svg?branch=master)](https://travis-ci.org/kroepke/luna)
-[![Runtime Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-runtime.svg)](https://javadoc.io/doc/org.classdump.luna/luna-runtime)
-[![Stdlib Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-stdlib.svg)](https://javadoc.io/doc/org.classdump.luna/luna-stdlib)
-[![Compiler Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-compiler.svg)](https://javadoc.io/doc/org.classdump.luna/luna-compiler)
+[![Runtime Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-runtime.svg?label=Runtime+Javadocs&?color=lightgrey)](https://javadoc.io/doc/org.classdump.luna/luna-runtime)
+[![Stdlib Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-stdlib.svg?label=Stdlib+Javadocs&?color=lightgrey)](https://javadoc.io/doc/org.classdump.luna/luna-stdlib)
+[![Compiler Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-compiler.svg?label=Compiler+Javadocs&?color=lightgrey)](https://javadoc.io/doc/org.classdump.luna/luna-compiler)
 
 
 # Luna
@@ -74,9 +74,9 @@ Luna requires a Java Runtime Environment (JRE) version 8 or higher.
 
 Generated JavaDocs are available online:
 
- * [![Runtime Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-runtime.svg)](https://javadoc.io/doc/org.classdump.luna/luna-runtime)
- * [![Stdlib Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-stdlib.svg)](https://javadoc.io/doc/org.classdump.luna/luna-stdlib)
- * [![Compiler Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-compiler.svg)](https://javadoc.io/doc/org.classdump.luna/luna-compiler)
+ * [![Runtime Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-runtime.svg?label=Runtime+Javadocs&?color=lightgrey)](https://javadoc.io/doc/org.classdump.luna/luna-runtime)
+ * [![Stdlib Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-stdlib.svg?label=Stdlib+Javadocs&?color=lightgrey)](https://javadoc.io/doc/org.classdump.luna/luna-stdlib)
+ * [![Compiler Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-compiler.svg?label=Compiler+Javadocs&?color=lightgrey)](https://javadoc.io/doc/org.classdump.luna/luna-compiler)
 
 There are also a few short texts in the `doc` folder:
 
