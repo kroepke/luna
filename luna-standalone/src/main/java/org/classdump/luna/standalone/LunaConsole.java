@@ -33,7 +33,6 @@ import org.classdump.luna.impl.StateContexts;
 import org.classdump.luna.lib.StandardLibrary;
 import org.classdump.luna.load.LoaderException;
 import org.classdump.luna.runtime.LuaFunction;
-import org.classdump.luna.standalone.Aux;
 
 import java.io.File;
 import java.io.IOException;
@@ -106,8 +105,8 @@ public class LunaConsole {
 				.withDebug(true)
 				.installInto(state);
 
-		printFunction = Aux.callGlobal(env, "print");
-		requireFunction = Aux.callGlobal(env, "require");
+		printFunction = AuxFunctions.callGlobal(env, "print");
+		requireFunction = AuxFunctions.callGlobal(env, "require");
 
 		this.callExecutor = DirectCallExecutor.newExecutor();
 
@@ -296,7 +295,7 @@ public class LunaConsole {
 
 	private String getGlobalString(String name, String defaultValue) throws CallException {
 		final Object[] result;
-		result = callFunction(Aux.index(env, name));
+		result = callFunction(AuxFunctions.index(env, name));
 
 		if (result.length > 0) {
 			ByteString s = Conversions.stringValueOf(result[0]);
