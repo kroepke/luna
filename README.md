@@ -135,7 +135,7 @@ hello world!
 
 ### Using Luna from Maven
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.classdump.luna/luna-all-shaded.svg)]()
+[![Maven Central](https://img.shields.io/maven-central/v/org.classdump.luna/luna-all-shaded.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.classdump.luna%22)
 
 Release are published to [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.classdump.luna%22).
 
