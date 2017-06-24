@@ -74,10 +74,10 @@ Luna requires a Java Runtime Environment (JRE) version 8 or higher.
 
 Generated JavaDocs are available online:
 
- * [![Runtime Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-runtime.svg?color=lightgrey&label=Runtime+Javadocs)](https://javadoc.io/doc/org.classdump.luna/luna-runtime)
- * [![Stdlib Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-stdlib.svg?color=lightgrey&label=Stdlib+Javadocs)](https://javadoc.io/doc/org.classdump.luna/luna-stdlib)
- * [![Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-compiler.svg?color=lightgrey&label=Compiler+Javadocs)](https://javadoc.io/doc/org.classdump.luna/luna-compiler)
-
+ * [![Runtime Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-runtime.svg?label=Runtime-Javadocs)](https://javadoc.io/doc/org.classdump.luna/luna-runtime)
+ * [![Stdlib Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-stdlib.svg?label=Stdlib-Javadocs)](https://javadoc.io/doc/org.classdump.luna/luna-stdlib)
+ * [![Javadocs](https://javadoc.io/badge/org.classdump.luna/luna-compiler.svg?label=Compiler-Javadocs)](https://javadoc.io/doc/org.classdump.luna/luna-compiler)
+ 
 There are also a few short texts in the `doc` folder:
 
  * [How are coroutines implemented?](doc/CoroutinesOverview.md)
