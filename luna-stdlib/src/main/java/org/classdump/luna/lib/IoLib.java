@@ -51,7 +51,6 @@ import org.classdump.luna.TableFactory;
 import org.classdump.luna.env.RuntimeEnvironment;
 import org.classdump.luna.impl.UnimplementedFunction;
 import org.classdump.luna.lib.io.InputStreamIoFile;
-import org.classdump.luna.lib.IoFile;
 import org.classdump.luna.lib.io.OutputStreamIoFile;
 import org.classdump.luna.runtime.Dispatch;
 import org.classdump.luna.runtime.ExecutionContext;
@@ -395,9 +394,9 @@ public final class IoLib {
 
 		this.fileSystem = fileSystem;
 
-		stdIn = in != null ? new InputStreamIoFile(in, mt, null) : null;
-		stdOut = out != null ? new OutputStreamIoFile(out, mt, null) : null;
-		stdErr = err != null ? new OutputStreamIoFile(err, mt, null) : null;
+		stdIn = in != null ? new InputStreamIoFile(in, mt) : null;
+		stdOut = out != null ? new OutputStreamIoFile(out, mt) : null;
+		stdErr = err != null ? new OutputStreamIoFile(err, mt) : null;
 
 		defaultInput = stdIn;
 		defaultOutput = stdOut;

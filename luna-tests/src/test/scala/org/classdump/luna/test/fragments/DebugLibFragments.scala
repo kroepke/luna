@@ -72,7 +72,7 @@ object DebugLibFragments extends FragmentBundle with FragmentExpectations with O
           |return nf, vf, ng, vg, vg == f
         """
       }
-      TwoNonENVFunctions in thisContext succeedsWith (null, null, "f", classOf[LuaFunction], true)
+      TwoNonENVFunctions in thisContext succeedsWith (null, null, "f", classOf[LuaFunction[_, _, _, _, _]], true)
 
     }
 
@@ -211,7 +211,7 @@ object DebugLibFragments extends FragmentBundle with FragmentExpectations with O
         """local udata = io.output()
           |local uvalue = debug.getuservalue(debug.setuservalue(io.output(), "hello"))
           |return udata, uvalue
-        """) succeedsWith (classOf[Userdata], "hello")
+        """) succeedsWith (classOf[Userdata[_]], "hello")
 
     }
 

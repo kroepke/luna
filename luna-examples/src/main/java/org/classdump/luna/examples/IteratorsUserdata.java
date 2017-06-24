@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017 Kay Roepke
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.classdump.luna.examples;
 
 import org.classdump.luna.Metatables;
@@ -13,8 +29,6 @@ import org.classdump.luna.impl.DefaultUserdata;
 import org.classdump.luna.impl.ImmutableTable;
 import org.classdump.luna.impl.NonsuspendableFunctionException;
 import org.classdump.luna.impl.StateContexts;
-import org.classdump.luna.lib.AbstractLibFunction;
-import org.classdump.luna.lib.ArgumentIterator;
 import org.classdump.luna.lib.BasicLib;
 import org.classdump.luna.lib.StandardLibrary;
 import org.classdump.luna.load.ChunkLoader;
@@ -55,27 +69,26 @@ public class IteratorsUserdata {
 
     }
 
-    private static class IteratorNext extends AbstractLibFunction {
+    private static class IteratorNext extends AbstractFunction1<ListIterator<String>> {
 
         @Override
-        protected String name() {
-            return "java_list_next";
+        public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
+            throw new NonsuspendableFunctionException();
         }
 
         @Override
-        protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-            final ListIterator iterator = args.nextOfClass(ListIterator.class);
+        public void invoke(ExecutionContext context, ListIterator<String> iterator) throws ResolvedControlThrowable {
             if (!iterator.hasNext()) {
                 context.getReturnBuffer().setTo(null);
                 return;
             }
-            final Object next = iterator.next();
+            final String next = iterator.next();
 
             context.getReturnBuffer().setTo(next);
         }
     }
 
-    private static class CollectionBridge extends DefaultUserdata {
+    private static class CollectionBridge extends DefaultUserdata<List<String>> {
         private static final ImmutableTable META_TABLE = new ImmutableTable.Builder()
                 .add(BasicLib.MT_PAIRS, new CollectionIteratorPairs())
                 .add(Metatables.MT_INDEX, new ListIndex())
@@ -87,37 +100,33 @@ public class IteratorsUserdata {
          *
          * @param list initial user value, may be {@code null}
          */
-        public CollectionBridge(List list) {
+        public CollectionBridge(List<String> list) {
             super(META_TABLE, list);
         }
 
-        private List getList() {
-            return (List) getUserValue();
-        }
-
-        private static class CollectionIteratorPairs extends AbstractFunction1 {
+        private static class CollectionIteratorPairs extends AbstractFunction1<CollectionBridge> {
             @Override
             public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
                 throw new NonsuspendableFunctionException();
             }
 
             @Override
-            public void invoke(ExecutionContext context, Object arg1) throws ResolvedControlThrowable {
-                final List list = ((CollectionBridge) arg1).getList();
+            public void invoke(ExecutionContext context, CollectionBridge bridge) throws ResolvedControlThrowable {
+                final List<String> list = bridge.getUserValue();
                 context.getReturnBuffer().setTo(new IteratorNext(), list.listIterator(), null);
             }
         }
 
-        private static class ListIndex extends AbstractFunction2 {
+        private static class ListIndex extends AbstractFunction2<CollectionBridge, Long> {
             @Override
             public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
                 throw new NonsuspendableFunctionException();
             }
 
             @Override
-            public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ResolvedControlThrowable {
-                final List list = ((CollectionBridge) arg1).getList();
-                final int index = ((Long) arg2).intValue() - 1;
+            public void invoke(ExecutionContext context, CollectionBridge bridge, Long longIndex) throws ResolvedControlThrowable {
+                final List<String> list = bridge.getUserValue();
+                final int index = longIndex.intValue() - 1;
                 if (index == list.size()) {
                     context.getReturnBuffer().setTo(null);
                     return;

@@ -16,12 +16,10 @@
 
 package org.classdump.luna.runtime;
 
-import org.classdump.luna.runtime.ResolvedControlThrowable;
-
 /**
  * An abstract function object.
  */
-public abstract class LuaFunction implements Resumable {
+public abstract class LuaFunction<T1, T2, T3, T4, T5> implements Resumable {
 
 	/**
 	 * Invokes this function in the given execution context {@code context} without arguments.
@@ -66,7 +64,7 @@ public abstract class LuaFunction implements Resumable {
 	 *
 	 * @throws ResolvedControlThrowable  if the call initiates a non-local control change
 	 */
-	public abstract void invoke(ExecutionContext context, Object arg1)
+	public abstract void invoke(ExecutionContext context, T1 arg1)
 			throws ResolvedControlThrowable;
 
 	/**
@@ -91,7 +89,7 @@ public abstract class LuaFunction implements Resumable {
 	 *
 	 * @throws ResolvedControlThrowable  if the call initiates a non-local control change
 	 */
-	public abstract void invoke(ExecutionContext context, Object arg1, Object arg2)
+	public abstract void invoke(ExecutionContext context, T1 arg1, T2 arg2)
 			throws ResolvedControlThrowable;
 
 	/**
@@ -118,7 +116,7 @@ public abstract class LuaFunction implements Resumable {
 	 *
 	 * @throws ResolvedControlThrowable  if the call initiates a non-local control change
 	 */
-	public abstract void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3)
+	public abstract void invoke(ExecutionContext context, T1 arg1, T2 arg2, T3 arg3)
 			throws ResolvedControlThrowable;
 
 	/**
@@ -146,7 +144,7 @@ public abstract class LuaFunction implements Resumable {
 	 *
 	 * @throws ResolvedControlThrowable  if the call initiates a non-local control change
 	 */
-	public abstract void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4)
+	public abstract void invoke(ExecutionContext context, T1 arg1, T2 arg2, T3 arg3, T4 arg4)
 			throws ResolvedControlThrowable;
 
 	/**
@@ -175,7 +173,7 @@ public abstract class LuaFunction implements Resumable {
 	 *
 	 * @throws ResolvedControlThrowable  if the call initiates a non-local control change
 	 */
-	public abstract void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
+	public abstract void invoke(ExecutionContext context, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
 			throws ResolvedControlThrowable;
 
 	/**

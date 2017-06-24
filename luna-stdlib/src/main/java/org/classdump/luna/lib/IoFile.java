@@ -19,10 +19,6 @@ package org.classdump.luna.lib;
 import org.classdump.luna.ByteString;
 import org.classdump.luna.Table;
 import org.classdump.luna.impl.DefaultUserdata;
-import org.classdump.luna.lib.AbstractLibFunction;
-import org.classdump.luna.lib.ArgumentIterator;
-import org.classdump.luna.lib.BadArgumentException;
-import org.classdump.luna.lib.IoLib;
 import org.classdump.luna.runtime.ExecutionContext;
 import org.classdump.luna.runtime.ResolvedControlThrowable;
 
@@ -31,9 +27,9 @@ import java.io.IOException;
 /**
  * A file handle used by the {@link IoLib I/O library}.
  */
-public abstract class IoFile extends DefaultUserdata {
+public abstract class IoFile<T> extends DefaultUserdata<T> {
 
-	protected IoFile(Table metatable, Object userValue) {
+	protected IoFile(Table metatable, T userValue) {
 		super(metatable, userValue);
 	}
 

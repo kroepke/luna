@@ -115,7 +115,7 @@ object BenchmarkRunner {
     env
   }
 
-  case class EnvWithMainChunk(state: StateContext, fn: LuaFunction)
+  case class EnvWithMainChunk(state: StateContext, fn: LuaFunction[_, _, _, _, _])
 
   def init(settings: CompilerSettings, filename: String, args: String*) = {
     val resourceStream = getClass.getResourceAsStream(filename)

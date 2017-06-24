@@ -114,7 +114,7 @@ object CoroutineLibFragments extends FragmentBundle with FragmentExpectations  {
       |return w
     """
   }
-  WrapReturnsAFunction in CoroContext succeedsWith (classOf[LuaFunction])
+  WrapReturnsAFunction in CoroContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
 
   val RunningCoroutineStatus = fragment ("RunningCoroutineStatus") {
     """local c = coroutine.running()

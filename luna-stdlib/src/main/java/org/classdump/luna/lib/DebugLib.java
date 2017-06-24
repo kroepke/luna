@@ -888,7 +888,7 @@ public final class DebugLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			Userdata userdata = args.nextUserdata();
+			Userdata<Object> userdata = args.nextUserdata();
 			Object value = args.nextAny();
 
 			userdata.setUserValue(value);
