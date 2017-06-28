@@ -266,7 +266,13 @@ public final class ModuleLib {
 		}
 	}
 
-	static void install(Table env, String modName, Object value) {
+	/**
+	 * Register the given module in _G and mark it as loaded in package.loaded.
+	 * @param env the _ENV table
+	 * @param modName the module name
+	 * @param value the module's table
+	 */
+	public static void install(Table env, String modName, Object value) {
 		env.rawset(modName, value);
 		addToLoaded(env, modName, value);
 	}
