@@ -279,6 +279,12 @@ class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public LValueExpr transform(IndexExpr e) {
+		// pop the value first, if we are assigning, this avoids confusing the val
+		// on the stack with potential multival returns from object or key
+		Val value = null;
+		if (assigning) {
+			value = popVal();
+		}
 		boolean as = assigning;
 		assigning = false;
 
@@ -292,7 +298,6 @@ class IRTranslatorTransformer extends Transformer {
 		insns.atLine(e.line());
 
 		if (assigning) {
-			Val value = popVal();
 			insns.add(new TabSet(obj, key, value));
 		}
 		else {
