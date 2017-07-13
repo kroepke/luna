@@ -18,6 +18,7 @@ package org.classdump.luna.compiler;
 
 import org.classdump.luna.Variable;
 import org.classdump.luna.load.ChunkClassLoader;
+import org.classdump.luna.load.ChunkFactory;
 import org.classdump.luna.load.ChunkLoader;
 import org.classdump.luna.load.LoaderException;
 import org.classdump.luna.parser.ParseException;
@@ -159,39 +160,44 @@ public class CompilerChunkLoader implements ChunkLoader {
 	}
 
 	@Override
-	public LuaFunction<?, ?, ?, ?, ?> loadTextChunk(Variable env, String chunkName, String sourceText) throws LoaderException {
+	public LuaFunction<Variable, ?, ?, ?, ?> loadTextChunk(Variable env, String chunkName, String sourceText) throws LoaderException {
 		Objects.requireNonNull(env);
 		Objects.requireNonNull(chunkName);
 		Objects.requireNonNull(sourceText);
 
-		synchronized (this) {
+		return compileTextChunk(chunkName, chunkName).newInstance(env);
+	}
+
+	@Override
+	public ChunkFactory compileTextChunk(String chunkName, String chunk) throws LoaderException {
+		Objects.requireNonNull(chunkName);
+		Objects.requireNonNull(chunk);
+
+		try {
 			String rootClassName = rootClassPrefix + (idx++);
-			try {
-				CompiledModule result = compiler.compile(sourceText, chunkName, rootClassName);
 
-				String mainClassName = chunkClassLoader.install(result);
-				Class<?> clazz = chunkClassLoader.loadClass(mainClassName);
+			CompiledModule result = compiler.compile(chunk, chunkName, rootClassName);
 
-				return (LuaFunction) clazz.getConstructor(Variable.class).newInstance(env);
-			}
-			catch (TokenMgrError ex) {
-				String msg = ex.getMessage();
-				int line = 0;  // TODO
-				boolean partial = msg != null && msg.contains("Encountered: <EOF>");  // TODO: is there really no better way?
-				throw new LoaderException(ex, chunkName, line, partial);
-			}
-			catch (ParseException ex) {
-				boolean partial = ex.currentToken != null
-						&& ex.currentToken.next != null
-						&& ex.currentToken.next.kind == Parser.EOF;
-				int line = ex.currentToken != null
-						? ex.currentToken.beginLine
-						: 0;
-				throw new LoaderException(ex, chunkName, line, partial);
-			}
-			catch (RuntimeException | LinkageError | ReflectiveOperationException ex) {
-				throw new LoaderException(ex, chunkName, 0, false);
-			}
+			String mainClassName = chunkClassLoader.install(result);
+			//noinspection unchecked
+			return new ChunkFactory((Class<? extends LuaFunction<Variable, ?, ? ,?, ?>>) chunkClassLoader.loadClass(mainClassName), chunkName);
+		}
+		catch (TokenMgrError ex) {
+			String msg = ex.getMessage();
+			int line = 0;  // TODO
+			boolean partial = msg != null && msg.contains("Encountered: <EOF>");  // TODO: is there really no better way?
+			throw new LoaderException(ex, chunkName, line, partial);
+		}
+		catch (ParseException ex) {
+			boolean partial = ex.currentToken != null
+					&& ex.currentToken.next != null
+					&& ex.currentToken.next.kind == Parser.EOF;
+			int line = ex.currentToken != null
+					? ex.currentToken.beginLine
+					: 0;
+			throw new LoaderException(ex, chunkName, line, partial);
+		} catch (ClassNotFoundException e) {
+			throw new LoaderException(e, chunkName, 0, false);
 		}
 	}
 
