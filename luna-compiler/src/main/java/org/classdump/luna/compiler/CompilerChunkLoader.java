@@ -165,39 +165,39 @@ public class CompilerChunkLoader implements ChunkLoader {
 		Objects.requireNonNull(chunkName);
 		Objects.requireNonNull(sourceText);
 
-		return compileTextChunk(chunkName, chunkName).newInstance(env);
+		return compileTextChunk(chunkName, sourceText).newInstance(env);
 	}
 
 	@Override
-	public ChunkFactory compileTextChunk(String chunkName, String chunk) throws LoaderException {
+	public ChunkFactory compileTextChunk(String chunkName, String sourceText) throws LoaderException {
 		Objects.requireNonNull(chunkName);
-		Objects.requireNonNull(chunk);
+		Objects.requireNonNull(sourceText);
 
-		try {
-			String rootClassName = rootClassPrefix + (idx++);
+		synchronized (this) {
+			try {
+				String rootClassName = rootClassPrefix + (idx++);
 
-			CompiledModule result = compiler.compile(chunk, chunkName, rootClassName);
+				CompiledModule result = compiler.compile(sourceText, chunkName, rootClassName);
 
-			String mainClassName = chunkClassLoader.install(result);
-			//noinspection unchecked
-			return new ChunkFactory((Class<? extends LuaFunction<Variable, ?, ? ,?, ?>>) chunkClassLoader.loadClass(mainClassName), chunkName);
-		}
-		catch (TokenMgrError ex) {
-			String msg = ex.getMessage();
-			int line = 0;  // TODO
-			boolean partial = msg != null && msg.contains("Encountered: <EOF>");  // TODO: is there really no better way?
-			throw new LoaderException(ex, chunkName, line, partial);
-		}
-		catch (ParseException ex) {
-			boolean partial = ex.currentToken != null
-					&& ex.currentToken.next != null
-					&& ex.currentToken.next.kind == Parser.EOF;
-			int line = ex.currentToken != null
-					? ex.currentToken.beginLine
-					: 0;
-			throw new LoaderException(ex, chunkName, line, partial);
-		} catch (ClassNotFoundException e) {
-			throw new LoaderException(e, chunkName, 0, false);
+				String mainClassName = chunkClassLoader.install(result);
+				//noinspection unchecked
+				return new ChunkFactory((Class<? extends LuaFunction<Variable, ?, ?, ?, ?>>) chunkClassLoader.loadClass(mainClassName), chunkName);
+			} catch (TokenMgrError ex) {
+				String msg = ex.getMessage();
+				int line = 0;  // TODO
+				boolean partial = msg != null && msg.contains("Encountered: <EOF>");  // TODO: is there really no better way?
+				throw new LoaderException(ex, chunkName, line, partial);
+			} catch (ParseException ex) {
+				boolean partial = ex.currentToken != null
+						&& ex.currentToken.next != null
+						&& ex.currentToken.next.kind == Parser.EOF;
+				int line = ex.currentToken != null
+						? ex.currentToken.beginLine
+						: 0;
+				throw new LoaderException(ex, chunkName, line, partial);
+			} catch (ClassNotFoundException e) {
+				throw new LoaderException(e, chunkName, 0, false);
+			}
 		}
 	}
 
