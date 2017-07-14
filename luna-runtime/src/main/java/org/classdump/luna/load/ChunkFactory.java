@@ -23,7 +23,7 @@ public class ChunkFactory {
      *
      * @param env the _ENV upvalue for this instance, should not be shared between scripts.
      * @return a new script instance
-     * @throws LoaderException when the script could not be instantied.
+     * @throws LoaderException when the script could not be instantiated.
      */
     public LuaFunction<Variable, ?, ?, ?, ?> newInstance(Variable env) throws LoaderException {
         try {
