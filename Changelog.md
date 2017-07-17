@@ -1,5 +1,12 @@
 # Notable changes and fixes
 
+# Version 0.4.1
+
+ * Split chunk compilation and instance creation in the compiler interface.
+
+   This allows using a ChunkLoader to compile a chunk once and then create many independent instances of it
+   all with different _ENV and libraries loaded. The bytecode is generated once and loaded classes are shared.
+
 # Version 0.4
 
  * Allow using function return values in table index assignments.
