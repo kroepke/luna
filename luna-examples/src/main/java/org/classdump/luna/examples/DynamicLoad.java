@@ -16,6 +16,7 @@
 
 package org.classdump.luna.examples;
 
+import java.util.Arrays;
 import org.classdump.luna.StateContext;
 import org.classdump.luna.Table;
 import org.classdump.luna.Variable;
@@ -30,28 +31,26 @@ import org.classdump.luna.load.ChunkLoader;
 import org.classdump.luna.load.LoaderException;
 import org.classdump.luna.runtime.LuaFunction;
 
-import java.util.Arrays;
-
 public class DynamicLoad {
 
-	public static void main(String[] args)
-			throws InterruptedException, CallPausedException, CallException, LoaderException {
+  public static void main(String[] args)
+      throws InterruptedException, CallPausedException, CallException, LoaderException {
 
-		String program = "return load(...)()";
+    String program = "return load(...)()";
 
-		ChunkLoader loader = CompilerChunkLoader.of("dyn_load");
+    ChunkLoader loader = CompilerChunkLoader.of("dyn_load");
 
-		StateContext state = StateContexts.newDefaultInstance();
-		Table env = StandardLibrary.in(RuntimeEnvironments.system())
-				.withLoader(loader)
-				.installInto(state);
+    StateContext state = StateContexts.newDefaultInstance();
+    Table env = StandardLibrary.in(RuntimeEnvironments.system())
+        .withLoader(loader)
+        .installInto(state);
 
-		LuaFunction main = loader.loadTextChunk(new Variable(env), "load", program);
+    LuaFunction main = loader.loadTextChunk(new Variable(env), "load", program);
 
-		Object[] result = DirectCallExecutor.newExecutor().call(state, main, "return 42");
+    Object[] result = DirectCallExecutor.newExecutor().call(state, main, "return 42");
 
-		System.out.println("Result: " + Arrays.toString(result));
+    System.out.println("Result: " + Arrays.toString(result));
 
-	}
+  }
 
 }

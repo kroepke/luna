@@ -16,56 +16,56 @@
 
 package org.classdump.luna.lib.io;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
 import org.classdump.luna.ByteString;
 import org.classdump.luna.Table;
 import org.classdump.luna.lib.IoFile;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Objects;
-
 public class InputStreamIoFile extends IoFile<SeekableInputStream> {
 
-	public InputStreamIoFile(InputStream in, Table metatable) {
-		super(metatable, new SeekableInputStream(Objects.requireNonNull(in)));
-	}
+  public InputStreamIoFile(InputStream in, Table metatable) {
+    super(metatable, new SeekableInputStream(Objects.requireNonNull(in)));
+  }
 
-	@Override
-	public boolean isClosed() {
-		return false;
-	}
+  @Override
+  public boolean isClosed() {
+    return false;
+  }
 
-	@Override
-	public void close() throws IOException {
-		throw new UnsupportedOperationException("cannot close standard file");
-	}
+  @Override
+  public void close() throws IOException {
+    throw new UnsupportedOperationException("cannot close standard file");
+  }
 
-	@Override
-	public void flush() throws IOException {
-		// no-op
-	}
+  @Override
+  public void flush() throws IOException {
+    // no-op
+  }
 
-	@Override
-	public void write(ByteString s) throws IOException {
-		throw new UnsupportedOperationException("Bad file descriptor");
-	}
+  @Override
+  public void write(ByteString s) throws IOException {
+    throw new UnsupportedOperationException("Bad file descriptor");
+  }
 
-	@Override
-	public long seek(IoFile.Whence whence, long offset) throws IOException {
-		switch (whence) {
-			case BEGINNING:
-			case END:
-				return inputStream().setPosition(offset);
+  @Override
+  public long seek(IoFile.Whence whence, long offset) throws IOException {
+    switch (whence) {
+      case BEGINNING:
+      case END:
+        return inputStream().setPosition(offset);
 
-			case CURRENT_POSITION:
-				return inputStream().addPosition(offset);
+      case CURRENT_POSITION:
+        return inputStream().addPosition(offset);
 
-			default: throw new IllegalArgumentException("Illegal whence: " + whence);
-		}
-	}
+      default:
+        throw new IllegalArgumentException("Illegal whence: " + whence);
+    }
+  }
 
-	private SeekableInputStream inputStream() {
-		return getUserValue();
-	}
+  private SeekableInputStream inputStream() {
+    return getUserValue();
+  }
 
 }

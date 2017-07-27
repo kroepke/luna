@@ -16,10 +16,8 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.Label;
-
 public interface JmpNode {
 
-	Label jmpDest();
+  Label jmpDest();
 
 }

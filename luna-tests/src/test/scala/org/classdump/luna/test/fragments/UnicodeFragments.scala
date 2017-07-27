@@ -22,7 +22,7 @@ import org.classdump.luna.test.{FragmentBundle, FragmentExpectations, OneLiners}
 
 object UnicodeFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
-  in (FullContext) {
+  in(FullContext) {
 
     // in UTF-8
     val s = "Nechť již hříšné saxofony ďáblů rozzvučí síň úděsnými tóny waltzu, tanga a quickstepu."
@@ -32,13 +32,13 @@ object UnicodeFragments extends FragmentBundle with FragmentExpectations with On
 
     def utf8Length(s: String) = s.getBytes(StandardCharsets.UTF_8).length
 
-    program (s"""return '$s'""") succeedsWith (s)
-    program (s"""return #('$s')""") succeedsWith (utf8Length(s))
-    program (s"""return #('$s') -- explicit""") succeedsWith (103)
+    program(s"""return '$s'""") succeedsWith (s)
+    program(s"""return #('$s')""") succeedsWith (utf8Length(s))
+    program(s"""return #('$s') -- explicit""") succeedsWith (103)
 
-    program (s"""return '$lua'""") succeedsWith (s)
-    program (s"""return #('$lua')""") succeedsWith (utf8Length(s))
-    program (s"""return #('$lua') -- explicit""") succeedsWith (103)
+    program(s"""return '$lua'""") succeedsWith (s)
+    program(s"""return #('$lua')""") succeedsWith (utf8Length(s))
+    program(s"""return #('$lua') -- explicit""") succeedsWith (103)
 
   }
 

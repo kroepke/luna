@@ -16,39 +16,37 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.FunctionId;
-import org.classdump.luna.compiler.ir.IRVisitor;
-
 import java.util.List;
 import java.util.Objects;
+import org.classdump.luna.compiler.FunctionId;
 
 public class Closure extends BodyNode {
 
-	private final Val dest;
-	private final FunctionId id;
-	private final List<AbstractVar> args;
+  private final Val dest;
+  private final FunctionId id;
+  private final List<AbstractVar> args;
 
-	public Closure(Val dest, FunctionId id, List<AbstractVar> args) {
-		this.dest = Objects.requireNonNull(dest);
-		this.id = Objects.requireNonNull(id);
-		this.args = Objects.requireNonNull(args);
-	}
+  public Closure(Val dest, FunctionId id, List<AbstractVar> args) {
+    this.dest = Objects.requireNonNull(dest);
+    this.id = Objects.requireNonNull(id);
+    this.args = Objects.requireNonNull(args);
+  }
 
-	public Val dest() {
-		return dest;
-	}
+  public Val dest() {
+    return dest;
+  }
 
-	public FunctionId id() {
-		return id;
-	}
+  public FunctionId id() {
+    return id;
+  }
 
-	public List<AbstractVar> args() {
-		return args;
-	}
+  public List<AbstractVar> args() {
+    return args;
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

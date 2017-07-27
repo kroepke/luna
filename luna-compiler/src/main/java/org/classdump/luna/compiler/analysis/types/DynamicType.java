@@ -20,36 +20,36 @@ import java.util.Objects;
 
 public final class DynamicType extends Type {
 
-	private final String name;
+  private final String name;
 
-	public DynamicType(String name) {
-		this.name = Objects.requireNonNull(name);
-	}
+  public DynamicType(String name) {
+    this.name = Objects.requireNonNull(name);
+  }
 
-	@Override
-	public String toString() {
-		return name;
-	}
+  @Override
+  public String toString() {
+    return name;
+  }
 
-	@Override
-	public boolean isSubtypeOf(Type that) {
-		return this.equals(that);
-	}
+  @Override
+  public boolean isSubtypeOf(Type that) {
+    return this.equals(that);
+  }
 
-	@Override
-	public Type restrict(Type that) {
-		return this;
-	}
+  @Override
+  public Type restrict(Type that) {
+    return this;
+  }
 
-	@Override
-	public Type join(Type that) {
-		return this;
-	}
+  @Override
+  public Type join(Type that) {
+    return this;
+  }
 
-	@Override
-	public Type meet(Type that) {
-		return this;
-	}
+  @Override
+  public Type meet(Type that) {
+    return this;
+  }
 
 //	@Override
 //	public Type unionWith(Type that) {

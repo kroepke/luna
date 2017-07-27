@@ -32,18 +32,18 @@ import org.classdump.luna.runtime.LuaFunction;
 
 public class HelloWorld {
 
-	public static void main(String[] args)
-			throws InterruptedException, CallPausedException, CallException, LoaderException {
+  public static void main(String[] args)
+      throws InterruptedException, CallPausedException, CallException, LoaderException {
 
-		String program = "print('hello world!')";
+    String program = "print('hello world!')";
 
-		StateContext state = StateContexts.newDefaultInstance();
-		Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
+    StateContext state = StateContexts.newDefaultInstance();
+    Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
 
-		ChunkLoader loader = CompilerChunkLoader.of("hello_world");
-		LuaFunction main = loader.loadTextChunk(new Variable(env), "hello", program);
+    ChunkLoader loader = CompilerChunkLoader.of("hello_world");
+    LuaFunction main = loader.loadTextChunk(new Variable(env), "hello", program);
 
-		DirectCallExecutor.newExecutor().call(state, main);
-	}
+    DirectCallExecutor.newExecutor().call(state, main);
+  }
 
 }

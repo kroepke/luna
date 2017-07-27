@@ -16,8 +16,6 @@
 
 package org.classdump.luna.exec;
 
-import org.classdump.luna.exec.CallEventHandler;
-import org.classdump.luna.exec.InvalidContinuationException;
 import org.classdump.luna.runtime.SchedulingContext;
 
 /**
@@ -25,25 +23,23 @@ import org.classdump.luna.runtime.SchedulingContext;
  */
 public interface Continuation {
 
-	/**
-	 * Returns the call identifier, an object that uniquely identifies the computation
-	 * (an execution run) represented by this continuation.
-	 *
-	 * @return  a non-{@code null} identifier of this computation
-	 */
-	Object callIdentifier();
+  /**
+   * Returns the call identifier, an object that uniquely identifies the computation
+   * (an execution run) represented by this continuation.
+   *
+   * @return a non-{@code null} identifier of this computation
+   */
+  Object callIdentifier();
 
-	/**
-	 * Resumes the continuation with the given event handler {@code handler} in the scheduling
-	 * context {@code schedulingContext}.
-	 *
-	 * @param handler  the call event handler, must not be {@code null}
-	 * @param schedulingContext  the scheduling context, must not be {@code null}
-	 *
-	 * @throws NullPointerException  if {@code handler} or {@code schedulingContext}
-	 *                               is {@code null}
-	 * @throws InvalidContinuationException  when the continuation is invalid
-	 */
-	void resume(CallEventHandler handler, SchedulingContext schedulingContext);
+  /**
+   * Resumes the continuation with the given event handler {@code handler} in the scheduling
+   * context {@code schedulingContext}.
+   *
+   * @param handler the call event handler, must not be {@code null}
+   * @param schedulingContext the scheduling context, must not be {@code null}
+   * @throws NullPointerException if {@code handler} or {@code schedulingContext} is {@code null}
+   * @throws InvalidContinuationException when the continuation is invalid
+   */
+  void resume(CallEventHandler handler, SchedulingContext schedulingContext);
 
 }

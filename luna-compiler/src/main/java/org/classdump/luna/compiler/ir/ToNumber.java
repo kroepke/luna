@@ -16,38 +16,36 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.IRVisitor;
-
 import java.util.Objects;
 
 public class ToNumber extends BodyNode {
 
-	private final Val dest;
-	private final Val src;
+  private final Val dest;
+  private final Val src;
 
-	private final String desc;
+  private final String desc;
 
-	public ToNumber(Val dest, Val src, String desc) {
-		this.dest = Objects.requireNonNull(dest);
-		this.src = Objects.requireNonNull(src);
-		this.desc = desc;
-	}
+  public ToNumber(Val dest, Val src, String desc) {
+    this.dest = Objects.requireNonNull(dest);
+    this.src = Objects.requireNonNull(src);
+    this.desc = desc;
+  }
 
-	public Val dest() {
-		return dest;
-	}
+  public Val dest() {
+    return dest;
+  }
 
-	public Val src() {
-		return src;
-	}
+  public Val src() {
+    return src;
+  }
 
-	public String desc() {
-		return desc;
-	}
+  public String desc() {
+    return desc;
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

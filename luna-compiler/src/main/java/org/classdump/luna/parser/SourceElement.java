@@ -16,30 +16,29 @@
 
 package org.classdump.luna.parser;
 
-import org.classdump.luna.parser.ast.SourceInfo;
-
 import java.util.Objects;
+import org.classdump.luna.parser.ast.SourceInfo;
 
 class SourceElement<T> {
 
-	public final SourceInfo src;
-	public final T elem;
+  public final SourceInfo src;
+  public final T elem;
 
-	public SourceElement(SourceInfo src, T elem) {
-		this.src = Objects.requireNonNull(src);
-		this.elem = Objects.requireNonNull(elem);
-	}
+  public SourceElement(SourceInfo src, T elem) {
+    this.src = Objects.requireNonNull(src);
+    this.elem = Objects.requireNonNull(elem);
+  }
 
-	public static <T> SourceElement<T> of(SourceInfo src, T elem) {
-		return new SourceElement<>(src, elem);
-	}
+  public static <T> SourceElement<T> of(SourceInfo src, T elem) {
+    return new SourceElement<>(src, elem);
+  }
 
-	public SourceInfo sourceInfo() {
-		return src;
-	}
+  public SourceInfo sourceInfo() {
+    return src;
+  }
 
-	public T element() {
-		return elem;
-	}
+  public T element() {
+    return elem;
+  }
 
 }

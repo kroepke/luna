@@ -16,38 +16,36 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.util.Check;
-import org.classdump.luna.compiler.ir.IRVisitor;
-
 import java.util.Objects;
+import org.classdump.luna.util.Check;
 
 public class TabRawAppendMulti extends BodyNode {
 
-	private final Val obj;
-	private final long firstIdx;
-	private final MultiVal src;
+  private final Val obj;
+  private final long firstIdx;
+  private final MultiVal src;
 
-	public TabRawAppendMulti(Val obj, int firstIdx, MultiVal src) {
-		this.obj = Objects.requireNonNull(obj);
-		this.firstIdx = Check.positive(firstIdx);
-		this.src = Objects.requireNonNull(src);
-	}
+  public TabRawAppendMulti(Val obj, int firstIdx, MultiVal src) {
+    this.obj = Objects.requireNonNull(obj);
+    this.firstIdx = Check.positive(firstIdx);
+    this.src = Objects.requireNonNull(src);
+  }
 
-	public Val obj() {
-		return obj;
-	}
+  public Val obj() {
+    return obj;
+  }
 
-	public long firstIdx() {
-		return firstIdx;
-	}
+  public long firstIdx() {
+    return firstIdx;
+  }
 
-	public MultiVal src() {
-		return src;
-	}
+  public MultiVal src() {
+    return src;
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

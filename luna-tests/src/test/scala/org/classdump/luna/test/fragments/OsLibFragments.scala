@@ -19,9 +19,9 @@ import org.classdump.luna.test.{FragmentBundle, FragmentExpectations, OneLiners}
 
 object OsLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
-  in (OsContext) {
-    about ("time") {
-      program ("return os.time()") succeedsWith classOf[Number]
+  in(OsContext) {
+    about("time") {
+      program("return os.time()") succeedsWith classOf[Number]
     }
   }
 }

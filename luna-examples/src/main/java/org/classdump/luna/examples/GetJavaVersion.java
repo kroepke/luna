@@ -16,6 +16,7 @@
 
 package org.classdump.luna.examples;
 
+import java.util.Arrays;
 import org.classdump.luna.StateContext;
 import org.classdump.luna.Table;
 import org.classdump.luna.Variable;
@@ -34,44 +35,42 @@ import org.classdump.luna.runtime.ExecutionContext;
 import org.classdump.luna.runtime.LuaFunction;
 import org.classdump.luna.runtime.ResolvedControlThrowable;
 
-import java.util.Arrays;
-
 public class GetJavaVersion {
 
-	static class JavaVersion extends AbstractFunction0 {
+  public static void main(String[] args)
+      throws InterruptedException, CallPausedException, CallException, LoaderException {
 
-		@Override
-		public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
-			String javaVmName = System.getProperty("java.vm.name");
-			String javaVersion = System.getProperty("java.version");
-			context.getReturnBuffer().setTo(javaVmName, javaVersion);
-		}
+    String program = "local vmname, version = javaversion()\n"
+        + "return 'Java VM name = \"'..vmname..'\", Java version = \"'..version..'\"'";
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-			throw new NonsuspendableFunctionException();
-		}
+    StateContext state = StateContexts.newDefaultInstance();
+    Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
+    env.rawset("javaversion", new JavaVersion());
 
-	}
+    ChunkLoader loader = CompilerChunkLoader.of("call_from_lua");
+    LuaFunction main = loader.loadTextChunk(new Variable(env), "", program);
 
+    Object[] result = DirectCallExecutor.newExecutor().call(state, main);
 
-	public static void main(String[] args)
-			throws InterruptedException, CallPausedException, CallException, LoaderException {
+    System.out.println("Result: " + Arrays.toString(result));
 
-		String program = "local vmname, version = javaversion()\n"
-				+ "return 'Java VM name = \"'..vmname..'\", Java version = \"'..version..'\"'";
+  }
 
-		StateContext state = StateContexts.newDefaultInstance();
-		Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
-		env.rawset("javaversion", new JavaVersion());
+  static class JavaVersion extends AbstractFunction0 {
 
-		ChunkLoader loader = CompilerChunkLoader.of("call_from_lua");
-		LuaFunction main = loader.loadTextChunk(new Variable(env), "", program);
+    @Override
+    public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
+      String javaVmName = System.getProperty("java.vm.name");
+      String javaVersion = System.getProperty("java.version");
+      context.getReturnBuffer().setTo(javaVmName, javaVersion);
+    }
 
-		Object[] result = DirectCallExecutor.newExecutor().call(state, main);
+    @Override
+    public void resume(ExecutionContext context, Object suspendedState)
+        throws ResolvedControlThrowable {
+      throw new NonsuspendableFunctionException();
+    }
 
-		System.out.println("Result: " + Arrays.toString(result));
-
-	}
+  }
 
 }

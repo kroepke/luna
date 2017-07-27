@@ -16,62 +16,57 @@
 
 package org.classdump.luna.parser.ast;
 
-import org.classdump.luna.parser.ast.Attributes;
-import org.classdump.luna.parser.ast.Block;
-import org.classdump.luna.parser.ast.BodyStatement;
-import org.classdump.luna.parser.ast.Expr;
-import org.classdump.luna.parser.ast.Name;
-import org.classdump.luna.parser.ast.Transformer;
-
 import java.util.List;
 import java.util.Objects;
 
 public class GenericForStatement extends BodyStatement {
 
-	private final List<Name> names;
-	private final List<Expr> exprs;
-	private final Block block;
+  private final List<Name> names;
+  private final List<Expr> exprs;
+  private final Block block;
 
-	public GenericForStatement(Attributes attr, List<Name> names, List<Expr> exprs, Block block) {
-		super(attr);
-		this.names = Objects.requireNonNull(names);
-		this.exprs = Objects.requireNonNull(exprs);
-		this.block = Objects.requireNonNull(block);
-	}
+  public GenericForStatement(Attributes attr, List<Name> names, List<Expr> exprs, Block block) {
+    super(attr);
+    this.names = Objects.requireNonNull(names);
+    this.exprs = Objects.requireNonNull(exprs);
+    this.block = Objects.requireNonNull(block);
+  }
 
-	public List<Name> names() {
-		return names;
-	}
+  public List<Name> names() {
+    return names;
+  }
 
-	public List<Expr> exprs() {
-		return exprs;
-	}
+  public List<Expr> exprs() {
+    return exprs;
+  }
 
-	public Block block() {
-		return block;
-	}
+  public Block block() {
+    return block;
+  }
 
-	public GenericForStatement update(List<Name> names, List<Expr> exprs, Block block) {
-		if (this.names.equals(names) && this.exprs.equals(exprs) && this.block.equals(block)) {
-			return this;
-		}
-		else {
-			return new GenericForStatement(attributes(), names, exprs, block);
-		}
-	}
+  public GenericForStatement update(List<Name> names, List<Expr> exprs, Block block) {
+    if (this.names.equals(names) && this.exprs.equals(exprs) && this.block.equals(block)) {
+      return this;
+    } else {
+      return new GenericForStatement(attributes(), names, exprs, block);
+    }
+  }
 
-	public GenericForStatement withAttributes(Attributes attr) {
-		if (attributes().equals(attr)) return this;
-		else return new GenericForStatement(attr, names, exprs, block);
-	}
+  public GenericForStatement withAttributes(Attributes attr) {
+    if (attributes().equals(attr)) {
+      return this;
+    } else {
+      return new GenericForStatement(attr, names, exprs, block);
+    }
+  }
 
-	public GenericForStatement with(Object o) {
-		return this.withAttributes(attributes().with(o));
-	}
+  public GenericForStatement with(Object o) {
+    return this.withAttributes(attributes().with(o));
+  }
 
-	@Override
-	public BodyStatement accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public BodyStatement accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

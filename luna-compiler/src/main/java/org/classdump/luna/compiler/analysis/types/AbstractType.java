@@ -20,50 +20,58 @@ import java.util.Objects;
 
 public class AbstractType extends Type {
 
-	protected final AbstractType supertype;  // may be null
-	protected final String name;
+  protected final AbstractType supertype;  // may be null
+  protected final String name;
 
-	protected AbstractType(AbstractType supertype, String name) {
-		this.supertype = supertype;
-		this.name = Objects.requireNonNull(name);
-	}
+  protected AbstractType(AbstractType supertype, String name) {
+    this.supertype = supertype;
+    this.name = Objects.requireNonNull(name);
+  }
 
-	@Override
-	public String toString() {
-		return name;
-	}
+  @Override
+  public String toString() {
+    return name;
+  }
 
-	public AbstractType supertype() {
-		return supertype;
-	}
+  public AbstractType supertype() {
+    return supertype;
+  }
 
-	@Override
-	public boolean isSubtypeOf(Type that) {
-		return this.equals(that) || (this.supertype() != null && this.supertype().isSubtypeOf(that));
-	}
+  @Override
+  public boolean isSubtypeOf(Type that) {
+    return this.equals(that) || (this.supertype() != null && this.supertype().isSubtypeOf(that));
+  }
 
-	@Override
-	public Type restrict(Type that) {
-		return that instanceof DynamicType ? that : this;
-	}
+  @Override
+  public Type restrict(Type that) {
+    return that instanceof DynamicType ? that : this;
+  }
 
-	@Override
-	public Type join(Type that) {
-		Objects.requireNonNull(that);
+  @Override
+  public Type join(Type that) {
+    Objects.requireNonNull(that);
 
-		if (that.isSubtypeOf(this)) return this;
-		else if (this.supertype() != null) return this.supertype().join(that);
-		else return null;
-	}
+    if (that.isSubtypeOf(this)) {
+      return this;
+    } else if (this.supertype() != null) {
+      return this.supertype().join(that);
+    } else {
+      return null;
+    }
+  }
 
-	@Override
-	public Type meet(Type that) {
-		Objects.requireNonNull(that);
+  @Override
+  public Type meet(Type that) {
+    Objects.requireNonNull(that);
 
-		if (this.isSubtypeOf(that)) return this;
-		else if (that.isSubtypeOf(this)) return that;
-		else return null;
-	}
+    if (this.isSubtypeOf(that)) {
+      return this;
+    } else if (that.isSubtypeOf(this)) {
+      return that;
+    } else {
+      return null;
+    }
+  }
 
 }
 

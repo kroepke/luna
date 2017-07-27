@@ -16,12 +16,8 @@
 
 package org.classdump.luna.runtime;
 
-import org.classdump.luna.runtime.ControlThrowablePayload;
-import org.classdump.luna.runtime.Resumable;
-import org.classdump.luna.runtime.ResumeInfo;
-import org.classdump.luna.util.Cons;
-
 import java.util.Objects;
+import org.classdump.luna.util.Cons;
 
 /**
  * A throwable used for non-local control flow changes, containing an incomplete
@@ -48,42 +44,41 @@ import java.util.Objects;
  */
 public final class UnresolvedControlThrowable extends Throwable {
 
-	private final ControlThrowablePayload payload;
-	private final Cons<ResumeInfo> resumeStack;
+  private final ControlThrowablePayload payload;
+  private final Cons<ResumeInfo> resumeStack;
 
-	UnresolvedControlThrowable(ControlThrowablePayload payload, Cons<ResumeInfo> resumeStack) {
-		super(null, null, true, false);
-		this.payload = Objects.requireNonNull(payload);
-		this.resumeStack = resumeStack;
-	}
+  UnresolvedControlThrowable(ControlThrowablePayload payload, Cons<ResumeInfo> resumeStack) {
+    super(null, null, true, false);
+    this.payload = Objects.requireNonNull(payload);
+    this.resumeStack = resumeStack;
+  }
 
-	UnresolvedControlThrowable(ControlThrowablePayload payload) {
-		this(payload, null);
-	}
+  UnresolvedControlThrowable(ControlThrowablePayload payload) {
+    this(payload, null);
+  }
 
-	/**
-	 * Resolves this control throwable by prepending a call frame to it. The resulting
-	 * {@link ResolvedControlThrowable} <b>must be thrown</b> in order to continue
-	 * unravelling the call stack.
-	 *
-	 * <p>When resuming this call, the runtime will use {@code resumable} as the function
-	 * object used to continue the execution, and supply it with the {@code suspendedState}
-	 * object (or an object <i>equivalent</i> to it, see {@link Resumable}) registered
-	 * by this method.</p>
-	 *
-	 * @param resumable  the resumable at this level, must not be {@code null}
-	 * @param suspendedState  the suspended state, may be any value
-	 * @return  a resolved control throwable, <b>must be thrown</b>
-	 *
-	 * @throws NullPointerException  if {@code resumable} is {@code null}
-	 */
-	public ResolvedControlThrowable resolve(Resumable resumable, Object suspendedState) {
-		return new ResolvedControlThrowable(payload,
-				new Cons<>(new ResumeInfo(resumable, suspendedState), resumeStack));
-	}
+  /**
+   * Resolves this control throwable by prepending a call frame to it. The resulting
+   * {@link ResolvedControlThrowable} <b>must be thrown</b> in order to continue
+   * unravelling the call stack.
+   *
+   * <p>When resuming this call, the runtime will use {@code resumable} as the function
+   * object used to continue the execution, and supply it with the {@code suspendedState}
+   * object (or an object <i>equivalent</i> to it, see {@link Resumable}) registered
+   * by this method.</p>
+   *
+   * @param resumable the resumable at this level, must not be {@code null}
+   * @param suspendedState the suspended state, may be any value
+   * @return a resolved control throwable, <b>must be thrown</b>
+   * @throws NullPointerException if {@code resumable} is {@code null}
+   */
+  public ResolvedControlThrowable resolve(Resumable resumable, Object suspendedState) {
+    return new ResolvedControlThrowable(payload,
+        new Cons<>(new ResumeInfo(resumable, suspendedState), resumeStack));
+  }
 
-	ResolvedControlThrowable resolve() {
-		return new ResolvedControlThrowable(payload, resumeStack);
-	}
+  ResolvedControlThrowable resolve() {
+    return new ResolvedControlThrowable(payload, resumeStack);
+  }
 
 }

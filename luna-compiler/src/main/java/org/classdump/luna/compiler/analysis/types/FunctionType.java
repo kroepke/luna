@@ -16,149 +16,140 @@
 
 package org.classdump.luna.compiler.analysis.types;
 
-import org.classdump.luna.compiler.analysis.types.AbstractType;
-import org.classdump.luna.compiler.analysis.types.DynamicType;
-import org.classdump.luna.compiler.analysis.types.Type;
-import org.classdump.luna.compiler.analysis.types.TypeSeq;
-
 import java.util.Objects;
 
 public class FunctionType extends ConcreteType {
 
-	// FIXME: masking the field in the superclass!
-	protected final AbstractType supertype;
+  // FIXME: masking the field in the superclass!
+  protected final AbstractType supertype;
 
-	protected final TypeSeq typeSeq;
-	protected final TypeSeq returnTypes;
+  protected final TypeSeq typeSeq;
+  protected final TypeSeq returnTypes;
 
-	FunctionType(AbstractType supertype, TypeSeq arg, TypeSeq ret) {
-		super(supertype, supertype.name);
-		this.supertype = Objects.requireNonNull(supertype);
-		this.typeSeq = Objects.requireNonNull(arg);
-		this.returnTypes = Objects.requireNonNull(ret);
-	}
+  FunctionType(AbstractType supertype, TypeSeq arg, TypeSeq ret) {
+    super(supertype, supertype.name);
+    this.supertype = Objects.requireNonNull(supertype);
+    this.typeSeq = Objects.requireNonNull(arg);
+    this.returnTypes = Objects.requireNonNull(ret);
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
-		FunctionType that = (FunctionType) o;
+    FunctionType that = (FunctionType) o;
 
-		return typeSeq.equals(that.typeSeq) && returnTypes.equals(that.returnTypes);
-	}
+    return typeSeq.equals(that.typeSeq) && returnTypes.equals(that.returnTypes);
+  }
 
-	@Override
-	public int hashCode() {
-		int result = typeSeq.hashCode();
-		result = 31 * result + returnTypes.hashCode();
-		return result;
-	}
+  @Override
+  public int hashCode() {
+    int result = typeSeq.hashCode();
+    result = 31 * result + returnTypes.hashCode();
+    return result;
+  }
 
-	@Override
-	public String toString() {
-		return name + argumentTypes().toString() + "->" + returnTypes().toString();
-	}
+  @Override
+  public String toString() {
+    return name + argumentTypes().toString() + "->" + returnTypes().toString();
+  }
 
-	@Deprecated
-	public String toExplicitString() {
-		return "(" + argumentTypes().toString() + ") -> (" + returnTypes().toString() + ")";
-	}
+  @Deprecated
+  public String toExplicitString() {
+    return "(" + argumentTypes().toString() + ") -> (" + returnTypes().toString() + ")";
+  }
 
-	public TypeSeq argumentTypes() {
-		return typeSeq;
-	}
+  public TypeSeq argumentTypes() {
+    return typeSeq;
+  }
 
-	public TypeSeq returnTypes() {
-		return returnTypes;
-	}
+  public TypeSeq returnTypes() {
+    return returnTypes;
+  }
 
-	@Override
-	public boolean isSubtypeOf(Type that) {
-		Objects.requireNonNull(that);
+  @Override
+  public boolean isSubtypeOf(Type that) {
+    Objects.requireNonNull(that);
 
-		if (this.equals(that)) {
-			return true;
-		}
-		if (that instanceof FunctionType) {
-			FunctionType ft = (FunctionType) that;
+    if (this.equals(that)) {
+      return true;
+    }
+    if (that instanceof FunctionType) {
+      FunctionType ft = (FunctionType) that;
 
-			return ft.argumentTypes().isSubsumedBy(this.argumentTypes())
-					&& this.returnTypes().isSubsumedBy(ft.returnTypes());
-		}
-		else {
-			return this.supertype().isSubtypeOf(that);
-		}
-	}
+      return ft.argumentTypes().isSubsumedBy(this.argumentTypes())
+          && this.returnTypes().isSubsumedBy(ft.returnTypes());
+    } else {
+      return this.supertype().isSubtypeOf(that);
+    }
+  }
 
-	@Override
-	public Type join(Type that) {
-		Objects.requireNonNull(that);
+  @Override
+  public Type join(Type that) {
+    Objects.requireNonNull(that);
 
-		if (this.isSubtypeOf(that)) {
-			return that;
-		}
-		else if (that instanceof FunctionType) {
-			FunctionType ft = (FunctionType) that;
+    if (this.isSubtypeOf(that)) {
+      return that;
+    } else if (that instanceof FunctionType) {
+      FunctionType ft = (FunctionType) that;
 
-			TypeSeq arg = this.argumentTypes().meet(ft.argumentTypes());
-			TypeSeq ret = this.returnTypes().join(ft.returnTypes());
+      TypeSeq arg = this.argumentTypes().meet(ft.argumentTypes());
+      TypeSeq ret = this.returnTypes().join(ft.returnTypes());
 
-			return arg != null && ret != null ? new FunctionType(supertype, arg, ret) : null;
-		}
-		else {
-			return this.supertype().join(that);
-		}
-	}
+      return arg != null && ret != null ? new FunctionType(supertype, arg, ret) : null;
+    } else {
+      return this.supertype().join(that);
+    }
+  }
 
-	@Override
-	public Type meet(Type that) {
-		Objects.requireNonNull(that);
+  @Override
+  public Type meet(Type that) {
+    Objects.requireNonNull(that);
 
-		if (this.isSubtypeOf(that)) {
-			return this;
-		}
-		else if (that.isSubtypeOf(this)) {
-			return that;
-		}
-		else if (that instanceof FunctionType) {
-			FunctionType ft = (FunctionType) that;
+    if (this.isSubtypeOf(that)) {
+      return this;
+    } else if (that.isSubtypeOf(this)) {
+      return that;
+    } else if (that instanceof FunctionType) {
+      FunctionType ft = (FunctionType) that;
 
-			TypeSeq arg = this.argumentTypes().join(ft.argumentTypes());
-			TypeSeq ret = this.returnTypes().meet(ft.returnTypes());
+      TypeSeq arg = this.argumentTypes().join(ft.argumentTypes());
+      TypeSeq ret = this.returnTypes().meet(ft.returnTypes());
 
-			return arg != null && ret != null ? new FunctionType(supertype, arg, ret) : null;
-		}
-		else {
-			return null;
-		}
-	}
+      return arg != null && ret != null ? new FunctionType(supertype, arg, ret) : null;
+    } else {
+      return null;
+    }
+  }
 
-	@Override
-	public Type restrict(Type that) {
-		if (that instanceof FunctionType) {
-			FunctionType thatFt = (FunctionType) that;
-			return new FunctionType(supertype,
-					this.argumentTypes().restrict(thatFt.argumentTypes()),
-					this.returnTypes().restrict(thatFt.returnTypes()));
-		}
-		else {
-			return that instanceof DynamicType ? that : this;
-		}
-	}
+  @Override
+  public Type restrict(Type that) {
+    if (that instanceof FunctionType) {
+      FunctionType thatFt = (FunctionType) that;
+      return new FunctionType(supertype,
+          this.argumentTypes().restrict(thatFt.argumentTypes()),
+          this.returnTypes().restrict(thatFt.returnTypes()));
+    } else {
+      return that instanceof DynamicType ? that : this;
+    }
+  }
 
-	@Override
-	public boolean isConsistentWith(Type that) {
-		if (that instanceof FunctionType) {
-			FunctionType thatFunc = (FunctionType) that;
+  @Override
+  public boolean isConsistentWith(Type that) {
+    if (that instanceof FunctionType) {
+      FunctionType thatFunc = (FunctionType) that;
 
-			return this.argumentTypes().isConsistentWith(thatFunc.argumentTypes())
-					&& this.returnTypes().isConsistentWith(thatFunc.returnTypes());
-		}
-		else {
-			return super.isConsistentWith(that);
-		}
-	}
+      return this.argumentTypes().isConsistentWith(thatFunc.argumentTypes())
+          && this.returnTypes().isConsistentWith(thatFunc.returnTypes());
+    } else {
+      return super.isConsistentWith(that);
+    }
+  }
 
 //	@Override
 //	public Type unionWith(Type that) {

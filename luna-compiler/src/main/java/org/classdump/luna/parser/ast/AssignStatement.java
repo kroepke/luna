@@ -16,42 +16,39 @@
 
 package org.classdump.luna.parser.ast;
 
-import org.classdump.luna.parser.ast.LValueExpr;
-
 import java.util.List;
 import java.util.Objects;
 
 public class AssignStatement extends BodyStatement {
 
-	private final List<LValueExpr> vars;
-	private final List<Expr> exprs;
+  private final List<LValueExpr> vars;
+  private final List<Expr> exprs;
 
-	public AssignStatement(Attributes attr, List<LValueExpr> vars, List<Expr> exprs) {
-		super(attr);
-		this.vars = Objects.requireNonNull(vars);
-		this.exprs = Objects.requireNonNull(exprs);
-	}
+  public AssignStatement(Attributes attr, List<LValueExpr> vars, List<Expr> exprs) {
+    super(attr);
+    this.vars = Objects.requireNonNull(vars);
+    this.exprs = Objects.requireNonNull(exprs);
+  }
 
-	public List<LValueExpr> vars() {
-		return vars;
-	}
+  public List<LValueExpr> vars() {
+    return vars;
+  }
 
-	public List<Expr> exprs() {
-		return exprs;
-	}
+  public List<Expr> exprs() {
+    return exprs;
+  }
 
-	public AssignStatement update(List<LValueExpr> vars, List<Expr> exprs) {
-		if (this.vars.equals(vars) && this.exprs.equals(exprs)) {
-			return this;
-		}
-		else {
-			return new AssignStatement(attributes(), vars, exprs);
-		}
-	}
+  public AssignStatement update(List<LValueExpr> vars, List<Expr> exprs) {
+    if (this.vars.equals(vars) && this.exprs.equals(exprs)) {
+      return this;
+    } else {
+      return new AssignStatement(attributes(), vars, exprs);
+    }
+  }
 
-	@Override
-	public BodyStatement accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public BodyStatement accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

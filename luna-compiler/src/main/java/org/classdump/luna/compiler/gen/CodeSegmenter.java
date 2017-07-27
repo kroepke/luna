@@ -16,6 +16,11 @@
 
 package org.classdump.luna.compiler.gen;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 import org.classdump.luna.compiler.ir.BasicBlock;
 import org.classdump.luna.compiler.ir.BodyNode;
 import org.classdump.luna.compiler.ir.Code;
@@ -23,124 +28,115 @@ import org.classdump.luna.compiler.ir.Label;
 import org.classdump.luna.compiler.ir.Line;
 import org.classdump.luna.compiler.ir.ToNext;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-
 public final class CodeSegmenter {
 
-	private CodeSegmenter() {
-		// not to be instantiated
-	}
+  private CodeSegmenter() {
+    // not to be instantiated
+  }
 
-	private static int blockLength(BasicBlock blk) {
-		return blk.body().size() + 1;
-	}
+  private static int blockLength(BasicBlock blk) {
+    return blk.body().size() + 1;
+  }
 
-	private static class BlockSplit {
+  private static int lastLine(List<BodyNode> nodes) {
+    int line = -1;
+    for (BodyNode n : nodes) {
+      if (n instanceof Line) {
+        line = ((Line) n).lineNumber();
+      }
+    }
+    return line;
+  }
 
-		final BasicBlock pred;
-		final BasicBlock succ;
+  private static BlockSplit splitBlockAt(BasicBlock blk, int index, int splitIdx) {
+    List<BodyNode> predBody = blk.body().subList(0, index);
+    List<BodyNode> succBody = new ArrayList<>();
 
-		private BlockSplit(BasicBlock pred, BasicBlock succ) {
-			this.pred = Objects.requireNonNull(pred);
-			this.succ = Objects.requireNonNull(succ);
-		}
+    // carry line info over to succ
+    int firstSuccLine = lastLine(predBody);
+    if (firstSuccLine != -1) {
+      succBody.add(new Line(firstSuccLine));
+    }
 
-	}
+    // append nodes to succ
+    succBody.addAll(blk.body().subList(index, blk.body().size()));
 
-	private static int lastLine(List<BodyNode> nodes) {
-		int line = -1;
-		for (BodyNode n : nodes) {
-			if (n instanceof Line) {
-				line = ((Line) n).lineNumber();
-			}
-		}
-		return line;
-	}
+    Label succLabel = new Label(-(splitIdx + 1));
 
-	private static BlockSplit splitBlockAt(BasicBlock blk, int index, int splitIdx) {
-		List<BodyNode> predBody = blk.body().subList(0, index);
-		List<BodyNode> succBody = new ArrayList<>();
+    BasicBlock pred = new BasicBlock(blk.label(), predBody, new ToNext(succLabel));
+    BasicBlock succ = new BasicBlock(succLabel, Collections.unmodifiableList(succBody), blk.end());
 
-		// carry line info over to succ
-		int firstSuccLine = lastLine(predBody);
-		if (firstSuccLine != -1) {
-			succBody.add(new Line(firstSuccLine));
-		}
+    return new BlockSplit(pred, succ);
+  }
 
-		// append nodes to succ
-		succBody.addAll(blk.body().subList(index, blk.body().size()));
+  public static SegmentedCode segment(Code code, int limit) {
+    if (limit <= 0) {
+      return SegmentedCode.singleton(code);
+    } else {
+      List<List<BasicBlock>> segmentBlocks = new ArrayList<>();
 
-		Label succLabel = new Label(-(splitIdx + 1));
+      List<BasicBlock> currentSegment = new ArrayList<>();
+      int count = 0;
+      int splitIdx = 0;
 
-		BasicBlock pred = new BasicBlock(blk.label(), predBody, new ToNext(succLabel));
-		BasicBlock succ = new BasicBlock(succLabel, Collections.unmodifiableList(succBody), blk.end());
+      Iterator<BasicBlock> bit = code.blockIterator();
+      BasicBlock blk = bit.hasNext() ? bit.next() : null;
 
-		return new BlockSplit(pred, succ);
-	}
+      while (blk != null) {
+        int len = blockLength(blk);
 
-	public static SegmentedCode segment(Code code, int limit) {
-		if (limit <= 0) {
-			return SegmentedCode.singleton(code);
-		}
-		else {
-			List<List<BasicBlock>> segmentBlocks = new ArrayList<>();
+        if (count + len < limit) {
+          // block fits in with a margin, append and fetch next one
+          currentSegment.add(blk);
+          count += len;
 
-			List<BasicBlock> currentSegment = new ArrayList<>();
-			int count = 0;
-			int splitIdx = 0;
+          blk = bit.hasNext() ? bit.next() : null;
+        } else if (count + len == limit) {
+          // fits entirely in, but it's the last one
+          currentSegment.add(blk);
+          segmentBlocks.add(Collections.unmodifiableList(currentSegment));
 
-			Iterator<BasicBlock> bit = code.blockIterator();
-			BasicBlock blk = bit.hasNext() ? bit.next() : null;
+          // start new segment
+          currentSegment = new ArrayList<>();
+          count = 0;
 
-			while (blk != null) {
-				int len = blockLength(blk);
+          blk = bit.hasNext() ? bit.next() : null;
+        } else {
+          assert (count + len > limit);
 
-				if (count + len < limit) {
-					// block fits in with a margin, append and fetch next one
-					currentSegment.add(blk);
-					count += len;
+          // split blk and try again
+          BlockSplit split = splitBlockAt(blk, limit - count, splitIdx++);
 
-					blk = bit.hasNext() ? bit.next() : null;
-				}
-				else if (count + len == limit) {
-					// fits entirely in, but it's the last one
-					currentSegment.add(blk);
-					segmentBlocks.add(Collections.unmodifiableList(currentSegment));
+          // current segment is done
+          currentSegment.add(split.pred);
+          segmentBlocks.add(Collections.unmodifiableList(currentSegment));
 
-					// start new segment
-					currentSegment = new ArrayList<>();
-					count = 0;
+          // start new segment
+          currentSegment = new ArrayList<>();
+          count = 0;
 
-					blk = bit.hasNext() ? bit.next() : null;
-				}
-				else {
-					assert (count + len > limit);
+          blk = split.succ;
+        }
+      }
 
-					// split blk and try again
-					BlockSplit split = splitBlockAt(blk, limit - count, splitIdx++);
+      if (!currentSegment.isEmpty()) {
+        segmentBlocks.add(Collections.unmodifiableList(currentSegment));
+      }
 
-					// current segment is done
-					currentSegment.add(split.pred);
-					segmentBlocks.add(Collections.unmodifiableList(currentSegment));
+      return SegmentedCode.of(segmentBlocks);
+    }
+  }
 
-					// start new segment
-					currentSegment = new ArrayList<>();
-					count = 0;
+  private static class BlockSplit {
 
-					blk = split.succ;
-				}
-			}
+    final BasicBlock pred;
+    final BasicBlock succ;
 
-			if (!currentSegment.isEmpty()) {
-				segmentBlocks.add(Collections.unmodifiableList(currentSegment));
-			}
+    private BlockSplit(BasicBlock pred, BasicBlock succ) {
+      this.pred = Objects.requireNonNull(pred);
+      this.succ = Objects.requireNonNull(succ);
+    }
 
-			return SegmentedCode.of(segmentBlocks);
-		}
-	}
+  }
 
 }

@@ -16,6 +16,7 @@
 
 package org.classdump.luna.examples;
 
+import java.util.Arrays;
 import org.classdump.luna.StateContext;
 import org.classdump.luna.Table;
 import org.classdump.luna.Variable;
@@ -34,45 +35,44 @@ import org.classdump.luna.runtime.ExecutionContext;
 import org.classdump.luna.runtime.LuaFunction;
 import org.classdump.luna.runtime.ResolvedControlThrowable;
 
-import java.util.Arrays;
-
 public class SimpleGlobalFunction {
 
-	// A simple function that returns the result of System.currentTimeMillis()
-	static class Now extends AbstractFunction0 {
+  public static void main(String[] args)
+      throws InterruptedException, CallPausedException, CallException, LoaderException {
 
-		@Override
-		public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
-			context.getReturnBuffer().setTo(System.currentTimeMillis());
-		}
+    // initialise state
+    StateContext state = StateContexts.newDefaultInstance();
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-			throw new NonsuspendableFunctionException();
-		}
+    // load the standard library; env is the global environment
+    Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
+    env.rawset("now", new Now());
 
-	}
+    // load the main function
+    ChunkLoader loader = CompilerChunkLoader.of("example");
+    LuaFunction main = loader.loadTextChunk(new Variable(env), "example", "return now()");
 
-	public static void main(String[] args)
-			throws InterruptedException, CallPausedException, CallException, LoaderException {
+    // run the main function
+    Object[] result = DirectCallExecutor.newExecutor().call(state, main);
 
-		// initialise state
-		StateContext state = StateContexts.newDefaultInstance();
+    // prints the number of milliseconds since 1 Jan 1970
+    System.out.println("Result: " + Arrays.toString(result));
 
-		// load the standard library; env is the global environment
-		Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
-		env.rawset("now", new Now());
+  }
 
-		// load the main function
-		ChunkLoader loader = CompilerChunkLoader.of("example");
-		LuaFunction main = loader.loadTextChunk(new Variable(env), "example", "return now()");
+  // A simple function that returns the result of System.currentTimeMillis()
+  static class Now extends AbstractFunction0 {
 
-		// run the main function
-		Object[] result = DirectCallExecutor.newExecutor().call(state, main);
+    @Override
+    public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
+      context.getReturnBuffer().setTo(System.currentTimeMillis());
+    }
 
-		// prints the number of milliseconds since 1 Jan 1970
-		System.out.println("Result: " + Arrays.toString(result));
+    @Override
+    public void resume(ExecutionContext context, Object suspendedState)
+        throws ResolvedControlThrowable {
+      throw new NonsuspendableFunctionException();
+    }
 
-	}
+  }
 
 }

@@ -16,50 +16,44 @@
 
 package org.classdump.luna.parser.ast;
 
-import org.classdump.luna.parser.ast.Attributes;
-import org.classdump.luna.parser.ast.Expr;
-import org.classdump.luna.parser.ast.Operator;
-import org.classdump.luna.parser.ast.Transformer;
-
 import java.util.Objects;
 
 public class BinaryOperationExpr extends Expr {
 
-	private final Operator.Binary op;
-	private final Expr left;
-	private final Expr right;
+  private final Operator.Binary op;
+  private final Expr left;
+  private final Expr right;
 
-	public BinaryOperationExpr(Attributes attr, Operator.Binary op, Expr left, Expr right) {
-		super(attr);
-		this.op = Objects.requireNonNull(op);
-		this.left = Objects.requireNonNull(left);
-		this.right = Objects.requireNonNull(right);
-	}
+  public BinaryOperationExpr(Attributes attr, Operator.Binary op, Expr left, Expr right) {
+    super(attr);
+    this.op = Objects.requireNonNull(op);
+    this.left = Objects.requireNonNull(left);
+    this.right = Objects.requireNonNull(right);
+  }
 
-	public Operator.Binary op() {
-		return op;
-	}
+  public Operator.Binary op() {
+    return op;
+  }
 
-	public Expr left() {
-		return left;
-	}
+  public Expr left() {
+    return left;
+  }
 
-	public Expr right() {
-		return right;
-	}
+  public Expr right() {
+    return right;
+  }
 
-	public BinaryOperationExpr update(Expr left, Expr right) {
-		if (this.left.equals(left) && this.right.equals(right)) {
-			return this;
-		}
-		else {
-			return new BinaryOperationExpr(attributes(), op, left, right);
-		}
-	}
+  public BinaryOperationExpr update(Expr left, Expr right) {
+    if (this.left.equals(left) && this.right.equals(right)) {
+      return this;
+    } else {
+      return new BinaryOperationExpr(attributes(), op, left, right);
+    }
+  }
 
-	@Override
-	public Expr accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public Expr accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

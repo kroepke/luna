@@ -16,27 +16,26 @@
 
 package org.classdump.luna;
 
-import org.classdump.luna.util.ByteIterator;
-
 import java.io.IOException;
 import java.io.InputStream;
+import org.classdump.luna.util.ByteIterator;
 
 class ByteStringInputStream extends InputStream {
 
-	private final ByteIterator iterator;
+  private final ByteIterator iterator;
 
-	public ByteStringInputStream(ByteIterator iterator) {
-		this.iterator = iterator;
-	}
+  public ByteStringInputStream(ByteIterator iterator) {
+    this.iterator = iterator;
+  }
 
-	@Override
-	public int read() throws IOException {
-		return !iterator.hasNext() ? -1 : iterator.nextByte() & 0xff;
-	}
+  @Override
+  public int read() throws IOException {
+    return !iterator.hasNext() ? -1 : iterator.nextByte() & 0xff;
+  }
 
-	// TODO implement more efficient version
-	@Override
-	public int read(byte[] b, int off, int len) throws IOException {
-		return super.read(b, off, len);
-	}
+  // TODO implement more efficient version
+  @Override
+  public int read(byte[] b, int off, int len) throws IOException {
+    return super.read(b, off, len);
+  }
 }

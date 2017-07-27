@@ -16,25 +16,24 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.parser.ast.Name;
-
 import java.util.Objects;
+import org.classdump.luna.parser.ast.Name;
 
 public class UpVar extends AbstractVar {
 
-	private final Name name;
+  private final Name name;
 
-	public UpVar(Name name) {
-		this.name = Objects.requireNonNull(name);
-	}
+  public UpVar(Name name) {
+    this.name = Objects.requireNonNull(name);
+  }
 
-	public Name name() {
-		return name;
-	}
+  public Name name() {
+    return name;
+  }
 
-	@Override
-	public String toString() {
-		return "^" + name.value();
-	}
+  @Override
+  public String toString() {
+    return "^" + name.value();
+  }
 
 }

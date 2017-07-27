@@ -20,8 +20,6 @@ import org.classdump.luna.Variable
 import org.classdump.luna.load.ChunkClassLoader
 import org.classdump.luna.runtime.LuaFunction
 import org.classdump.luna.test.Util
-import org.classdump.luna.compiler.LuaCompiler
-import org.classdump.luna.test.Util
 import org.classdump.luna.test.fragments.BasicFragments
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -46,17 +44,17 @@ class FragmentCompileAndLoadTest extends FunSpec with MustMatchers {
     }
   }
 
-  describe ("fragment") {
+  describe("fragment") {
 
     val bundle = BasicFragments
 
     for (fragment <- bundle.all) {
 
-      describe (fragment.description) {
+      describe(fragment.description) {
 
         val settings = CompilerSettings.defaultSettings()
 
-        it ("can be compiled to Java bytecode") {
+        it("can be compiled to Java bytecode") {
           Util.silenced {
             println("-- CODE BEGIN --")
             println(fragment.code)
@@ -71,7 +69,7 @@ class FragmentCompileAndLoadTest extends FunSpec with MustMatchers {
           }
         }
 
-        it ("can be loaded by the VM") {
+        it("can be loaded by the VM") {
           Util.silenced {
 
             val classLoader = new ChunkClassLoader()

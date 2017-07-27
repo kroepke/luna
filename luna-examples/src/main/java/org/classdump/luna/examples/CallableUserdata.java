@@ -16,6 +16,7 @@
 
 package org.classdump.luna.examples;
 
+import java.util.Arrays;
 import org.classdump.luna.Metatables;
 import org.classdump.luna.StateContext;
 import org.classdump.luna.Table;
@@ -37,102 +38,101 @@ import org.classdump.luna.runtime.ExecutionContext;
 import org.classdump.luna.runtime.LuaFunction;
 import org.classdump.luna.runtime.ResolvedControlThrowable;
 
-import java.util.Arrays;
-
 public class CallableUserdata {
 
-	abstract static class AbstractCallableObject extends Userdata<Object> {
+  public static void main(String[] args)
+      throws InterruptedException, CallPausedException, CallException, LoaderException {
 
-		private static final Table mt = new ImmutableTable.Builder()
-				.add(Metatables.MT_CALL, new Call())
-				.build();
+    // initialise state
+    StateContext state = StateContexts.newDefaultInstance();
 
-		@Override
-		public Table getMetatable() {
-			return mt;
-		}
+    // load the standard library; env is the global environment
+    Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
+    env.rawset("object", new ExampleCallableObject());
 
-		@Override
-		public Table setMetatable(Table mt) {
-			throw new UnsupportedOperationException();
-		}
+    // the main function as Lua source
+    String program =
+        "print(object)\n"
+            + "print(type(object))\n"
+            + "return object('hello', 'world', 1, 2.0, nil)";
 
-		@Override
-		public Object getUserValue() {
-			return null;
-		}
+    // load the main function
+    ChunkLoader loader = CompilerChunkLoader.of("example");
+    LuaFunction main = loader.loadTextChunk(new Variable(env), "example", program);
 
-		@Override
-		public Object setUserValue(Object value) {
-			throw new UnsupportedOperationException();
-		}
+    // run the main function
+    Object[] result = DirectCallExecutor.newExecutor().call(state, main);
 
-		protected abstract Object[] call(Object[] args);
+    // prints [null, 2.0, 1, world, hello]
+    System.out.println("Result: " + Arrays.toString(result));
 
-		private static class Call extends AbstractFunctionAnyArg {
+  }
 
-			@Override
-			public void invoke(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
-				AbstractCallableObject o = (AbstractCallableObject) args[0];
-				Object[] result = o.call(Arrays.copyOfRange(args, 1, args.length));
-				context.getReturnBuffer().setToContentsOf(result);
-			}
+  abstract static class AbstractCallableObject extends Userdata<Object> {
 
-			@Override
-			public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-				throw new NonsuspendableFunctionException();
-			}
+    private static final Table mt = new ImmutableTable.Builder()
+        .add(Metatables.MT_CALL, new Call())
+        .build();
 
-		}
+    @Override
+    public Table getMetatable() {
+      return mt;
+    }
 
-	}
+    @Override
+    public Table setMetatable(Table mt) {
+      throw new UnsupportedOperationException();
+    }
 
-	static class ExampleCallableObject extends AbstractCallableObject {
+    @Override
+    public Object getUserValue() {
+      return null;
+    }
 
-		@Override
-		protected Object[] call(Object[] args) {
+    @Override
+    public Object setUserValue(Object value) {
+      throw new UnsupportedOperationException();
+    }
 
-			// reverse args
+    protected abstract Object[] call(Object[] args);
 
-			for (int i = 0; i < args.length / 2; i++) {
-				int j = args.length - i - 1;
+    private static class Call extends AbstractFunctionAnyArg {
 
-				Object tmp = args[i];
-				args[i] = args[j];
-				args[j] = tmp;
-			}
+      @Override
+      public void invoke(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
+        AbstractCallableObject o = (AbstractCallableObject) args[0];
+        Object[] result = o.call(Arrays.copyOfRange(args, 1, args.length));
+        context.getReturnBuffer().setToContentsOf(result);
+      }
 
-			return args;
-		}
+      @Override
+      public void resume(ExecutionContext context, Object suspendedState)
+          throws ResolvedControlThrowable {
+        throw new NonsuspendableFunctionException();
+      }
 
-	}
+    }
 
-	public static void main(String[] args)
-			throws InterruptedException, CallPausedException, CallException, LoaderException {
+  }
 
-		// initialise state
-		StateContext state = StateContexts.newDefaultInstance();
+  static class ExampleCallableObject extends AbstractCallableObject {
 
-		// load the standard library; env is the global environment
-		Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
-		env.rawset("object", new ExampleCallableObject());
+    @Override
+    protected Object[] call(Object[] args) {
 
-		// the main function as Lua source
-		String program =
-				"print(object)\n"
-				+ "print(type(object))\n"
-				+ "return object('hello', 'world', 1, 2.0, nil)";
+      // reverse args
 
-		// load the main function
-		ChunkLoader loader = CompilerChunkLoader.of("example");
-		LuaFunction main = loader.loadTextChunk(new Variable(env), "example", program);
+      for (int i = 0; i < args.length / 2; i++) {
+        int j = args.length - i - 1;
 
-		// run the main function
-		Object[] result = DirectCallExecutor.newExecutor().call(state, main);
+        Object tmp = args[i];
+        args[i] = args[j];
+        args[j] = tmp;
+      }
 
-		// prints [null, 2.0, 1, world, hello]
-		System.out.println("Result: " + Arrays.toString(result));
+      return args;
+    }
 
-	}
+  }
 
 }

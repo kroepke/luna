@@ -16,56 +16,56 @@
 
 package org.classdump.luna.lib.io;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Objects;
 import org.classdump.luna.ByteString;
 import org.classdump.luna.Table;
 import org.classdump.luna.lib.IoFile;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Objects;
-
 public class OutputStreamIoFile extends IoFile<SeekableOutputStream> {
 
-	public OutputStreamIoFile(OutputStream out, Table metatable) {
-		super(metatable, new SeekableOutputStream(Objects.requireNonNull(out)));
-	}
+  public OutputStreamIoFile(OutputStream out, Table metatable) {
+    super(metatable, new SeekableOutputStream(Objects.requireNonNull(out)));
+  }
 
-	@Override
-	public boolean isClosed() {
-		return false;
-	}
+  @Override
+  public boolean isClosed() {
+    return false;
+  }
 
-	@Override
-	public void close() throws IOException {
-		throw new UnsupportedOperationException("cannot close standard file");
-	}
+  @Override
+  public void close() throws IOException {
+    throw new UnsupportedOperationException("cannot close standard file");
+  }
 
-	@Override
-	public void flush() throws IOException {
-		outputStream().flush();
-	}
+  @Override
+  public void flush() throws IOException {
+    outputStream().flush();
+  }
 
-	@Override
-	public void write(ByteString s) throws IOException {
-		s.writeTo(outputStream());
-	}
+  @Override
+  public void write(ByteString s) throws IOException {
+    s.writeTo(outputStream());
+  }
 
-	@Override
-	public long seek(IoFile.Whence whence, long offset) throws IOException {
-		switch (whence) {
-			case BEGINNING:
-			case END:
-				return outputStream().setPosition(offset);
+  @Override
+  public long seek(IoFile.Whence whence, long offset) throws IOException {
+    switch (whence) {
+      case BEGINNING:
+      case END:
+        return outputStream().setPosition(offset);
 
-			case CURRENT_POSITION:
-				return outputStream().addPosition(offset);
+      case CURRENT_POSITION:
+        return outputStream().addPosition(offset);
 
-			default: throw new IllegalArgumentException("Illegal whence: " + whence);
-		}
-	}
+      default:
+        throw new IllegalArgumentException("Illegal whence: " + whence);
+    }
+  }
 
-	private SeekableOutputStream outputStream() {
-		return getUserValue();
-	}
+  private SeekableOutputStream outputStream() {
+    return getUserValue();
+  }
 
 }

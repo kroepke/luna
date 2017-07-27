@@ -16,15 +16,14 @@
 
 package org.classdump.luna.impl;
 
-import org.classdump.luna.Conversions;
-import org.classdump.luna.Table;
-import org.classdump.luna.TableFactory;
-import org.classdump.luna.util.TraversableHashMap;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.classdump.luna.Conversions;
+import org.classdump.luna.Table;
+import org.classdump.luna.TableFactory;
+import org.classdump.luna.util.TraversableHashMap;
 
 /**
  * An immutable table.
@@ -51,287 +50,283 @@ import java.util.Objects;
  */
 public class ImmutableTable extends Table {
 
-	private final Map<Object, Entry> entries;
-	private final Object initialKey;  // null iff the table is empty
+  private final Map<Object, Entry> entries;
+  private final Object initialKey;  // null iff the table is empty
 
-	static class Entry {
+  ImmutableTable(Map<Object, Entry> entries, Object initialKey) {
+    this.entries = Objects.requireNonNull(entries);
+    this.initialKey = initialKey;
+  }
 
-		private final Object value;
-		private final Object nextKey;  // may be null
+  /**
+   * Returns an {@code ImmutableTable} based on the contents of the sequence of
+   * map entries {@code entries}.
+   *
+   * <p>For every {@code key}-{@code value} pair in {@code entries}, the behaviour of this
+   * method is similar to that of {@link Table#rawset(Object, Object)}:</p>
+   * <ul>
+   * <li>when {@code value} is <b>nil</b> (i.e., {@code null}), then {@code key}
+   * will not have any value associated with it in the resulting table;</li>
+   * <li>if {@code key} is <b>nil</b> or <i>NaN</i>, a {@link IllegalArgumentException}
+   * is thrown;</li>
+   * <li>if {@code key} is a number that has an integer value, it is converted to that integer
+   * value.</li>
+   * </ul>
+   *
+   * <p>Keys may occur multiple times in {@code entries} &mdash; only the last occurrence
+   * counts.</p>
+   *
+   * @param entries the map entries, must not be {@code null}
+   * @return an immutable table based on the contents of {@code entries}
+   * @throws NullPointerException if {@code entries} is {@code null}
+   * @throws IllegalArgumentException if {@code entries} contains an entry with a {@code null} or
+   * <i>NaN</i> key
+   */
+  public static ImmutableTable of(Iterable<Map.Entry<Object, Object>> entries) {
+    Builder builder = new Builder();
+    for (Map.Entry<Object, Object> entry : entries) {
+      builder.add(entry.getKey(), entry.getValue());
+    }
+    return builder.build();
+  }
 
-		private Entry(Object value, Object nextKey) {
-			this.value = Objects.requireNonNull(value);
-			this.nextKey = nextKey;
-		}
+  /**
+   * Returns an {@code ImmutableTable} based on the contents of the map {@code map}.
+   *
+   * <p>For every {@code key}-{@code value} pair in {@code map}, the behaviour of this method
+   * is similar to that of {@link Table#rawset(Object, Object)}:</p>
+   * <ul>
+   * <li>when {@code value} is <b>nil</b> (i.e., {@code null}), then {@code key}
+   * will not have any value associated with it in the resulting table;</li>
+   * <li>if {@code key} is <b>nil</b> or <i>NaN</i>, a {@link IllegalArgumentException}
+   * is thrown;</li>
+   * <li>if {@code key} is a number that has an integer value, it is converted to that integer
+   * value.</li>
+   * </ul>
+   *
+   * @param map the map used to source the contents of the table, must not be {@code null}
+   * @return an immutable table based on the contents of {@code map}
+   * @throws NullPointerException if {@code entries} is {@code null}
+   * @throws IllegalArgumentException if {@code map} contains a {@code null} or <i>NaN</i> key
+   */
+  public static ImmutableTable of(Map<Object, Object> map) {
+    return of(map.entrySet());
+  }
 
-	}
+  /**
+   * Returns a new table constructed using the supplied {@code tableFactory}, and copies
+   * the contents of this table to it.
+   *
+   * @param tableFactory the table factory to use, must not be {@code null}
+   * @return a mutable copy of this table
+   */
+  public Table newCopy(TableFactory tableFactory) {
+    Table t = tableFactory.newTable();
+    for (Object key : entries.keySet()) {
+      Entry e = entries.get(key);
+      t.rawset(key, e.value);
+    }
+    return t;
+  }
 
-	ImmutableTable(Map<Object, Entry> entries, Object initialKey) {
-		this.entries = Objects.requireNonNull(entries);
-		this.initialKey = initialKey;
-	}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    ImmutableTable that = (ImmutableTable) o;
+    return entries.equals(that.entries)
+        && (initialKey != null ? initialKey.equals(that.initialKey) : that.initialKey == null);
+  }
 
-	/**
-	 * Returns an {@code ImmutableTable} based on the contents of the sequence of
-	 * map entries {@code entries}.
-	 *
-	 * <p>For every {@code key}-{@code value} pair in {@code entries}, the behaviour of this
-	 * method is similar to that of {@link Table#rawset(Object, Object)}:</p>
-	 * <ul>
-	 *   <li>when {@code value} is <b>nil</b> (i.e., {@code null}), then {@code key}
-	 *     will not have any value associated with it in the resulting table;</li>
-	 *   <li>if {@code key} is <b>nil</b> or <i>NaN</i>, a {@link IllegalArgumentException}
-	 *     is thrown;</li>
-	 *   <li>if {@code key} is a number that has an integer value, it is converted to that integer
-	 *     value.</li>
-	 * </ul>
-	 *
-	 * <p>Keys may occur multiple times in {@code entries} &mdash; only the last occurrence
-	 * counts.</p>
-	 *
-	 * @param entries  the map entries, must not be {@code null}
-	 * @return  an immutable table based on the contents of {@code entries}
-	 *
-	 * @throws NullPointerException  if {@code entries} is {@code null}
-	 * @throws IllegalArgumentException  if {@code entries} contains an entry with
-	 *                                   a {@code null} or <i>NaN</i> key
-	 */
-	public static ImmutableTable of(Iterable<Map.Entry<Object, Object>> entries) {
-		Builder builder = new Builder();
-		for (Map.Entry<Object, Object> entry : entries) {
-			builder.add(entry.getKey(), entry.getValue());
-		}
-		return builder.build();
-	}
+  @Override
+  public int hashCode() {
+    int result = entries.hashCode();
+    result = 31 * result + (initialKey != null ? initialKey.hashCode() : 0);
+    return result;
+  }
 
-	/**
-	 * Returns an {@code ImmutableTable} based on the contents of the map {@code map}.
-	 *
-	 * <p>For every {@code key}-{@code value} pair in {@code map}, the behaviour of this method
-	 * is similar to that of {@link Table#rawset(Object, Object)}:</p>
-	 * <ul>
-	 *   <li>when {@code value} is <b>nil</b> (i.e., {@code null}), then {@code key}
-	 *     will not have any value associated with it in the resulting table;</li>
-	 *   <li>if {@code key} is <b>nil</b> or <i>NaN</i>, a {@link IllegalArgumentException}
-	 *     is thrown;</li>
-	 *   <li>if {@code key} is a number that has an integer value, it is converted to that integer
-	 *     value.</li>
-	 * </ul>
-	 *
-	 * @param map  the map used to source the contents of the table, must not be {@code null}
-	 * @return  an immutable table based on the contents of {@code map}
-	 *
-	 * @throws NullPointerException  if {@code entries} is {@code null}
-	 * @throws IllegalArgumentException  if {@code map} contains a {@code null} or <i>NaN</i> key
-	 */
-	public static ImmutableTable of(Map<Object, Object> map) {
-		return of(map.entrySet());
-	}
+  @Override
+  public Object rawget(Object key) {
+    key = Conversions.normaliseKey(key);
+    Entry e = entries.get(key);
+    return e != null ? e.value : null;
+  }
 
-	/**
-	 * Returns a new table constructed using the supplied {@code tableFactory}, and copies
-	 * the contents of this table to it.
-	 *
-	 * @param tableFactory  the table factory to use, must not be {@code null}
-	 * @return  a mutable copy of this table
-	 */
-	public Table newCopy(TableFactory tableFactory) {
-		Table t = tableFactory.newTable();
-		for (Object key : entries.keySet()) {
-			Entry e = entries.get(key);
-			t.rawset(key, e.value);
-		}
-		return t;
-	}
+  /**
+   * Throws an {@link UnsupportedOperationException}, since this table is immutable.
+   *
+   * @param key ignored
+   * @param value ignored
+   * @throws UnsupportedOperationException every time this method is called
+   */
+  @Override
+  public void rawset(Object key, Object value) {
+    throw new UnsupportedOperationException("table is immutable");
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		ImmutableTable that = (ImmutableTable) o;
-		return entries.equals(that.entries)
-				&& (initialKey != null ? initialKey.equals(that.initialKey) : that.initialKey == null);
-	}
+  /**
+   * Throws an {@link UnsupportedOperationException}, since this table is immutable.
+   *
+   * @param idx ignored
+   * @param value ignored
+   * @throws UnsupportedOperationException every time this method is called
+   */
+  @Override
+  public void rawset(long idx, Object value) {
+    throw new UnsupportedOperationException("table is immutable");
+  }
 
-	@Override
-	public int hashCode() {
-		int result = entries.hashCode();
-		result = 31 * result + (initialKey != null ? initialKey.hashCode() : 0);
-		return result;
-	}
+  @Override
+  public Table getMetatable() {
+    return null;
+  }
 
-	@Override
-	public Object rawget(Object key) {
-		key = Conversions.normaliseKey(key);
-		Entry e = entries.get(key);
-		return e != null ? e.value : null;
-	}
+  /**
+   * Throws an {@link UnsupportedOperationException}, since this table is immutable.
+   *
+   * @param mt ignored
+   * @return nothing (always throws an exception)
+   * @throws UnsupportedOperationException every time this method is called
+   */
+  @Override
+  public Table setMetatable(Table mt) {
+    throw new UnsupportedOperationException("table is immutable");
+  }
 
-	/**
-	 * Throws an {@link UnsupportedOperationException}, since this table is immutable.
-	 *
-	 * @param key  ignored
-	 * @param value  ignored
-	 *
-	 * @throws UnsupportedOperationException  every time this method is called
-	 */
-	@Override
-	public void rawset(Object key, Object value) {
-		throw new UnsupportedOperationException("table is immutable");
-	}
+  @Override
+  public Object initialKey() {
+    return initialKey;
+  }
 
-	/**
-	 * Throws an {@link UnsupportedOperationException}, since this table is immutable.
-	 *
-	 * @param idx  ignored
-	 * @param value  ignored
-	 *
-	 * @throws UnsupportedOperationException  every time this method is called
-	 */
-	@Override
-	public void rawset(long idx, Object value) {
-		throw new UnsupportedOperationException("table is immutable");
-	}
+  @Override
+  public Object successorKeyOf(Object key) {
+    key = Conversions.normaliseKey(key);
+    try {
+      Entry e = entries.get(key);
+      return e.nextKey;
+    } catch (NullPointerException ex) {
+      throw new IllegalArgumentException("invalid key to 'next'", ex);
+    }
+  }
 
-	@Override
-	public Table getMetatable() {
-		return null;
-	}
+  @Override
+  protected void setMode(boolean weakKeys, boolean weakValues) {
+    // no-op
+  }
 
-	/**
-	 * Throws an {@link UnsupportedOperationException}, since this table is immutable.
-	 *
-	 * @param mt  ignored
-	 * @return  nothing (always throws an exception)
-	 *
-	 * @throws UnsupportedOperationException  every time this method is called
-	 */
-	@Override
-	public Table setMetatable(Table mt) {
-		throw new UnsupportedOperationException("table is immutable");
-	}
+  static class Entry {
 
-	@Override
-	public Object initialKey() {
-		return initialKey;
-	}
+    private final Object value;
+    private final Object nextKey;  // may be null
 
-	@Override
-	public Object successorKeyOf(Object key) {
-		key = Conversions.normaliseKey(key);
-		try {
-			Entry e = entries.get(key);
-			return e.nextKey;
-		}
-		catch (NullPointerException ex) {
-			throw new IllegalArgumentException("invalid key to 'next'", ex);
-		}
-	}
+    private Entry(Object value, Object nextKey) {
+      this.value = Objects.requireNonNull(value);
+      this.nextKey = nextKey;
+    }
 
-	@Override
-	protected void setMode(boolean weakKeys, boolean weakValues) {
-		// no-op
-	}
+  }
 
-	/**
-	 * Builder class for constructing instances of {@link ImmutableTable}.
-	 */
-	public static class Builder {
+  /**
+   * Builder class for constructing instances of {@link ImmutableTable}.
+   */
+  public static class Builder {
 
-		private final TraversableHashMap<Object, Object> entries;
+    private final TraversableHashMap<Object, Object> entries;
 
-		private static void checkKey(Object key) {
-			if (key == null || (key instanceof Double && Double.isNaN(((Double) key).doubleValue()))) {
-				throw new IllegalArgumentException("invalid table key: " + Conversions.toHumanReadableString(key));
-			}
-		}
+    private Builder(TraversableHashMap<Object, Object> entries) {
+      this.entries = Objects.requireNonNull(entries);
+    }
 
-		private Builder(TraversableHashMap<Object, Object> entries) {
-			this.entries = Objects.requireNonNull(entries);
-		}
+    /**
+     * Constructs a new empty builder.
+     */
+    public Builder() {
+      this(new TraversableHashMap<>());
+    }
 
-		/**
-		 * Constructs a new empty builder.
-		 */
-		public Builder() {
-			this(new TraversableHashMap<>());
-		}
+    /**
+     * Constructs a copy of the given builder (a copy constructor).
+     *
+     * @param builder the original builder, must not be {@code null}
+     * @throws NullPointerException if {@code builder} is {@code null}
+     */
+    public Builder(Builder builder) {
+      this(mapCopy(builder.entries));
+    }
 
-		private static <K, V> TraversableHashMap<K, V> mapCopy(TraversableHashMap<K, V> map) {
-			TraversableHashMap<K, V> result = new TraversableHashMap<>();
-			result.putAll(map);
-			return result;
-		}
+    private static void checkKey(Object key) {
+      if (key == null || (key instanceof Double && Double.isNaN(((Double) key).doubleValue()))) {
+        throw new IllegalArgumentException(
+            "invalid table key: " + Conversions.toHumanReadableString(key));
+      }
+    }
 
-		/**
-		 * Constructs a copy of the given builder (a copy constructor).
-		 *
-		 * @param builder  the original builder, must not be {@code null}
-		 *
-		 * @throws  NullPointerException  if {@code builder} is {@code null}
-		 */
-		public Builder(Builder builder) {
-			this(mapCopy(builder.entries));
-		}
+    private static <K, V> TraversableHashMap<K, V> mapCopy(TraversableHashMap<K, V> map) {
+      TraversableHashMap<K, V> result = new TraversableHashMap<>();
+      result.putAll(map);
+      return result;
+    }
 
-		/**
-		 * Sets the value associated with the key {@code key} to {@code value}.
-		 *
-		 * <p>The behaviour of this method is similar to that of
-		 * {@link Table#rawset(Object, Object)}:</p>
-		 * <ul>
-		 *   <li>when {@code value} is <b>nil</b> (i.e., {@code null}), the key {@code key}
-		 *     will not have any value associated with it after this method returns;</li>
-		 *   <li><b>nil</b> and <i>NaN</i> keys are rejected by throwing
-		 *     a {@link IllegalArgumentException};</li>
-		 *   <li>numeric keys with an integer value are converted to that integer value.</li>
-		 * </ul>
-		 *
-		 * <p>The method returns {@code this}, allowing calls to this method to be chained.</p>
-		 *
-		 * @param key  the key, must not be {@code null} or <i>NaN</i>
-		 * @param value  the value, may be {@code null}
-		 * @return  this builder
-		 *
-		 * @throws IllegalArgumentException  when {@code key} is {@code null} or a <i>NaN</i>
-		 */
-		public Builder add(Object key, Object value) {
-			key = Conversions.normaliseKey(key);
-			checkKey(key);
+    /**
+     * Sets the value associated with the key {@code key} to {@code value}.
+     *
+     * <p>The behaviour of this method is similar to that of
+     * {@link Table#rawset(Object, Object)}:</p>
+     * <ul>
+     * <li>when {@code value} is <b>nil</b> (i.e., {@code null}), the key {@code key}
+     * will not have any value associated with it after this method returns;</li>
+     * <li><b>nil</b> and <i>NaN</i> keys are rejected by throwing
+     * a {@link IllegalArgumentException};</li>
+     * <li>numeric keys with an integer value are converted to that integer value.</li>
+     * </ul>
+     *
+     * <p>The method returns {@code this}, allowing calls to this method to be chained.</p>
+     *
+     * @param key the key, must not be {@code null} or <i>NaN</i>
+     * @param value the value, may be {@code null}
+     * @return this builder
+     * @throws IllegalArgumentException when {@code key} is {@code null} or a <i>NaN</i>
+     */
+    public Builder add(Object key, Object value) {
+      key = Conversions.normaliseKey(key);
+      checkKey(key);
 
-			if (value != null) {
-				entries.put(key, value);
-			}
-			else {
-				entries.remove(key);
-			}
+      if (value != null) {
+        entries.put(key, value);
+      } else {
+        entries.remove(key);
+      }
 
-			return this;
-		}
+      return this;
+    }
 
-		/**
-		 * Clears the builder.
-		 */
-		public void clear() {
-			entries.clear();
-		}
+    /**
+     * Clears the builder.
+     */
+    public void clear() {
+      entries.clear();
+    }
 
-		/**
-		 * Constructs and returns a new immutable table based on the contents of this
-		 * builder.
-		 *
-		 * @return  a new immutable table
-		 */
-		public ImmutableTable build() {
-			Map<Object, Entry> tableEntries = new HashMap<>();
+    /**
+     * Constructs and returns a new immutable table based on the contents of this
+     * builder.
+     *
+     * @return a new immutable table
+     */
+    public ImmutableTable build() {
+      Map<Object, Entry> tableEntries = new HashMap<>();
 
-			for (Map.Entry<Object, Object> e : entries.entrySet()) {
-				Object k = e.getKey();
-				tableEntries.put(e.getKey(), new Entry(e.getValue(), entries.getSuccessorOf(k)));
-			}
-			return new ImmutableTable(Collections.unmodifiableMap(tableEntries), entries.getFirstKey());
-		}
+      for (Map.Entry<Object, Object> e : entries.entrySet()) {
+        Object k = e.getKey();
+        tableEntries.put(e.getKey(), new Entry(e.getValue(), entries.getSuccessorOf(k)));
+      }
+      return new ImmutableTable(Collections.unmodifiableMap(tableEntries), entries.getFirstKey());
+    }
 
-	}
+  }
 
 }

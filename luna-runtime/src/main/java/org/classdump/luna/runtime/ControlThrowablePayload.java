@@ -18,18 +18,18 @@ package org.classdump.luna.runtime;
 
 abstract class ControlThrowablePayload {
 
-	abstract void accept(Visitor visitor);
+  abstract void accept(Visitor visitor);
 
-	interface Visitor {
+  interface Visitor {
 
-		void preempted();
+    void preempted();
 
-		void coroutineYield(Object[] values);
+    void coroutineYield(Object[] values);
 
-		void coroutineResume(Coroutine target, Object[] values);
+    void coroutineResume(Coroutine target, Object[] values);
 
-		void async(AsyncTask task);
+    void async(AsyncTask task);
 
-	}
+  }
 
 }

@@ -16,6 +16,8 @@
 
 package org.classdump.luna.compiler.gen.asm.helpers;
 
+import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
+
 import org.classdump.luna.runtime.ReturnBuffer;
 import org.classdump.luna.util.Check;
 import org.objectweb.asm.Type;
@@ -23,102 +25,106 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 
-import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
-
 public class ReturnBufferMethods {
 
-	private ReturnBufferMethods() {
-		// not to be instantiated
-	}
+  public final static int MAX_SETTO_KIND;
+  public final static int MAX_TAILCALL_KIND;
 
-	private static Type selfTpe() {
-		return Type.getType(ReturnBuffer.class);
-	}
+  static {
+    int k = 1;
+    while (setTo_method(k).exists()) {
+      k += 1;
+    }
+    MAX_SETTO_KIND = k - 1;
+  }
 
-	public static AbstractInsnNode size() {
-		return new MethodInsnNode(
-				INVOKEINTERFACE,
-				selfTpe().getInternalName(),
-				"size",
-				Type.getMethodType(
-						Type.INT_TYPE).getDescriptor(),
-				true);
-	}
+  static {
+    int k = 1;
+    while (tailCall_method(k).exists()) {
+      k += 1;
+    }
+    MAX_TAILCALL_KIND = k - 1;
+  }
 
-	public static AbstractInsnNode get() {
-		return new MethodInsnNode(
-				INVOKEINTERFACE,
-				selfTpe().getInternalName(),
-				"get",
-				Type.getMethodType(
-						Type.getType(Object.class),
-						Type.INT_TYPE).getDescriptor(),
-				true);
-	}
+  private ReturnBufferMethods() {
+    // not to be instantiated
+  }
 
-	public static InsnList get(int index) {
-		Check.nonNegative(index);
+  private static Type selfTpe() {
+    return Type.getType(ReturnBuffer.class);
+  }
 
-		InsnList il = new InsnList();
+  public static AbstractInsnNode size() {
+    return new MethodInsnNode(
+        INVOKEINTERFACE,
+        selfTpe().getInternalName(),
+        "size",
+        Type.getMethodType(
+            Type.INT_TYPE).getDescriptor(),
+        true);
+  }
 
-		if (index <= 4) {
-			String methodName = "get" + index;
-			il.add(new MethodInsnNode(
-					INVOKEINTERFACE,
-					selfTpe().getInternalName(),
-					methodName,
-					Type.getMethodType(
-							Type.getType(Object.class)).getDescriptor(),
-					true));
-		}
-		else {
-			il.add(ASMUtils.loadInt(index));
-			il.add(get());
-		}
+  public static AbstractInsnNode get() {
+    return new MethodInsnNode(
+        INVOKEINTERFACE,
+        selfTpe().getInternalName(),
+        "get",
+        Type.getMethodType(
+            Type.getType(Object.class),
+            Type.INT_TYPE).getDescriptor(),
+        true);
+  }
 
-		return il;
-	}
+  public static InsnList get(int index) {
+    Check.nonNegative(index);
 
-	public final static int MAX_SETTO_KIND;
-	static {
-		int k = 1;
-		while (setTo_method(k).exists()) k += 1;
-		MAX_SETTO_KIND = k - 1;
-	}
+    InsnList il = new InsnList();
 
-	public final static int MAX_TAILCALL_KIND;
-	static {
-		int k = 1;
-		while (tailCall_method(k).exists()) k += 1;
-		MAX_TAILCALL_KIND = k - 1;
-	}
+    if (index <= 4) {
+      String methodName = "get" + index;
+      il.add(new MethodInsnNode(
+          INVOKEINTERFACE,
+          selfTpe().getInternalName(),
+          methodName,
+          Type.getMethodType(
+              Type.getType(Object.class)).getDescriptor(),
+          true));
+    } else {
+      il.add(ASMUtils.loadInt(index));
+      il.add(get());
+    }
 
-	private static ReflectionUtils.Method setTo_method(int kind) {
-		String methodName = kind > 0 ? "setTo" : "setToContentsOf";
-		return ReflectionUtils.virtualArgListMethodFromKind(ReturnBuffer.class, methodName, null, kind);
-	}
+    return il;
+  }
 
-	private static ReflectionUtils.Method tailCall_method(int kind) {
-		String methodName = kind >0 ? "setToCall" : "setToCallWithContentsOf";
-		return ReflectionUtils.virtualArgListMethodFromKind(ReturnBuffer.class, methodName, new Class[] { Object.class }, kind);
-	}
+  private static ReflectionUtils.Method setTo_method(int kind) {
+    String methodName = kind > 0 ? "setTo" : "setToContentsOf";
+    return ReflectionUtils.virtualArgListMethodFromKind(ReturnBuffer.class, methodName, null, kind);
+  }
 
-	public static AbstractInsnNode setTo(int kind) {
-		return setTo_method(kind).toMethodInsnNode();
-	}
+  private static ReflectionUtils.Method tailCall_method(int kind) {
+    String methodName = kind > 0 ? "setToCall" : "setToCallWithContentsOf";
+    return ReflectionUtils
+        .virtualArgListMethodFromKind(ReturnBuffer.class, methodName, new Class[]{Object.class},
+            kind);
+  }
 
-	public static AbstractInsnNode tailCall(int kind) {
-		return tailCall_method(kind).toMethodInsnNode();
-	}
+  public static AbstractInsnNode setTo(int kind) {
+    return setTo_method(kind).toMethodInsnNode();
+  }
 
-	public static AbstractInsnNode toArray() {
-		return new MethodInsnNode(
-				INVOKEINTERFACE,
-				selfTpe().getInternalName(),
-				"getAsArray",
-				Type.getMethodType(
-						ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-				true);
-	}
+  public static AbstractInsnNode tailCall(int kind) {
+    return tailCall_method(kind).toMethodInsnNode();
+  }
+
+  public static AbstractInsnNode toArray() {
+    return new MethodInsnNode(
+        INVOKEINTERFACE,
+        selfTpe().getInternalName(),
+        "getAsArray",
+        Type.getMethodType(
+            ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
+        true);
+  }
 
 }

@@ -16,90 +16,88 @@
 
 package org.classdump.luna.compiler.analysis;
 
-import org.classdump.luna.compiler.ir.AbstractVal;
-import org.classdump.luna.compiler.ir.IRNode;
-import org.classdump.luna.compiler.ir.Var;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import org.classdump.luna.compiler.ir.AbstractVal;
+import org.classdump.luna.compiler.ir.IRNode;
+import org.classdump.luna.compiler.ir.Var;
 
 public class LivenessInfo {
 
-	private final Map<IRNode, Entry> entries;
-	
-	public LivenessInfo(Map<IRNode, Entry> entries) {
-		this.entries = Objects.requireNonNull(entries);
-	}
+  private final Map<IRNode, Entry> entries;
 
-	public static class Entry {
+  public LivenessInfo(Map<IRNode, Entry> entries) {
+    this.entries = Objects.requireNonNull(entries);
+  }
 
-		private final Set<Var> var_in;
-		private final Set<Var> var_out;
-		private final Set<AbstractVal> val_in;
-		private final Set<AbstractVal> val_out;
+  public Entry entry(IRNode node) {
+    Objects.requireNonNull(node);
+    Entry e = entries.get(node);
+    if (e == null) {
+      throw new NoSuchElementException("No liveness information for " + node);
+    } else {
+      return e;
+    }
+  }
 
-		Entry(Set<Var> var_in, Set<Var> var_out, Set<AbstractVal> val_in, Set<AbstractVal> val_out) {
-			this.var_in = Objects.requireNonNull(var_in);
-			this.var_out = Objects.requireNonNull(var_out);
-			this.val_in = Objects.requireNonNull(val_in);
-			this.val_out = Objects.requireNonNull(val_out);
-		}
+  public Iterable<Var> liveInVars(IRNode node) {
+    return entry(node).inVar();
+  }
 
-		public Entry immutableCopy() {
-			return new Entry(
-					Collections.unmodifiableSet(new HashSet<>(var_in)),
-					Collections.unmodifiableSet(new HashSet<>(var_out)),
-					Collections.unmodifiableSet(new HashSet<>(val_in)),
-					Collections.unmodifiableSet(new HashSet<>(val_out)));
-		}
+  public Iterable<Var> liveOutVars(IRNode node) {
+    return entry(node).outVar();
+  }
 
-		public Set<Var> inVar() {
-			return var_in;
-		}
+  public Iterable<AbstractVal> liveInVals(IRNode node) {
+    return entry(node).inVal();
+  }
 
-		public Set<Var> outVar() {
-			return var_out;
-		}
+  public Iterable<AbstractVal> liveOutVals(IRNode node) {
+    return entry(node).outVal();
+  }
 
-		public Set<AbstractVal> inVal() {
-			return val_in;
-		}
+  public static class Entry {
 
-		public Set<AbstractVal> outVal() {
-			return val_out;
-		}
+    private final Set<Var> var_in;
+    private final Set<Var> var_out;
+    private final Set<AbstractVal> val_in;
+    private final Set<AbstractVal> val_out;
 
-	}
+    Entry(Set<Var> var_in, Set<Var> var_out, Set<AbstractVal> val_in, Set<AbstractVal> val_out) {
+      this.var_in = Objects.requireNonNull(var_in);
+      this.var_out = Objects.requireNonNull(var_out);
+      this.val_in = Objects.requireNonNull(val_in);
+      this.val_out = Objects.requireNonNull(val_out);
+    }
 
-	public Entry entry(IRNode node) {
-		Objects.requireNonNull(node);
-		Entry e = entries.get(node);
-		if (e == null) {
-			throw new NoSuchElementException("No liveness information for " + node);
-		}
-		else {
-			return e;
-		}
-	}
+    public Entry immutableCopy() {
+      return new Entry(
+          Collections.unmodifiableSet(new HashSet<>(var_in)),
+          Collections.unmodifiableSet(new HashSet<>(var_out)),
+          Collections.unmodifiableSet(new HashSet<>(val_in)),
+          Collections.unmodifiableSet(new HashSet<>(val_out)));
+    }
 
-	public Iterable<Var> liveInVars(IRNode node) {
-		return entry(node).inVar();
-	}
+    public Set<Var> inVar() {
+      return var_in;
+    }
 
-	public Iterable<Var> liveOutVars(IRNode node) {
-		return entry(node).outVar();
-	}
+    public Set<Var> outVar() {
+      return var_out;
+    }
 
-	public Iterable<AbstractVal> liveInVals(IRNode node) {
-		return entry(node).inVal();
-	}
+    public Set<AbstractVal> inVal() {
+      return val_in;
+    }
 
-	public Iterable<AbstractVal> liveOutVals(IRNode node) {
-		return entry(node).outVal();
-	}
+    public Set<AbstractVal> outVal() {
+      return val_out;
+    }
+
+  }
 
 }

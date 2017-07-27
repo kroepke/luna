@@ -24,7 +24,9 @@ import org.scalatest.junit.JUnitRunner
 class MetatableFragmentsRunSpec extends FragmentExecTestSuite {
 
   override def bundles = Seq(MetatableFragments)
+
   override def expectations = Seq(MetatableFragments)
+
   override def contexts = Seq(Basic)
 
   override def steps = Seq(1, Int.MaxValue)

@@ -24,53 +24,52 @@ import java.nio.file.FileSystems;
 
 class SystemRuntimeEnvironment implements RuntimeEnvironment {
 
-	private final InputStream in;
-	private final OutputStream out;
-	private final OutputStream err;
+  private static final SystemRuntimeEnvironment INSTANCE = new SystemRuntimeEnvironment(
+      System.in, System.out, System.err);
+  private final InputStream in;
+  private final OutputStream out;
+  private final OutputStream err;
 
-	private static final SystemRuntimeEnvironment INSTANCE = new SystemRuntimeEnvironment(
-			System.in, System.out, System.err);
+  SystemRuntimeEnvironment(InputStream in, OutputStream out, OutputStream err) {
+    this.in = in;
+    this.out = out;
+    this.err = err;
+  }
 
-	SystemRuntimeEnvironment(InputStream in, OutputStream out, OutputStream err) {
-		this.in = in;
-		this.out = out;
-		this.err = err;
-	}
+  public static SystemRuntimeEnvironment getInstance() {
+    return INSTANCE;
+  }
 
-	public static SystemRuntimeEnvironment getInstance() {
-		return INSTANCE;
-	}
+  @Override
+  public InputStream standardInput() {
+    return in;
+  }
 
-	@Override
-	public InputStream standardInput() {
-		return in;
-	}
+  @Override
+  public OutputStream standardOutput() {
+    return out;
+  }
 
-	@Override
-	public OutputStream standardOutput() {
-		return out;
-	}
+  @Override
+  public OutputStream standardError() {
+    return err;
+  }
 
-	@Override
-	public OutputStream standardError() {
-		return err;
-	}
+  @Override
+  public FileSystem fileSystem() {
+    return FileSystems.getDefault();
+  }
 
-	@Override
-	public FileSystem fileSystem() {
-		return FileSystems.getDefault();
-	}
+  @Override
+  public String getEnv(String name) {
+    return System.getenv(name);
+  }
 
-	@Override
-	public String getEnv(String name) {
-		return System.getenv(name);
-	}
-
-	@Override
-	public double getCpuTime() {
-		// FIXME: this really isn't a good idea...
-		long nanos = ManagementFactory.getThreadMXBean().getCurrentThreadCpuTime();
-		return nanos / 1000000000.0;
-	}
+  @Override
+  public double getCpuTime() {
+    // FIXME: this really isn't a good idea...
+    long nanos = ManagementFactory.getThreadMXBean().getCurrentThreadCpuTime();
+    return nanos / 1000000000.0;
+  }
 
 }

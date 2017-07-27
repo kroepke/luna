@@ -16,114 +16,112 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.ByteString;
-import org.classdump.luna.compiler.ir.IRVisitor;
-
 import java.util.Objects;
+import org.classdump.luna.ByteString;
 
 public abstract class LoadConst extends BodyNode {
 
-	private final Val dest;
+  private final Val dest;
 
-	private LoadConst(Val dest) {
-		this.dest = Objects.requireNonNull(dest);
-	}
+  private LoadConst(Val dest) {
+    this.dest = Objects.requireNonNull(dest);
+  }
 
-	public Val dest() {
-		return dest;
-	}
+  public Val dest() {
+    return dest;
+  }
 
-	public static class Nil extends LoadConst {
+  public static class Nil extends LoadConst {
 
-		public Nil(Val dest) {
-			super(dest);
-		}
+    public Nil(Val dest) {
+      super(dest);
+    }
 
-		@Override
-		public void accept(IRVisitor visitor) {
-			visitor.visit(this);
-		}
+    @Override
+    public void accept(IRVisitor visitor) {
+      visitor.visit(this);
+    }
 
-	}
-	
-	public static class Bool extends LoadConst {
-		
-		private final boolean value;
-		
-		public Bool(Val dest, boolean value) {
-			super(dest);
-			this.value = value;
-		}
+  }
 
-		@Override
-		public void accept(IRVisitor visitor) {
-			visitor.visit(this);
-		}
+  public static class Bool extends LoadConst {
 
-		public boolean value() {
-			return value;
-		}
+    private final boolean value;
 
-	}
+    public Bool(Val dest, boolean value) {
+      super(dest);
+      this.value = value;
+    }
 
-	public static class Int extends LoadConst {
+    @Override
+    public void accept(IRVisitor visitor) {
+      visitor.visit(this);
+    }
 
-		private final long value;
+    public boolean value() {
+      return value;
+    }
 
-		public Int(Val dest, long value) {
-			super(dest);
-			this.value = value;
-		}
+  }
 
-		@Override
-		public void accept(IRVisitor visitor) {
-			visitor.visit(this);
-		}
+  public static class Int extends LoadConst {
 
-		public long value() {
-			return value;
-		}
+    private final long value;
 
-	}
+    public Int(Val dest, long value) {
+      super(dest);
+      this.value = value;
+    }
 
-	public static class Flt extends LoadConst {
+    @Override
+    public void accept(IRVisitor visitor) {
+      visitor.visit(this);
+    }
 
-		private final double value;
+    public long value() {
+      return value;
+    }
 
-		public Flt(Val dest, double value) {
-			super(dest);
-			this.value = value;
-		}
+  }
 
-		@Override
-		public void accept(IRVisitor visitor) {
-			visitor.visit(this);
-		}
+  public static class Flt extends LoadConst {
 
-		public double value() {
-			return value;
-		}
+    private final double value;
 
-	}
+    public Flt(Val dest, double value) {
+      super(dest);
+      this.value = value;
+    }
 
-	public static class Str extends LoadConst {
+    @Override
+    public void accept(IRVisitor visitor) {
+      visitor.visit(this);
+    }
 
-		private final ByteString value;
+    public double value() {
+      return value;
+    }
 
-		public Str(Val dest, ByteString value) {
-			super(dest);
-			this.value = Objects.requireNonNull(value);
-		}
+  }
 
-		@Override
-		public void accept(IRVisitor visitor) {
-			visitor.visit(this);
-		}
+  public static class Str extends LoadConst {
 
-		public ByteString value() {
-			return value;
-		}
+    private final ByteString value;
 
-	}
+    public Str(Val dest, ByteString value) {
+      super(dest);
+      this.value = Objects.requireNonNull(value);
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+      visitor.visit(this);
+    }
+
+    public ByteString value() {
+      return value;
+    }
+
+  }
 
 }

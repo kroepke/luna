@@ -19,36 +19,41 @@ package org.classdump.luna.runtime;
 /**
  * Abstract function of an arbitrary number of arguments.
  */
-public abstract class AbstractFunctionAnyArg extends LuaFunction<Object, Object, Object, Object, Object> {
+public abstract class AbstractFunctionAnyArg extends
+    LuaFunction<Object, Object, Object, Object, Object> {
 
-	@Override
-	public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
-		invoke(context, new Object[] { });
-	}
+  @Override
+  public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
+    invoke(context, new Object[]{});
+  }
 
-	@Override
-	public void invoke(ExecutionContext context, Object arg1) throws ResolvedControlThrowable {
-		invoke(context, new Object[] { arg1 });
-	}
+  @Override
+  public void invoke(ExecutionContext context, Object arg1) throws ResolvedControlThrowable {
+    invoke(context, new Object[]{arg1});
+  }
 
-	@Override
-	public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ResolvedControlThrowable {
-		invoke(context, new Object[] { arg1, arg2 });
-	}
+  @Override
+  public void invoke(ExecutionContext context, Object arg1, Object arg2)
+      throws ResolvedControlThrowable {
+    invoke(context, new Object[]{arg1, arg2});
+  }
 
-	@Override
-	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ResolvedControlThrowable {
-		invoke(context, new Object[] { arg1, arg2, arg3 });
-	}
+  @Override
+  public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3)
+      throws ResolvedControlThrowable {
+    invoke(context, new Object[]{arg1, arg2, arg3});
+  }
 
-	@Override
-	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4) throws ResolvedControlThrowable {
-		invoke(context, new Object[] { arg1, arg2, arg3, arg4 });
-	}
+  @Override
+  public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4)
+      throws ResolvedControlThrowable {
+    invoke(context, new Object[]{arg1, arg2, arg3, arg4});
+  }
 
-	@Override
-	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ResolvedControlThrowable {
-		invoke(context, new Object[] { arg1, arg2, arg3, arg4, arg5 });
-	}
+  @Override
+  public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4,
+      Object arg5) throws ResolvedControlThrowable {
+    invoke(context, new Object[]{arg1, arg2, arg3, arg4, arg5});
+  }
 
 }

@@ -51,71 +51,71 @@ neptune.vy = 1.62824170038242295e-03 * DAYS_PER_YEAR
 neptune.vz = -9.51592254519715870e-05 * DAYS_PER_YEAR
 neptune.mass = 5.15138902046611451e-05 * SOLAR_MASS
 
-local bodies = {sun,jupiter,saturn,uranus,neptune}
+local bodies = { sun, jupiter, saturn, uranus, neptune }
 
 local function advance(bodies, nbody, dt)
-  for i=1,nbody do
-    local bi = bodies[i]
-    local bix, biy, biz, bimass = bi.x, bi.y, bi.z, bi.mass
-    local bivx, bivy, bivz = bi.vx, bi.vy, bi.vz
-    for j=i+1,nbody do
-      local bj = bodies[j]
-      local dx, dy, dz = bix-bj.x, biy-bj.y, biz-bj.z
-      local dist2 = dx*dx + dy*dy + dz*dz
-      local mag = sqrt(dist2)
-      mag = dt / (mag * dist2)
-      local bm = bj.mass*mag
-      bivx = bivx - (dx * bm)
-      bivy = bivy - (dy * bm)
-      bivz = bivz - (dz * bm)
-      bm = bimass*mag
-      bj.vx = bj.vx + (dx * bm)
-      bj.vy = bj.vy + (dy * bm)
-      bj.vz = bj.vz + (dz * bm)
+    for i = 1, nbody do
+        local bi = bodies[i]
+        local bix, biy, biz, bimass = bi.x, bi.y, bi.z, bi.mass
+        local bivx, bivy, bivz = bi.vx, bi.vy, bi.vz
+        for j = i + 1, nbody do
+            local bj = bodies[j]
+            local dx, dy, dz = bix - bj.x, biy - bj.y, biz - bj.z
+            local dist2 = dx * dx + dy * dy + dz * dz
+            local mag = sqrt(dist2)
+            mag = dt / (mag * dist2)
+            local bm = bj.mass * mag
+            bivx = bivx - (dx * bm)
+            bivy = bivy - (dy * bm)
+            bivz = bivz - (dz * bm)
+            bm = bimass * mag
+            bj.vx = bj.vx + (dx * bm)
+            bj.vy = bj.vy + (dy * bm)
+            bj.vz = bj.vz + (dz * bm)
+        end
+        bi.vx = bivx
+        bi.vy = bivy
+        bi.vz = bivz
+        bi.x = bix + dt * bivx
+        bi.y = biy + dt * bivy
+        bi.z = biz + dt * bivz
     end
-    bi.vx = bivx
-    bi.vy = bivy
-    bi.vz = bivz
-    bi.x = bix + dt * bivx
-    bi.y = biy + dt * bivy
-    bi.z = biz + dt * bivz
-  end
 end
 
 local function energy(bodies, nbody)
-  local e = 0
-  for i=1,nbody do
-    local bi = bodies[i]
-    local vx, vy, vz, bim = bi.vx, bi.vy, bi.vz, bi.mass
-    e = e + (0.5 * bim * (vx*vx + vy*vy + vz*vz))
-    for j=i+1,nbody do
-      local bj = bodies[j]
-      local dx, dy, dz = bi.x-bj.x, bi.y-bj.y, bi.z-bj.z
-      local distance = sqrt(dx*dx + dy*dy + dz*dz)
-      e = e - ((bim * bj.mass) / distance)
+    local e = 0
+    for i = 1, nbody do
+        local bi = bodies[i]
+        local vx, vy, vz, bim = bi.vx, bi.vy, bi.vz, bi.mass
+        e = e + (0.5 * bim * (vx * vx + vy * vy + vz * vz))
+        for j = i + 1, nbody do
+            local bj = bodies[j]
+            local dx, dy, dz = bi.x - bj.x, bi.y - bj.y, bi.z - bj.z
+            local distance = sqrt(dx * dx + dy * dy + dz * dz)
+            e = e - ((bim * bj.mass) / distance)
+        end
     end
-  end
-  return e
+    return e
 end
 
 local function offsetMomentum(b, nbody)
-  local px, py, pz = 0, 0, 0
-  for i=1,nbody do
-    local bi = b[i]
-    local bim = bi.mass
-    px = px + (bi.vx * bim)
-    py = py + (bi.vy * bim)
-    pz = pz + (bi.vz * bim)
-  end
-  b[1].vx = -px / SOLAR_MASS
-  b[1].vy = -py / SOLAR_MASS
-  b[1].vz = -pz / SOLAR_MASS
+    local px, py, pz = 0, 0, 0
+    for i = 1, nbody do
+        local bi = b[i]
+        local bim = bi.mass
+        px = px + (bi.vx * bim)
+        py = py + (bi.vy * bim)
+        pz = pz + (bi.vz * bim)
+    end
+    b[1].vx = -px / SOLAR_MASS
+    b[1].vy = -py / SOLAR_MASS
+    b[1].vz = -pz / SOLAR_MASS
 end
 
 local N = tonumber(arg and arg[1]) or 1000
 local nbody = #bodies
 
 offsetMomentum(bodies, nbody)
-io.write( string.format("%0.9f",energy(bodies, nbody)), "\n")
-for i=1,N do advance(bodies, nbody, 0.01) end
-io.write( string.format("%0.9f",energy(bodies, nbody)), "\n")
+io.write(string.format("%0.9f", energy(bodies, nbody)), "\n")
+for i = 1, N do advance(bodies, nbody, 0.01) end
+io.write(string.format("%0.9f", energy(bodies, nbody)), "\n")

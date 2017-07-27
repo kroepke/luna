@@ -22,30 +22,30 @@ import java.util.Objects;
 
 public class VarMapping {
 
-	private final List<Variable> vars;
+  private final List<Variable> vars;
 
-	public VarMapping(List<Variable> vars) {
-		Objects.requireNonNull(vars);
-		if (vars.isEmpty()) {
-			throw new IllegalArgumentException("variable list is empty");
-		}
-		this.vars = vars;
-	}
+  public VarMapping(List<Variable> vars) {
+    Objects.requireNonNull(vars);
+    if (vars.isEmpty()) {
+      throw new IllegalArgumentException("variable list is empty");
+    }
+    this.vars = vars;
+  }
 
-	public VarMapping(Variable v) {
-		this(Collections.singletonList(Objects.requireNonNull(v)));
-	}
+  public VarMapping(Variable v) {
+    this(Collections.singletonList(Objects.requireNonNull(v)));
+  }
 
-	public List<Variable> vars() {
-		return vars;
-	}
+  public List<Variable> vars() {
+    return vars;
+  }
 
-	public Variable get(int idx) {
-		return vars.get(idx);
-	}
+  public Variable get(int idx) {
+    return vars.get(idx);
+  }
 
-	public Variable get() {
-		return get(0);
-	}
+  public Variable get() {
+    return get(0);
+  }
 
 }

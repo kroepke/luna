@@ -16,6 +16,7 @@
 
 package org.classdump.luna.examples;
 
+import java.util.Arrays;
 import org.classdump.luna.StateContext;
 import org.classdump.luna.exec.CallException;
 import org.classdump.luna.exec.CallPausedException;
@@ -27,32 +28,31 @@ import org.classdump.luna.runtime.AbstractFunction0;
 import org.classdump.luna.runtime.ExecutionContext;
 import org.classdump.luna.runtime.ResolvedControlThrowable;
 
-import java.util.Arrays;
-
 public class SimpleJavaFunction {
 
-	static class ExampleFunction extends AbstractFunction0 {
+  public static void main(String[] args)
+      throws InterruptedException, CallPausedException, CallException, LoaderException {
 
-		@Override
-		public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
-			context.getReturnBuffer().setTo(System.currentTimeMillis());
-		}
+    StateContext state = StateContexts.newDefaultInstance();
+    Object[] result = DirectCallExecutor.newExecutor().call(state, new ExampleFunction());
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-			throw new NonsuspendableFunctionException();
-		}
+    System.out.println("Result: " + Arrays.toString(result));
 
-	}
+  }
 
-	public static void main(String[] args)
-			throws InterruptedException, CallPausedException, CallException, LoaderException {
+  static class ExampleFunction extends AbstractFunction0 {
 
-		StateContext state = StateContexts.newDefaultInstance();
-		Object[] result = DirectCallExecutor.newExecutor().call(state, new ExampleFunction());
+    @Override
+    public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
+      context.getReturnBuffer().setTo(System.currentTimeMillis());
+    }
 
-		System.out.println("Result: " + Arrays.toString(result));
+    @Override
+    public void resume(ExecutionContext context, Object suspendedState)
+        throws ResolvedControlThrowable {
+      throw new NonsuspendableFunctionException();
+    }
 
-	}
+  }
 
 }

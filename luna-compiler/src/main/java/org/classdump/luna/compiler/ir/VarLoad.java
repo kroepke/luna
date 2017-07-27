@@ -16,33 +16,29 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.BodyNode;
-import org.classdump.luna.compiler.ir.Val;
-import org.classdump.luna.compiler.ir.Var;
-
 import java.util.Objects;
 
 public class VarLoad extends BodyNode {
 
-	private final Val dest;
-	private final Var var;
+  private final Val dest;
+  private final Var var;
 
-	public VarLoad(Val dest, Var var) {
-		this.dest = Objects.requireNonNull(dest);
-		this.var = Objects.requireNonNull(var);
-	}
+  public VarLoad(Val dest, Var var) {
+    this.dest = Objects.requireNonNull(dest);
+    this.var = Objects.requireNonNull(var);
+  }
 
-	public Val dest() {
-		return dest;
-	}
+  public Val dest() {
+    return dest;
+  }
 
-	public Var var() {
-		return var;
-	}
+  public Var var() {
+    return var;
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

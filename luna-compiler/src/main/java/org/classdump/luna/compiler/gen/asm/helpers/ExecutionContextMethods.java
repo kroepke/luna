@@ -16,63 +16,62 @@
 
 package org.classdump.luna.compiler.gen.asm.helpers;
 
+import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
+
 import org.classdump.luna.Table;
-import org.classdump.luna.compiler.gen.asm.helpers.ASMUtils;
 import org.classdump.luna.runtime.ExecutionContext;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 
-import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
-
 public abstract class ExecutionContextMethods {
 
-	private ExecutionContextMethods() {
-		// not to be instantiated or extended
-	}
+  private ExecutionContextMethods() {
+    // not to be instantiated or extended
+  }
 
-	private static Type selfTpe() {
-		return Type.getType(ExecutionContext.class);
-	}
+  private static Type selfTpe() {
+    return Type.getType(ExecutionContext.class);
+  }
 
-	public static MethodInsnNode registerTicks() {
-		return new MethodInsnNode(
-				INVOKEINTERFACE,
-				selfTpe().getInternalName(),
-				"registerTicks",
-				Type.getMethodDescriptor(
-						Type.VOID_TYPE,
-						Type.INT_TYPE),
-				true);
-	}
+  public static MethodInsnNode registerTicks() {
+    return new MethodInsnNode(
+        INVOKEINTERFACE,
+        selfTpe().getInternalName(),
+        "registerTicks",
+        Type.getMethodDescriptor(
+            Type.VOID_TYPE,
+            Type.INT_TYPE),
+        true);
+  }
 
-	public static MethodInsnNode checkCallYield() {
-		return new MethodInsnNode(
-				INVOKEINTERFACE,
-				selfTpe().getInternalName(),
-				"pauseIfRequested",
-				Type.getMethodDescriptor(
-						Type.VOID_TYPE),
-				true);
-	}
+  public static MethodInsnNode checkCallYield() {
+    return new MethodInsnNode(
+        INVOKEINTERFACE,
+        selfTpe().getInternalName(),
+        "pauseIfRequested",
+        Type.getMethodDescriptor(
+            Type.VOID_TYPE),
+        true);
+  }
 
-	public static InsnList newTable(int array, int hash) {
-		InsnList il = new InsnList();
+  public static InsnList newTable(int array, int hash) {
+    InsnList il = new InsnList();
 
-		il.add(ASMUtils.loadInt(array));
-		il.add(ASMUtils.loadInt(hash));
+    il.add(ASMUtils.loadInt(array));
+    il.add(ASMUtils.loadInt(hash));
 
-		il.add(new MethodInsnNode(
-				INVOKEINTERFACE,
-				selfTpe().getInternalName(),
-				"newTable",
-				Type.getMethodType(
-						Type.getType(Table.class),
-						Type.INT_TYPE,
-						Type.INT_TYPE).getDescriptor(),
-				true));
+    il.add(new MethodInsnNode(
+        INVOKEINTERFACE,
+        selfTpe().getInternalName(),
+        "newTable",
+        Type.getMethodType(
+            Type.getType(Table.class),
+            Type.INT_TYPE,
+            Type.INT_TYPE).getDescriptor(),
+        true));
 
-		return il;
-	}
+    return il;
+  }
 
 }

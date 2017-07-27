@@ -30,20 +30,20 @@ package org.classdump.luna;
  */
 public abstract class Userdata<T> extends LuaObject {
 
-	/**
-	 * Returns the user value attached to this full userdata.
-	 *
-	 * @return  the user value attached to this full userdata
-	 */
-	public abstract T getUserValue();
+  /**
+   * Returns the user value attached to this full userdata.
+   *
+   * @return the user value attached to this full userdata
+   */
+  public abstract T getUserValue();
 
-	/**
-	 * Sets the user value attached to this full userdata to {@code value}, returning
-	 * the old user value.
-	 *
-	 * @param value  new user value, may be {@code null}
-	 * @return  old user value
-	 */
-	public abstract T setUserValue(T value);
+  /**
+   * Sets the user value attached to this full userdata to {@code value}, returning
+   * the old user value.
+   *
+   * @param value new user value, may be {@code null}
+   * @return old user value
+   */
+  public abstract T setUserValue(T value);
 
 }

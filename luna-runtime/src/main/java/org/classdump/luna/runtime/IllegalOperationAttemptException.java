@@ -24,23 +24,23 @@ import org.classdump.luna.LuaRuntimeException;
  */
 public class IllegalOperationAttemptException extends LuaRuntimeException {
 
-	/**
-	 * Constructs a new {@code IllegalOperationAttemptException} with the given error message.
-	 *
-	 * @param message  the error message
-	 */
-	public IllegalOperationAttemptException(String message) {
-		super(message);
-	}
+  /**
+   * Constructs a new {@code IllegalOperationAttemptException} with the given error message.
+   *
+   * @param message the error message
+   */
+  public IllegalOperationAttemptException(String message) {
+    super(message);
+  }
 
-	/**
-	 * Constructs a new {@code IllegalOperationAttemptException} with {@code cause} as
-	 * the cause of this error.
-	 *
-	 * @param cause  the cause of this exception, may be {@code null}
-	 */
-	public IllegalOperationAttemptException(Throwable cause) {
-		super(cause);
-	}
+  /**
+   * Constructs a new {@code IllegalOperationAttemptException} with {@code cause} as
+   * the cause of this error.
+   *
+   * @param cause the cause of this exception, may be {@code null}
+   */
+  public IllegalOperationAttemptException(Throwable cause) {
+    super(cause);
+  }
 
 }

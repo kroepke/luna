@@ -16,12 +16,11 @@
 
 package org.classdump.luna.runtime;
 
+import java.util.Objects;
 import org.classdump.luna.StateContext;
 import org.classdump.luna.exec.CallInitialiser;
 import org.classdump.luna.exec.Continuation;
 import org.classdump.luna.impl.ReturnBuffers;
-
-import java.util.Objects;
 
 /**
  * The default implementation of a call initialiser.
@@ -31,47 +30,46 @@ import java.util.Objects;
  */
 public class RuntimeCallInitialiser implements CallInitialiser {
 
-	private final StateContext stateContext;
-	private final ReturnBufferFactory returnBufferFactory;
+  private final StateContext stateContext;
+  private final ReturnBufferFactory returnBufferFactory;
 
-	RuntimeCallInitialiser(StateContext stateContext, ReturnBufferFactory returnBufferFactory) {
-		this.stateContext = Objects.requireNonNull(stateContext);
-		this.returnBufferFactory = Objects.requireNonNull(returnBufferFactory);
-	}
+  RuntimeCallInitialiser(StateContext stateContext, ReturnBufferFactory returnBufferFactory) {
+    this.stateContext = Objects.requireNonNull(stateContext);
+    this.returnBufferFactory = Objects.requireNonNull(returnBufferFactory);
+  }
 
-	/**
-	 * Returns a new call initialiser for calls executed in the specified state
-	 * context {@code stateContext} that use return buffers initialised by the specified
-	 * factory {@code returnBufferFactory}.
-	 *
-	 * @param stateContext  the state context, must not be {@code null}
-	 * @param returnBufferFactory  the return buffer factory, must not be {@code null}
-	 * @return  a new call initialiser for {@code stateContext}
-	 *
-	 * @throws NullPointerException  if {@code stateContext} or {@code returnBufferFactory}
-	 *                               is {@code null}
-	 */
-	public static RuntimeCallInitialiser forState(StateContext stateContext, ReturnBufferFactory returnBufferFactory) {
-		return new RuntimeCallInitialiser(stateContext, returnBufferFactory);
-	}
+  /**
+   * Returns a new call initialiser for calls executed in the specified state
+   * context {@code stateContext} that use return buffers initialised by the specified
+   * factory {@code returnBufferFactory}.
+   *
+   * @param stateContext the state context, must not be {@code null}
+   * @param returnBufferFactory the return buffer factory, must not be {@code null}
+   * @return a new call initialiser for {@code stateContext}
+   * @throws NullPointerException if {@code stateContext} or {@code returnBufferFactory} is {@code
+   * null}
+   */
+  public static RuntimeCallInitialiser forState(StateContext stateContext,
+      ReturnBufferFactory returnBufferFactory) {
+    return new RuntimeCallInitialiser(stateContext, returnBufferFactory);
+  }
 
-	/**
-	 * Returns a new call initialiser for calls executed in the specified state
-	 * context {@code stateContext}, and using the default return buffer factory
-	 * (see {@link ReturnBuffers#defaultFactory()}).
-	 *
-	 * @param stateContext  the state context, must not be {@code null}
-	 * @return  a new call initialiser for {@code stateContext}
-	 *
-	 * @throws NullPointerException  if {@code stateContext} is {@code null}
-	 */
-	public static RuntimeCallInitialiser forState(StateContext stateContext) {
-		return forState(stateContext, ReturnBuffers.defaultFactory());
-	}
+  /**
+   * Returns a new call initialiser for calls executed in the specified state
+   * context {@code stateContext}, and using the default return buffer factory
+   * (see {@link ReturnBuffers#defaultFactory()}).
+   *
+   * @param stateContext the state context, must not be {@code null}
+   * @return a new call initialiser for {@code stateContext}
+   * @throws NullPointerException if {@code stateContext} is {@code null}
+   */
+  public static RuntimeCallInitialiser forState(StateContext stateContext) {
+    return forState(stateContext, ReturnBuffers.defaultFactory());
+  }
 
-	@Override
-	public Continuation newCall(Object fn, Object... args) {
-		return Call.init(stateContext, returnBufferFactory, fn, args).getCurrentContinuation();
-	}
+  @Override
+  public Continuation newCall(Object fn, Object... args) {
+    return Call.init(stateContext, returnBufferFactory, fn, args).getCurrentContinuation();
+  }
 
 }

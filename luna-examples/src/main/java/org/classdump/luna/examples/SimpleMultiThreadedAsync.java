@@ -16,6 +16,11 @@
 
 package org.classdump.luna.examples;
 
+import java.util.Objects;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.classdump.luna.StateContext;
 import org.classdump.luna.exec.CallEventHandler;
 import org.classdump.luna.exec.CallException;
@@ -31,163 +36,158 @@ import org.classdump.luna.runtime.ResolvedControlThrowable;
 import org.classdump.luna.runtime.RuntimeCallInitialiser;
 import org.classdump.luna.runtime.UnresolvedControlThrowable;
 
-import java.util.Objects;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class SimpleMultiThreadedAsync {
 
-	public static final int INITIAL_POPULATION = 10;
-	public static final double SPAWN_CHANCE = 0.8;
+  public static final int INITIAL_POPULATION = 10;
+  public static final double SPAWN_CHANCE = 0.8;
 
-	private static final AtomicInteger nextId = new AtomicInteger(1);
-	private static final AtomicInteger numLive = new AtomicInteger(0);
+  private static final AtomicInteger nextId = new AtomicInteger(1);
+  private static final AtomicInteger numLive = new AtomicInteger(0);
 
-	private static final AsyncFunction FN_INSTANCE = new AsyncFunction();
+  private static final AsyncFunction FN_INSTANCE = new AsyncFunction();
 
-	static class SleepAndSpawn implements AsyncTask {
+  private static void spawnNewTask(StateContext context, BlockingQueue<Continuation> workQueue) {
+    Continuation cont = RuntimeCallInitialiser.forState(context)
+        .newCall(FN_INSTANCE, nextId.getAndIncrement(), workQueue);
+    assert (cont != null);
+    numLive.incrementAndGet();
+    workQueue.add(cont);
+  }
 
-		private final Object id;
-		private final AtomicInteger var;
-		private final StateContext context;
-		private final BlockingQueue<Continuation> workQueue;
+  static void executeInNewThread(final AsyncTask task, final AsyncTask.ContinueCallback callback) {
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        task.execute(callback);
+      }
+    }).start();
+  }
 
-		SleepAndSpawn(Object id, AtomicInteger var, StateContext context, BlockingQueue<Continuation> workQueue) {
-			this.id = id;
-			this.var = var;
-			this.context = Objects.requireNonNull(context);
-			this.workQueue = Objects.requireNonNull(workQueue);
-		}
+  public static void main(String[] args)
+      throws InterruptedException, CallPausedException, CallException, LoaderException {
 
-		@Override
-		public void execute(ContinueCallback callback) {
-			int sleepMs = ThreadLocalRandom.current().nextInt(1, 100);
-			System.out.println("[" + Thread.currentThread() + "]: BEGIN async task of " + id
-					+ " (will sleep for " + sleepMs + " ms)");
-			try {
-				Thread.sleep(sleepMs);
-				var.set(sleepMs);
+    StateContext state = StateContexts.newDefaultInstance();
 
-				if (ThreadLocalRandom.current().nextDouble() <= SPAWN_CHANCE) {
-					// spawn a new task!
-					spawnNewTask(context, workQueue);
-				}
-			}
-			catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			finally {
-				System.out.println("[" + Thread.currentThread() + "]: END async task of " + id);
-				callback.finished();
-			}
-		}
-	}
+    final LinkedBlockingQueue<Continuation> workQueue = new LinkedBlockingQueue<>();
 
-	static class AsyncFunction extends AbstractFunction2 {
+    final AtomicInteger sum = new AtomicInteger(0);
 
-		@Override
-		public void invoke(ExecutionContext context, Object id, Object arg2) throws ResolvedControlThrowable {
+    CallEventHandler handler = new CallEventHandler() {
+      @Override
+      public void returned(Object id, Object[] result) {
+        sum.getAndAdd((Integer) result[0]);
+        numLive.decrementAndGet();
+      }
 
-			@SuppressWarnings("unchecked")
-			final BlockingQueue<Continuation> workQueue = (BlockingQueue<Continuation>) arg2;
+      @Override
+      public void failed(Object id, Throwable error) {
+        numLive.decrementAndGet();
+      }
 
-			System.out.println("[" + Thread.currentThread() + "]: Invoke " + id);
+      @Override
+      public void paused(Object id, final Continuation c) {
+        workQueue.add(c);
+      }
 
-			AtomicInteger var = new AtomicInteger(0);
+      @Override
+      public void async(Object id, final Continuation c, final AsyncTask task) {
+        executeInNewThread(task, new AsyncTask.ContinueCallback() {
+          @Override
+          public void finished() {
+            workQueue.add(c);
+          }
+        });
+      }
+    };
 
-			try {
-				context.resumeAfter(new SleepAndSpawn(id, var, context, workQueue));
-			}
-			catch (UnresolvedControlThrowable ct) {
-				throw ct.resolve(this, new Object[] {id, var});
-			}
+    long before = System.nanoTime();
 
-			throw new AssertionError();  // control never reaches this point
-		}
+    for (int i = 0; i < INITIAL_POPULATION; i++) {
+      spawnNewTask(state, workQueue);
+    }
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-			Object[] a = (Object[]) suspendedState;
-			Object id = a[0];
-			AtomicInteger var = (AtomicInteger) a[1];
-			System.out.println("[" + Thread.currentThread() + "]: Resume " + id);
-			context.getReturnBuffer().setTo(var.get());
-		}
+    while (numLive.get() > 0) {
+      Continuation cont = workQueue.take();
+      cont.resume(handler, SchedulingContexts.neverPause());
+    }
 
-	}
+    long after = System.nanoTime();
 
-	private static void spawnNewTask(StateContext context, BlockingQueue<Continuation> workQueue) {
-		Continuation cont = RuntimeCallInitialiser.forState(context).newCall(FN_INSTANCE, nextId.getAndIncrement(), workQueue);
-		assert (cont != null);
-		numLive.incrementAndGet();
-		workQueue.add(cont);
-	}
+    System.out.println();
+    System.out
+        .println("Total time spent: " + String.format("%.1f ms", (after - before) / 1000000.0));
+    System.out.println("Total sleep time: " + sum.get() + " ms");
 
-	static void executeInNewThread(final AsyncTask task, final AsyncTask.ContinueCallback callback) {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				task.execute(callback);
-			}
-		}).start();
-	}
+  }
 
-	public static void main(String[] args)
-			throws InterruptedException, CallPausedException, CallException, LoaderException {
+  static class SleepAndSpawn implements AsyncTask {
 
-		StateContext state = StateContexts.newDefaultInstance();
+    private final Object id;
+    private final AtomicInteger var;
+    private final StateContext context;
+    private final BlockingQueue<Continuation> workQueue;
 
-		final LinkedBlockingQueue<Continuation> workQueue = new LinkedBlockingQueue<>();
+    SleepAndSpawn(Object id, AtomicInteger var, StateContext context,
+        BlockingQueue<Continuation> workQueue) {
+      this.id = id;
+      this.var = var;
+      this.context = Objects.requireNonNull(context);
+      this.workQueue = Objects.requireNonNull(workQueue);
+    }
 
-		final AtomicInteger sum = new AtomicInteger(0);
+    @Override
+    public void execute(ContinueCallback callback) {
+      int sleepMs = ThreadLocalRandom.current().nextInt(1, 100);
+      System.out.println("[" + Thread.currentThread() + "]: BEGIN async task of " + id
+          + " (will sleep for " + sleepMs + " ms)");
+      try {
+        Thread.sleep(sleepMs);
+        var.set(sleepMs);
 
-		CallEventHandler handler = new CallEventHandler() {
-			@Override
-			public void returned(Object id, Object[] result) {
-				sum.getAndAdd((Integer) result[0]);
-				numLive.decrementAndGet();
-			}
+        if (ThreadLocalRandom.current().nextDouble() <= SPAWN_CHANCE) {
+          // spawn a new task!
+          spawnNewTask(context, workQueue);
+        }
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      } finally {
+        System.out.println("[" + Thread.currentThread() + "]: END async task of " + id);
+        callback.finished();
+      }
+    }
+  }
 
-			@Override
-			public void failed(Object id, Throwable error) {
-				numLive.decrementAndGet();
-			}
+  static class AsyncFunction extends AbstractFunction2 {
 
-			@Override
-			public void paused(Object id, final Continuation c) {
-				workQueue.add(c);
-			}
+    @Override
+    public void invoke(ExecutionContext context, Object id, Object arg2)
+        throws ResolvedControlThrowable {
 
-			@Override
-			public void async(Object id, final Continuation c, final AsyncTask task) {
-				executeInNewThread(task, new AsyncTask.ContinueCallback() {
-					@Override
-					public void finished() {
-						workQueue.add(c);
-					}
-				});
-			}
-		};
+      @SuppressWarnings("unchecked")      final BlockingQueue<Continuation> workQueue = (BlockingQueue<Continuation>) arg2;
 
-		long before = System.nanoTime();
+      System.out.println("[" + Thread.currentThread() + "]: Invoke " + id);
 
-		for (int i = 0; i < INITIAL_POPULATION; i++) {
-			spawnNewTask(state, workQueue);
-		}
+      AtomicInteger var = new AtomicInteger(0);
 
-		while (numLive.get() > 0) {
-			Continuation cont = workQueue.take();
-			cont.resume(handler, SchedulingContexts.neverPause());
-		}
+      try {
+        context.resumeAfter(new SleepAndSpawn(id, var, context, workQueue));
+      } catch (UnresolvedControlThrowable ct) {
+        throw ct.resolve(this, new Object[]{id, var});
+      }
 
-		long after = System.nanoTime();
+      throw new AssertionError();  // control never reaches this point
+    }
 
-		System.out.println();
-		System.out.println("Total time spent: " + String.format("%.1f ms", (after - before) / 1000000.0));
-		System.out.println("Total sleep time: " + sum.get() + " ms");
+    @Override
+    public void resume(ExecutionContext context, Object suspendedState)
+        throws ResolvedControlThrowable {
+      Object[] a = (Object[]) suspendedState;
+      Object id = a[0];
+      AtomicInteger var = (AtomicInteger) a[1];
+      System.out.println("[" + Thread.currentThread() + "]: Resume " + id);
+      context.getReturnBuffer().setTo(var.get());
+    }
 
-	}
+  }
 
 }

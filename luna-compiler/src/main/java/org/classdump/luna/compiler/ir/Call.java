@@ -16,37 +16,35 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.IRVisitor;
-
 import java.util.Objects;
 
 public class Call extends BodyNode {
 
-	private final MultiVal dest;
-	private final Val fn;
-	private final VList args;
+  private final MultiVal dest;
+  private final Val fn;
+  private final VList args;
 
-	public Call(MultiVal dest, Val fn, VList args) {
-		this.dest = Objects.requireNonNull(dest);
-		this.fn = Objects.requireNonNull(fn);
-		this.args = Objects.requireNonNull(args);
-	}
+  public Call(MultiVal dest, Val fn, VList args) {
+    this.dest = Objects.requireNonNull(dest);
+    this.fn = Objects.requireNonNull(fn);
+    this.args = Objects.requireNonNull(args);
+  }
 
-	public MultiVal dest() {
-		return dest;
-	}
+  public MultiVal dest() {
+    return dest;
+  }
 
-	public Val fn() {
-		return fn;
-	}
+  public Val fn() {
+    return fn;
+  }
 
-	public VList args() {
-		return args;
-	}
+  public VList args() {
+    return args;
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

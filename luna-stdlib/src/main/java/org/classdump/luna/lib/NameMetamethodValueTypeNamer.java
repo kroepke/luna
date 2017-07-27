@@ -16,15 +16,13 @@
 
 package org.classdump.luna.lib;
 
+import java.util.Objects;
 import org.classdump.luna.ByteString;
 import org.classdump.luna.LuaType;
 import org.classdump.luna.MetatableProvider;
 import org.classdump.luna.Metatables;
 import org.classdump.luna.PlainValueTypeNamer;
 import org.classdump.luna.ValueTypeNamer;
-import org.classdump.luna.lib.BasicLib;
-
-import java.util.Objects;
 
 /**
  * A value type namer that looks up type names in object metatables, and distinguishes
@@ -35,55 +33,50 @@ import java.util.Objects;
  * used as the type name. Otherwise, light userdata is assigned the type name
  * {@code "light userdata"} ({@link BasicLib#TYPENAME_LIGHT_USERDATA}), and the rest is
  * assigned the same name as assigned by {@link PlainValueTypeNamer}.</p>
- *
  */
 public class NameMetamethodValueTypeNamer implements ValueTypeNamer {
 
-	private final MetatableProvider metatableProvider;
+  private final MetatableProvider metatableProvider;
 
-	/**
-	 * Creates a new instance of this value type namer that uses the supplied
-	 * metatable provider {@code metatableProvider} for looking up type names.
-	 *
-	 * @param metatableProvider  the metatable provider, must not be {@code null}
-	 * @throws NullPointerException  if {@code metatableProvider} is {@code null}
-	 */
-	public NameMetamethodValueTypeNamer(MetatableProvider metatableProvider) {
-		this.metatableProvider = Objects.requireNonNull(metatableProvider);
-	}
+  /**
+   * Creates a new instance of this value type namer that uses the supplied
+   * metatable provider {@code metatableProvider} for looking up type names.
+   *
+   * @param metatableProvider the metatable provider, must not be {@code null}
+   * @throws NullPointerException if {@code metatableProvider} is {@code null}
+   */
+  public NameMetamethodValueTypeNamer(MetatableProvider metatableProvider) {
+    this.metatableProvider = Objects.requireNonNull(metatableProvider);
+  }
 
-	/**
-	 * Returns the type name (a string) of the given value {@code instance}, using
-	 * {@code metatableProvider} to look up the the name in the {@code "__name"} field
-	 * of {@code instance}'s metatable, if it is defined.
-	 *
-	 * @param instance  the object instance, may be {@code null}
-	 * @param metatableProvider  the metatable provider, must not be {@code null}
-	 * @return  type name of {@code instance}
-	 *
-	 * @throws NullPointerException  if {@code metatableProvider} is {@code null}
-	 */
-	public static ByteString typeNameOf(Object instance, MetatableProvider metatableProvider) {
-		Object nameField = Metatables.getMetamethod(metatableProvider, BasicLib.MT_NAME, instance);
-		if (nameField instanceof ByteString) {
-			return (ByteString) nameField;
-		}
-		else if (nameField instanceof String) {
-			return ByteString.of((String) nameField);
-		}
-		else {
-			if (LuaType.isLightUserdata(instance)) {
-				return BasicLib.TYPENAME_LIGHT_USERDATA;
-			}
-			else {
-				return PlainValueTypeNamer.INSTANCE.typeNameOf(instance);
-			}
-		}
-	}
+  /**
+   * Returns the type name (a string) of the given value {@code instance}, using
+   * {@code metatableProvider} to look up the the name in the {@code "__name"} field
+   * of {@code instance}'s metatable, if it is defined.
+   *
+   * @param instance the object instance, may be {@code null}
+   * @param metatableProvider the metatable provider, must not be {@code null}
+   * @return type name of {@code instance}
+   * @throws NullPointerException if {@code metatableProvider} is {@code null}
+   */
+  public static ByteString typeNameOf(Object instance, MetatableProvider metatableProvider) {
+    Object nameField = Metatables.getMetamethod(metatableProvider, BasicLib.MT_NAME, instance);
+    if (nameField instanceof ByteString) {
+      return (ByteString) nameField;
+    } else if (nameField instanceof String) {
+      return ByteString.of((String) nameField);
+    } else {
+      if (LuaType.isLightUserdata(instance)) {
+        return BasicLib.TYPENAME_LIGHT_USERDATA;
+      } else {
+        return PlainValueTypeNamer.INSTANCE.typeNameOf(instance);
+      }
+    }
+  }
 
-	@Override
-	public ByteString typeNameOf(Object instance) {
-		return typeNameOf(instance, metatableProvider);
-	}
+  @Override
+  public ByteString typeNameOf(Object instance) {
+    return typeNameOf(instance, metatableProvider);
+  }
 
 }

@@ -16,32 +16,29 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.IRVisitor;
-import org.classdump.luna.compiler.ir.Label;
-
 import java.util.Collections;
 import java.util.Objects;
 
 public class Ret extends BlockTermNode {
 
-	private final VList args;
+  private final VList args;
 
-	public Ret(VList args) {
-		this.args = Objects.requireNonNull(args);
-	}
+  public Ret(VList args) {
+    this.args = Objects.requireNonNull(args);
+  }
 
-	public VList args() {
-		return args;
-	}
+  public VList args() {
+    return args;
+  }
 
-	@Override
-	public Iterable<Label> nextLabels() {
-		return Collections.emptyList();
-	}
+  @Override
+  public Iterable<Label> nextLabels() {
+    return Collections.emptyList();
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

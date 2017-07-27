@@ -26,46 +26,44 @@ import org.classdump.luna.runtime.UnresolvedControlThrowable;
 
 public class AsyncExample extends AbstractFunction1 {
 
-	@Override
-	public void invoke(ExecutionContext context, Object arg) throws ResolvedControlThrowable {
-		final long millis = Conversions.toIntegerValue(arg);
-		final Variable v = new Variable(null);
-		try {
-			context.resumeAfter(new AsyncTask() {
-				@Override
-				public void execute(final ContinueCallback callback) {
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								long before = System.currentTimeMillis();
-								Thread.sleep(millis);
-								long after = System.currentTimeMillis();
-								v.set(after - before);
-							}
-							catch (InterruptedException ex) {
-								// ignore
-							}
-							finally {
-								callback.finished();
-							}
-						}
-					}).start();
-				}
-			});
+  @Override
+  public void invoke(ExecutionContext context, Object arg) throws ResolvedControlThrowable {
+    final long millis = Conversions.toIntegerValue(arg);
+    final Variable v = new Variable(null);
+    try {
+      context.resumeAfter(new AsyncTask() {
+        @Override
+        public void execute(final ContinueCallback callback) {
+          new Thread(new Runnable() {
+            @Override
+            public void run() {
+              try {
+                long before = System.currentTimeMillis();
+                Thread.sleep(millis);
+                long after = System.currentTimeMillis();
+                v.set(after - before);
+              } catch (InterruptedException ex) {
+                // ignore
+              } finally {
+                callback.finished();
+              }
+            }
+          }).start();
+        }
+      });
 
-			// control should never reach this point
-			throw new AssertionError();
-		}
-		catch (UnresolvedControlThrowable ct) {
-			throw ct.resolve(this, v);
-		}
-	}
+      // control should never reach this point
+      throw new AssertionError();
+    } catch (UnresolvedControlThrowable ct) {
+      throw ct.resolve(this, v);
+    }
+  }
 
-	@Override
-	public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-		Variable v = (Variable) suspendedState;
-		context.getReturnBuffer().setTo(v.get());
-	}
+  @Override
+  public void resume(ExecutionContext context, Object suspendedState)
+      throws ResolvedControlThrowable {
+    Variable v = (Variable) suspendedState;
+    context.getReturnBuffer().setTo(v.get());
+  }
 
 }

@@ -16,59 +16,62 @@
 
 package org.classdump.luna.compiler.analysis.types;
 
-import org.classdump.luna.compiler.analysis.types.AbstractType;
-import org.classdump.luna.compiler.analysis.types.DynamicType;
-import org.classdump.luna.compiler.analysis.types.Type;
-
 import java.util.Objects;
 
 public class ConcreteType extends Type {
 
-	protected final AbstractType supertype;
-	protected final String name;
+  protected final AbstractType supertype;
+  protected final String name;
 
-	protected ConcreteType(AbstractType supertype, String name) {
-		this.supertype = Objects.requireNonNull(supertype);
-		this.name = Objects.requireNonNull(name);
-	}
+  protected ConcreteType(AbstractType supertype, String name) {
+    this.supertype = Objects.requireNonNull(supertype);
+    this.name = Objects.requireNonNull(name);
+  }
 
-	@Override
-	public String toString() {
-		return name;
-	}
+  @Override
+  public String toString() {
+    return name;
+  }
 
-	public AbstractType supertype() {
-		return supertype;
-	}
+  public AbstractType supertype() {
+    return supertype;
+  }
 
-	@Override
-	public boolean isSubtypeOf(Type that) {
-		return this.equals(that) || this.supertype().isSubtypeOf(that);
-	}
+  @Override
+  public boolean isSubtypeOf(Type that) {
+    return this.equals(that) || this.supertype().isSubtypeOf(that);
+  }
 
-	@Override
-	public Type restrict(Type that) {
-		return that instanceof DynamicType ? that : this;
-	}
+  @Override
+  public Type restrict(Type that) {
+    return that instanceof DynamicType ? that : this;
+  }
 
-	@Override
-	public Type join(Type that) {
-		Objects.requireNonNull(that);
+  @Override
+  public Type join(Type that) {
+    Objects.requireNonNull(that);
 
-		if (that.isSubtypeOf(this)) return this;
-		else return this.supertype().join(that);
-	}
+    if (that.isSubtypeOf(this)) {
+      return this;
+    } else {
+      return this.supertype().join(that);
+    }
+  }
 
-	@Override
-	public Type meet(Type that) {
-		Objects.requireNonNull(that);
+  @Override
+  public Type meet(Type that) {
+    Objects.requireNonNull(that);
 
-		if (this.isSubtypeOf(that)) return this;
-		else if (that.isSubtypeOf(this)) return that;
-		else return null;
-	}
+    if (this.isSubtypeOf(that)) {
+      return this;
+    } else if (that.isSubtypeOf(this)) {
+      return that;
+    } else {
+      return null;
+    }
+  }
 
-	//	@Override
+  //	@Override
 //	public Type unionWith(Type that) {
 //		if (this.isSubtypeOf(that)) return that;
 //		else if (that.isSubtypeOf(this)) return this;

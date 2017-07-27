@@ -16,31 +16,29 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.IRVisitor;
-
 import java.util.Objects;
 
 public class UpLoad extends BodyNode {
 
-	private final Val dest;
-	private final UpVar uv;
+  private final Val dest;
+  private final UpVar uv;
 
-	public UpLoad(Val dest, UpVar uv) {
-		this.dest = Objects.requireNonNull(dest);
-		this.uv = Objects.requireNonNull(uv);
-	}
+  public UpLoad(Val dest, UpVar uv) {
+    this.dest = Objects.requireNonNull(dest);
+    this.uv = Objects.requireNonNull(uv);
+  }
 
-	public Val dest() {
-		return dest;
-	}
+  public Val dest() {
+    return dest;
+  }
 
-	public UpVar upval() {
-		return uv;
-	}
+  public UpVar upval() {
+    return uv;
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

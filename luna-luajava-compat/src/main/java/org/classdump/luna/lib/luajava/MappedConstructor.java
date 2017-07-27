@@ -25,32 +25,32 @@ import java.util.Objects;
 
 class MappedConstructor<T> {
 
-	private final Constructor<T> constructor;
-	private final ParameterMapping[] parameterMappings;
+  private final Constructor<T> constructor;
+  private final ParameterMapping[] parameterMappings;
 
-	MappedConstructor(Constructor<T> constructor, ParameterMapping[] parameterMappings) {
-		this.constructor = Objects.requireNonNull(constructor);
-		this.parameterMappings = Objects.requireNonNull(parameterMappings);
-	}
+  MappedConstructor(Constructor<T> constructor, ParameterMapping[] parameterMappings) {
+    this.constructor = Objects.requireNonNull(constructor);
+    this.parameterMappings = Objects.requireNonNull(parameterMappings);
+  }
 
-	static <T> MappedConstructor<T> of(Constructor<T> constructor) {
-		ParameterMapping[] mappings = ParameterMapping.mappingsFor(constructor.getParameterTypes());
-		return new MappedConstructor<>(constructor, mappings);
-	}
+  static <T> MappedConstructor<T> of(Constructor<T> constructor) {
+    ParameterMapping[] mappings = ParameterMapping.mappingsFor(constructor.getParameterTypes());
+    return new MappedConstructor<>(constructor, mappings);
+  }
 
-	public Constructor<T> constructor() {
-		return constructor;
-	}
+  public Constructor<T> constructor() {
+    return constructor;
+  }
 
-	public List<ParameterMapping> parameterMappings() {
-		return Collections.unmodifiableList(Arrays.asList(parameterMappings));
-	}
+  public List<ParameterMapping> parameterMappings() {
+    return Collections.unmodifiableList(Arrays.asList(parameterMappings));
+  }
 
-	public T newInstance(Object[] args)
-			throws IllegalAccessException, InvocationTargetException, InstantiationException {
+  public T newInstance(Object[] args)
+      throws IllegalAccessException, InvocationTargetException, InstantiationException {
 
-		Object[] actualArgs = ApplyMappingVisitor.applyAll(parameterMappings, args);
-		return constructor.newInstance(actualArgs);
-	}
+    Object[] actualArgs = ApplyMappingVisitor.applyAll(parameterMappings, args);
+    return constructor.newInstance(actualArgs);
+  }
 
 }

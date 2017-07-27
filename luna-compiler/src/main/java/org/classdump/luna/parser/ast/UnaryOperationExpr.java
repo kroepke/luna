@@ -20,35 +20,34 @@ import java.util.Objects;
 
 public class UnaryOperationExpr extends Expr {
 
-	private final Operator.Unary op;
-	private final Expr arg;
+  private final Operator.Unary op;
+  private final Expr arg;
 
-	public UnaryOperationExpr(Attributes attr, Operator.Unary op, Expr arg) {
-		super(attr);
-		this.op = Objects.requireNonNull(op);
-		this.arg = Objects.requireNonNull(arg);
-	}
+  public UnaryOperationExpr(Attributes attr, Operator.Unary op, Expr arg) {
+    super(attr);
+    this.op = Objects.requireNonNull(op);
+    this.arg = Objects.requireNonNull(arg);
+  }
 
-	public Operator.Unary op() {
-		return op;
-	}
+  public Operator.Unary op() {
+    return op;
+  }
 
-	public Expr arg() {
-		return arg;
-	}
+  public Expr arg() {
+    return arg;
+  }
 
-	public UnaryOperationExpr update(Expr arg) {
-		if (this.arg.equals(arg)) {
-			return this;
-		}
-		else {
-			return new UnaryOperationExpr(attributes(), op, arg);
-		}
-	}
+  public UnaryOperationExpr update(Expr arg) {
+    if (this.arg.equals(arg)) {
+      return this;
+    } else {
+      return new UnaryOperationExpr(attributes(), op, arg);
+    }
+  }
 
-	@Override
-	public Expr accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public Expr accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

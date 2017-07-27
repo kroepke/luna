@@ -16,48 +16,50 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.Label;
-
 import java.util.List;
 import java.util.Objects;
 
 public class BasicBlock {
 
-	private final Label label;
-	private final List<BodyNode> body;
-	private final BlockTermNode end;
+  private final Label label;
+  private final List<BodyNode> body;
+  private final BlockTermNode end;
 
-	public BasicBlock(Label label, List<BodyNode> body, BlockTermNode end) {
-		this.label = Objects.requireNonNull(label);
-		this.body = Objects.requireNonNull(body);
-		this.end = Objects.requireNonNull(end);
-	}
+  public BasicBlock(Label label, List<BodyNode> body, BlockTermNode end) {
+    this.label = Objects.requireNonNull(label);
+    this.body = Objects.requireNonNull(body);
+    this.end = Objects.requireNonNull(end);
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		BasicBlock that = (BasicBlock) o;
-		return this.label.equals(that.label) &&
-				this.body.equals(that.body) &&
-				this.end.equals(that.end);
-	}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    BasicBlock that = (BasicBlock) o;
+    return this.label.equals(that.label) &&
+        this.body.equals(that.body) &&
+        this.end.equals(that.end);
+  }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(label, body, end);
-	}
+  @Override
+  public int hashCode() {
+    return Objects.hash(label, body, end);
+  }
 
-	public Label label() {
-		return label;
-	}
+  public Label label() {
+    return label;
+  }
 
-	public List<BodyNode> body() {
-		return body;
-	}
+  public List<BodyNode> body() {
+    return body;
+  }
 
-	public BlockTermNode end() {
-		return end;
-	}
+  public BlockTermNode end() {
+    return end;
+  }
 
 }

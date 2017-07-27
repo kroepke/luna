@@ -17,23 +17,22 @@
 package org.classdump.luna.compiler.ir;
 
 import org.classdump.luna.util.Check;
-import org.classdump.luna.compiler.ir.IRVisitor;
 
 public class Line extends BodyNode {
 
-	private final int lineNumber;
+  private final int lineNumber;
 
-	public Line(int lineNumber) {
-		this.lineNumber = Check.positive(lineNumber);
-	}
+  public Line(int lineNumber) {
+    this.lineNumber = Check.positive(lineNumber);
+  }
 
-	public int lineNumber() {
-		return lineNumber;
-	}
+  public int lineNumber() {
+    return lineNumber;
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

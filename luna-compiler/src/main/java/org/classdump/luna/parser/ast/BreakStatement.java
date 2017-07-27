@@ -16,19 +16,15 @@
 
 package org.classdump.luna.parser.ast;
 
-import org.classdump.luna.parser.ast.Attributes;
-import org.classdump.luna.parser.ast.BodyStatement;
-import org.classdump.luna.parser.ast.Transformer;
-
 public class BreakStatement extends BodyStatement {
 
-	public BreakStatement(Attributes attr) {
-		super(attr);
-	}
+  public BreakStatement(Attributes attr) {
+    super(attr);
+  }
 
-	@Override
-	public BodyStatement accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public BodyStatement accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

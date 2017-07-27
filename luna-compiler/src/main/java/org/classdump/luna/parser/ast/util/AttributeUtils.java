@@ -21,18 +21,18 @@ import org.classdump.luna.parser.ast.SyntaxElement;
 
 public abstract class AttributeUtils {
 
-	private AttributeUtils() {
-		// not to be instantiated
-	}
+  private AttributeUtils() {
+    // not to be instantiated
+  }
 
-	public static String sourceInfoString(SyntaxElement elem) {
-		SourceInfo src = elem.attributes().get(SourceInfo.class);
-		return src != null ? src.toString() : "?:?";
-	}
+  public static String sourceInfoString(SyntaxElement elem) {
+    SourceInfo src = elem.attributes().get(SourceInfo.class);
+    return src != null ? src.toString() : "?:?";
+  }
 
-	public static String lineString(SyntaxElement elem) {
-		int line = elem.line();
-		return line != 0 ? Integer.toString(line) : "?";
-	}
+  public static String lineString(SyntaxElement elem) {
+    int line = elem.line();
+    return line != 0 ? Integer.toString(line) : "?";
+  }
 
 }

@@ -16,17 +16,16 @@
 
 package org.classdump.luna.parser.analysis;
 
-import org.classdump.luna.parser.ast.Chunk;
-
 import java.util.Objects;
+import org.classdump.luna.parser.ast.Chunk;
 
 public class NameResolver {
 
-	public static Chunk resolveNames(Chunk chunk) {
-		Objects.requireNonNull(chunk);
-		chunk = new NameResolutionTransformer().transform(chunk);
-		chunk = new LabelResolutionTransformer().transform(chunk);
-		return chunk;
-	}
+  public static Chunk resolveNames(Chunk chunk) {
+    Objects.requireNonNull(chunk);
+    chunk = new NameResolutionTransformer().transform(chunk);
+    chunk = new LabelResolutionTransformer().transform(chunk);
+    return chunk;
+  }
 
 }

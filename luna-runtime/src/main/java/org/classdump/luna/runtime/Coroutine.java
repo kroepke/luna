@@ -16,12 +16,9 @@
 
 package org.classdump.luna.runtime;
 
+import java.util.Objects;
 import org.classdump.luna.Ordering;
 import org.classdump.luna.util.Cons;
-import org.classdump.luna.runtime.ResolvedControlThrowable;
-import org.classdump.luna.runtime.UnresolvedControlThrowable;
-
-import java.util.Objects;
 
 /**
  * A Lua coroutine.
@@ -29,10 +26,10 @@ import java.util.Objects;
  * <p>This class does not expose any public API; to manipulate {@code Coroutine} objects,
  * use the following methods in {@link ExecutionContext}:</p>
  * <ul>
- *     <li>to create a new coroutine, use {@link ExecutionContext#newCoroutine(LuaFunction)};</li>
- *     <li>to get coroutine status, use {@link ExecutionContext#getCoroutineStatus(Coroutine)};</li>
- *     <li>to resume a coroutine, use {@link ExecutionContext#resume(Coroutine, Object[])};</li>
- *     <li>to yield from a coroutine, use {@link ExecutionContext#yield(Object[])}.</li>
+ * <li>to create a new coroutine, use {@link ExecutionContext#newCoroutine(LuaFunction)};</li>
+ * <li>to get coroutine status, use {@link ExecutionContext#getCoroutineStatus(Coroutine)};</li>
+ * <li>to resume a coroutine, use {@link ExecutionContext#resume(Coroutine, Object[])};</li>
+ * <li>to yield from a coroutine, use {@link ExecutionContext#yield(Object[])}.</li>
  * </ul>
  *
  * <p><b>Note on equality:</b> according to §3.4.4 of the Lua Reference Manual,
@@ -43,134 +40,128 @@ import java.util.Objects;
  */
 public final class Coroutine {
 
-	// paused call stack: up-to-date only iff coroutine is not running
-	private Cons<ResumeInfo> callStack;
-	private Status status;
+  // paused call stack: up-to-date only iff coroutine is not running
+  private Cons<ResumeInfo> callStack;
+  private Status status;
 
-	Coroutine(Object body) {
-		this.callStack = new Cons<>(new ResumeInfo(BootstrapResumable.INSTANCE, body));
-		this.status = Status.SUSPENDED;
-	}
+  Coroutine(Object body) {
+    this.callStack = new Cons<>(new ResumeInfo(BootstrapResumable.INSTANCE, body));
+    this.status = Status.SUSPENDED;
+  }
 
-	/**
-	 * Coroutine status.
-	 */
-	public enum Status {
+  // (RUNNING, SUSPENDED) -> (NORMAL, RUNNING)
+  static Cons<ResumeInfo> _resume(final Coroutine a, final Coroutine b, Cons<ResumeInfo> cs) {
+    Objects.requireNonNull(a);
+    Objects.requireNonNull(b);
+    Objects.requireNonNull(cs);
 
-		/**
-		 * The status of a <i>suspended</i> coroutine, i.e., a coroutine that may be resumed.
-		 */
-		SUSPENDED,
+    synchronized (a) {
+      if (a.status == Status.RUNNING) {
+        synchronized (b) {
+          if (b.status == Status.SUSPENDED) {
+            Cons<ResumeInfo> result = b.callStack;
+            a.callStack = cs;
+            b.callStack = null;
+            a.status = Status.NORMAL;
+            b.status = Status.RUNNING;
+            return result;
+          } else {
+            if (b.status == Status.DEAD) {
+              throw Errors.resumeDeadCoroutine();
+            } else {
+              throw Errors.resumeNonSuspendedCoroutine();
+            }
+          }
+        }
+      } else {
+        throw new IllegalStateException("resuming coroutine not in running state");
+      }
+    }
+  }
 
-		/**
-		 * The status of a <i>running</i> coroutine, i.e., a coroutine that is currently executing.
-		 */
-		RUNNING,
+  // (NORMAL, RUNNING) -> (RUNNING, SUSPENDED)
+  static Cons<ResumeInfo> _yield(final Coroutine a, final Coroutine b, Cons<ResumeInfo> cs) {
+    synchronized (a) {
+      if (a.status == Status.NORMAL) {
+        synchronized (b) {
+          if (b.status == Status.RUNNING) {
+            Cons<ResumeInfo> result = a.callStack;
+            a.callStack = null;
+            b.callStack = cs;
+            a.status = Status.RUNNING;
+            b.status = b.callStack != null ? Status.SUSPENDED : Status.DEAD;
+            return result;
+          } else {
+            throw new IllegalCoroutineStateException("yielding coroutine not in running state");
+          }
+        }
+      } else {
+        throw new IllegalCoroutineStateException("yielding coroutine not in normal state");
+      }
+    }
+  }
 
-		/**
-		 * The status of a coroutine that is resuming another coroutine.
-		 */
-		NORMAL,
+  // (NORMAL, RUNNING) -> (RUNNING, DEAD)
+  static Cons<ResumeInfo> _return(Coroutine a, Coroutine b) {
+    return _yield(a, b, null);
+  }
 
-		/**
-		 * The status of a <i>dead</i> coroutine, i.e., a coroutine that has finished execution.
-		 */
-		DEAD
-	}
+  synchronized Status getStatus() {
+    return status;
+  }
 
-	synchronized Status getStatus() {
-		return status;
-	}
+  synchronized Cons<ResumeInfo> unpause() {
+    // TODO: check status?
+    status = Status.RUNNING;
+    Cons<ResumeInfo> result = callStack;
+    callStack = null;
+    return result;
+  }
 
-	private static class BootstrapResumable implements Resumable {
+  synchronized void pause(Cons<ResumeInfo> callStack) {
+    // TODO: check status?
+    this.callStack = callStack;
+  }
 
-		static final BootstrapResumable INSTANCE = new BootstrapResumable();
+  /**
+   * Coroutine status.
+   */
+  public enum Status {
 
-		@Override
-		public void resume(ExecutionContext context, Object target) throws ResolvedControlThrowable {
-			try {
-				Dispatch.call(context, target, context.getReturnBuffer().getAsArray());
-			}
-			catch (UnresolvedControlThrowable ct) {
-				throw ct.resolve();
-			}
-		}
+    /**
+     * The status of a <i>suspended</i> coroutine, i.e., a coroutine that may be resumed.
+     */
+    SUSPENDED,
 
-	}
+    /**
+     * The status of a <i>running</i> coroutine, i.e., a coroutine that is currently executing.
+     */
+    RUNNING,
 
-	// (RUNNING, SUSPENDED) -> (NORMAL, RUNNING)
-	static Cons<ResumeInfo> _resume(final Coroutine a, final Coroutine b, Cons<ResumeInfo> cs) {
-		Objects.requireNonNull(a);
-		Objects.requireNonNull(b);
-		Objects.requireNonNull(cs);
+    /**
+     * The status of a coroutine that is resuming another coroutine.
+     */
+    NORMAL,
 
-		synchronized (a) {
-			if (a.status == Status.RUNNING) {
-				synchronized (b) {
-					if (b.status == Status.SUSPENDED) {
-						Cons<ResumeInfo> result = b.callStack;
-						a.callStack = cs;
-						b.callStack = null;
-						a.status = Status.NORMAL;
-						b.status = Status.RUNNING;
-						return result;
-					}
-					else {
-						if (b.status == Status.DEAD) {
-							throw Errors.resumeDeadCoroutine();
-						}
-						else {
-							throw Errors.resumeNonSuspendedCoroutine();
-						}
-					}
-				}
-			}
-			else {
-				throw new IllegalStateException("resuming coroutine not in running state");
-			}
-		}
-	}
+    /**
+     * The status of a <i>dead</i> coroutine, i.e., a coroutine that has finished execution.
+     */
+    DEAD
+  }
 
-	// (NORMAL, RUNNING) -> (RUNNING, SUSPENDED)
-	static Cons<ResumeInfo> _yield(final Coroutine a, final Coroutine b, Cons<ResumeInfo> cs) {
-		synchronized (a) {
-			if (a.status == Status.NORMAL) {
-				synchronized (b) {
-					if (b.status == Status.RUNNING) {
-						Cons<ResumeInfo> result = a.callStack;
-						a.callStack = null;
-						b.callStack = cs;
-						a.status = Status.RUNNING;
-						b.status = b.callStack != null ? Status.SUSPENDED : Status.DEAD;
-						return result;
-					}
-					else {
-						throw new IllegalCoroutineStateException("yielding coroutine not in running state");
-					}
-				}
-			}
-			else {
-				throw new IllegalCoroutineStateException("yielding coroutine not in normal state");
-			}
-		}
-	}
+  private static class BootstrapResumable implements Resumable {
 
-	// (NORMAL, RUNNING) -> (RUNNING, DEAD)
-	static Cons<ResumeInfo> _return(Coroutine a, Coroutine b) {
-		return _yield(a, b, null);
-	}
+    static final BootstrapResumable INSTANCE = new BootstrapResumable();
 
-	synchronized Cons<ResumeInfo> unpause() {
-		// TODO: check status?
-		status = Status.RUNNING;
-		Cons<ResumeInfo> result = callStack;
-		callStack = null;
-		return result;
-	}
+    @Override
+    public void resume(ExecutionContext context, Object target) throws ResolvedControlThrowable {
+      try {
+        Dispatch.call(context, target, context.getReturnBuffer().getAsArray());
+      } catch (UnresolvedControlThrowable ct) {
+        throw ct.resolve();
+      }
+    }
 
-	synchronized void pause(Cons<ResumeInfo> callStack) {
-		// TODO: check status?
-		this.callStack = callStack;
-	}
+  }
 
 }

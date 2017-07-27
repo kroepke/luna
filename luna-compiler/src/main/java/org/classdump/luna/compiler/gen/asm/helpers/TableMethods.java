@@ -16,41 +16,41 @@
 
 package org.classdump.luna.compiler.gen.asm.helpers;
 
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+
 import org.classdump.luna.Table;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-
 public class TableMethods {
 
-	private TableMethods() {
-		// not to be instantiated
-	}
+  private TableMethods() {
+    // not to be instantiated
+  }
 
-	public static AbstractInsnNode rawset_int() {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(Table.class),
-				"rawset",
-				Type.getMethodDescriptor(
-						Type.VOID_TYPE,
-						Type.LONG_TYPE,
-						Type.getType(Object.class)),
-				false);
-	}
+  public static AbstractInsnNode rawset_int() {
+    return new MethodInsnNode(
+        INVOKEVIRTUAL,
+        Type.getInternalName(Table.class),
+        "rawset",
+        Type.getMethodDescriptor(
+            Type.VOID_TYPE,
+            Type.LONG_TYPE,
+            Type.getType(Object.class)),
+        false);
+  }
 
-	public static AbstractInsnNode rawset() {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(Table.class),
-				"rawset",
-				Type.getMethodDescriptor(
-						Type.VOID_TYPE,
-						Type.getType(Object.class),
-						Type.getType(Object.class)),
-				false);
-	}
+  public static AbstractInsnNode rawset() {
+    return new MethodInsnNode(
+        INVOKEVIRTUAL,
+        Type.getInternalName(Table.class),
+        "rawset",
+        Type.getMethodDescriptor(
+            Type.VOID_TYPE,
+            Type.getType(Object.class),
+            Type.getType(Object.class)),
+        false);
+  }
 
 }

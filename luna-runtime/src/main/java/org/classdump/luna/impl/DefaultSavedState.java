@@ -25,10 +25,10 @@ import java.util.Arrays;
  * <p>The class provides a uniform structured representation of the saved state consisting
  * of</p>
  * <ul>
- *     <li>a <i>resumption point</i>, an integer value, used to select the appropriate
- *       continuation point;</li>
- *     <li>the <i>register state</i>, a sequence of arbitrary objects, typically used to restore
- *       the local variables of the call.</li>
+ * <li>a <i>resumption point</i>, an integer value, used to select the appropriate
+ * continuation point;</li>
+ * <li>the <i>register state</i>, a sequence of arbitrary objects, typically used to restore
+ * the local variables of the call.</li>
  * </ul>
  *
  * <p>The exact meaning of the values stored in these fields is left to the discretion
@@ -37,43 +37,43 @@ import java.util.Arrays;
 @SuppressWarnings("unused")
 public class DefaultSavedState {
 
-	private final int resumptionPoint;
-	private final Object[] registers;
+  private final int resumptionPoint;
+  private final Object[] registers;
 
-	/**
-	 * Constructs a new instance of {@code DefaultSavedState} with the specified
-	 * {@code resumptionPoint} and {@code registers}.
-	 *
-	 * @param resumptionPoint  the resumption point
-	 * @param registers  the registers, may be {@code null}
-	 */
-	@SuppressWarnings("unused")
-	public DefaultSavedState(int resumptionPoint, Object[] registers) {
-		this.resumptionPoint = resumptionPoint;
-		this.registers = registers != null ? Arrays.copyOf(registers, registers.length) : null;
-	}
+  /**
+   * Constructs a new instance of {@code DefaultSavedState} with the specified
+   * {@code resumptionPoint} and {@code registers}.
+   *
+   * @param resumptionPoint the resumption point
+   * @param registers the registers, may be {@code null}
+   */
+  @SuppressWarnings("unused")
+  public DefaultSavedState(int resumptionPoint, Object[] registers) {
+    this.resumptionPoint = resumptionPoint;
+    this.registers = registers != null ? Arrays.copyOf(registers, registers.length) : null;
+  }
 
-	/**
-	 * Returns the resumption point stored in this saved state.
-	 *
-	 * @return  the resumption point
-	 */
-	@SuppressWarnings("unused")
-	public int resumptionPoint() {
-		return resumptionPoint;
-	}
+  /**
+   * Returns the resumption point stored in this saved state.
+   *
+   * @return the resumption point
+   */
+  @SuppressWarnings("unused")
+  public int resumptionPoint() {
+    return resumptionPoint;
+  }
 
-	/**
-	 * Returns a copy of the register state stored in this saved state, or {@code null}
-	 * if the register state array stored in this saved state was {@code null}.
-	 *
-	 * @return  the registers stored in this saved state, possibly {@code null}
-	 */
-	@SuppressWarnings("unused")
-	public Object[] registers() {
-		return registers != null
-				? Arrays.copyOf(registers, registers.length)
-				: null;
-	}
+  /**
+   * Returns a copy of the register state stored in this saved state, or {@code null}
+   * if the register state array stored in this saved state was {@code null}.
+   *
+   * @return the registers stored in this saved state, possibly {@code null}
+   */
+  @SuppressWarnings("unused")
+  public Object[] registers() {
+    return registers != null
+        ? Arrays.copyOf(registers, registers.length)
+        : null;
+  }
 
 }

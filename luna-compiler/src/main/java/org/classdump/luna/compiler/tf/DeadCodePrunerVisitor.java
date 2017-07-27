@@ -16,6 +16,7 @@
 
 package org.classdump.luna.compiler.tf;
 
+import java.util.Objects;
 import org.classdump.luna.compiler.analysis.LivenessInfo;
 import org.classdump.luna.compiler.analysis.TypeInfo;
 import org.classdump.luna.compiler.ir.AbstractVal;
@@ -28,100 +29,97 @@ import org.classdump.luna.compiler.ir.VarInit;
 import org.classdump.luna.compiler.ir.VarLoad;
 import org.classdump.luna.compiler.ir.VarStore;
 
-import java.util.Objects;
-
 public class DeadCodePrunerVisitor extends CodeTransformerVisitor {
 
-	private final TypeInfo types;
-	private final LivenessInfo liveness;
+  private final TypeInfo types;
+  private final LivenessInfo liveness;
 
-	public DeadCodePrunerVisitor(TypeInfo types, LivenessInfo liveness) {
-		this.types = Objects.requireNonNull(types);
-		this.liveness = Objects.requireNonNull(liveness);
-	}
+  public DeadCodePrunerVisitor(TypeInfo types, LivenessInfo liveness) {
+    this.types = Objects.requireNonNull(types);
+    this.liveness = Objects.requireNonNull(liveness);
+  }
 
-	protected void skip(BodyNode node) {
-		int idx = currentBody().indexOf(node);
-		if (idx < 0) {
-			throw new IllegalStateException("Node not found: " + node);
-		}
-		else {
-			currentBody().remove(idx);
-		}
-	}
+  protected void skip(BodyNode node) {
+    int idx = currentBody().indexOf(node);
+    if (idx < 0) {
+      throw new IllegalStateException("Node not found: " + node);
+    } else {
+      currentBody().remove(idx);
+    }
+  }
 
-	protected boolean isLiveOut(IRNode at, AbstractVal v) {
-		return liveness.entry(at).outVal().contains(v);
-	}
+  protected boolean isLiveOut(IRNode at, AbstractVal v) {
+    return liveness.entry(at).outVal().contains(v);
+  }
 
-	protected boolean isLiveOut(IRNode at, Var v) {
-		return liveness.entry(at).outVar().contains(v);
-	}
+  protected boolean isLiveOut(IRNode at, Var v) {
+    return liveness.entry(at).outVar().contains(v);
+  }
 
-	@Override
-	public void visit(LoadConst.Nil node) {
-		if (!isLiveOut(node, node.dest())) {
-			skip(node);
-		}
-	}
+  @Override
+  public void visit(LoadConst.Nil node) {
+    if (!isLiveOut(node, node.dest())) {
+      skip(node);
+    }
+  }
 
-	@Override
-	public void visit(LoadConst.Bool node) {
-		if (!isLiveOut(node, node.dest())) {
-			skip(node);
-		}
-	}
+  @Override
+  public void visit(LoadConst.Bool node) {
+    if (!isLiveOut(node, node.dest())) {
+      skip(node);
+    }
+  }
 
-	@Override
-	public void visit(LoadConst.Int node) {
-		if (!isLiveOut(node, node.dest())) {
-			skip(node);
-		}
-	}
+  @Override
+  public void visit(LoadConst.Int node) {
+    if (!isLiveOut(node, node.dest())) {
+      skip(node);
+    }
+  }
 
-	@Override
-	public void visit(LoadConst.Flt node) {
-		if (!isLiveOut(node, node.dest())) {
-			skip(node);
-		}
-	}
+  @Override
+  public void visit(LoadConst.Flt node) {
+    if (!isLiveOut(node, node.dest())) {
+      skip(node);
+    }
+  }
 
-	@Override
-	public void visit(LoadConst.Str node) {
-		if (!isLiveOut(node, node.dest())) {
-			skip(node);
-		}
-	}
+  @Override
+  public void visit(LoadConst.Str node) {
+    if (!isLiveOut(node, node.dest())) {
+      skip(node);
+    }
+  }
 
-	@Override
-	public void visit(VarInit node) {
-		// FIXME: very inefficient
-		if (!types.isReified(node.var()) && !isLiveOut(node, node.var())) {
-			skip(node);
-		}
-	}
+  @Override
+  public void visit(VarInit node) {
+    // FIXME: very inefficient
+    if (!types.isReified(node.var()) && !isLiveOut(node, node.var())) {
+      skip(node);
+    }
+  }
 
-	@Override
-	public void visit(VarStore node) {
-		// FIXME: very inefficient
-		if (!types.isReified(node.var()) && !isLiveOut(node, node.var())) {
-			skip(node);
-		}
-	}
+  @Override
+  public void visit(VarStore node) {
+    // FIXME: very inefficient
+    if (!types.isReified(node.var()) && !isLiveOut(node, node.var())) {
+      skip(node);
+    }
+  }
 
-	@Override
-	public void visit(VarLoad node) {
-		// FIXME: very inefficient
-		if (!types.isReified(node.var()) && !isLiveOut(node, node.dest())) {
-			skip(node);
-		}
-	}
+  @Override
+  public void visit(VarLoad node) {
+    // FIXME: very inefficient
+    if (!types.isReified(node.var()) && !isLiveOut(node, node.dest())) {
+      skip(node);
+    }
+  }
 
-	@Override
-	public void visit(MultiGet node) {
-		if (!isLiveOut(node, node.dest())) {
-			skip(node);
-		}
-	}
+  @Override
+  public void visit(MultiGet node) {
+    if (!isLiveOut(node, node.dest())) {
+      skip(node);
+    }
+  }
 
 }

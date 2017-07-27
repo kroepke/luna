@@ -23,68 +23,68 @@ import org.classdump.luna.{ConversionException, LuaRuntimeException, Table}
 //noinspection TypeAnnotation
 object BasicFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
-  val JustX = fragment ("JustX") {
+  val JustX = fragment("JustX") {
     """return x
     """
   }
   JustX in EmptyContext succeedsWith (null)
 
-  val NotX = fragment ("NotX") {
+  val NotX = fragment("NotX") {
     """return not x
     """
   }
   NotX in EmptyContext succeedsWith (true)
 
-  val NotTrue = fragment ("NotTrue") {
+  val NotTrue = fragment("NotTrue") {
     """return not true
     """
   }
   NotTrue in EmptyContext succeedsWith (false)
 
-  val NotNotX = fragment ("NotNotX") {
+  val NotNotX = fragment("NotNotX") {
     """return not not x
     """
   }
   NotNotX in EmptyContext succeedsWith (false)
 
-  val EnvResolution = fragment ("EnvResolution") {
+  val EnvResolution = fragment("EnvResolution") {
     """return _ENV
     """
   }
   EnvResolution in EmptyContext succeedsWith (classOf[Table])
 
-  val StringParsing1 = fragment ("StringParsing1") {
+  val StringParsing1 = fragment("StringParsing1") {
     """return "\\","\\"
     """
   }
-  StringParsing1 in EmptyContext succeedsWith ("\\", "\\")
+  StringParsing1 in EmptyContext succeedsWith("\\", "\\")
 
-  val StringParsing2 = fragment ("StringParsing2") {
+  val StringParsing2 = fragment("StringParsing2") {
     """return '\\','\\'
     """
   }
-  StringParsing2 in EmptyContext succeedsWith ("\\", "\\")
+  StringParsing2 in EmptyContext succeedsWith("\\", "\\")
 
-  val StringParsing3 = fragment ("StringParsing3") {
+  val StringParsing3 = fragment("StringParsing3") {
     """return '\\',"\\",'\\',"\\"
     """
   }
-  StringParsing3 in EmptyContext succeedsWith ("\\", "\\", "\\", "\\")
+  StringParsing3 in EmptyContext succeedsWith("\\", "\\", "\\", "\\")
 
-  val FloatParsing = fragment ("FloatParsing") {
+  val FloatParsing = fragment("FloatParsing") {
     """return 0e12 == 0 and .0 == 0 and 0. == 0 and .2e2 == 20 and 2.E-1 == 0.2
     """
   }
   FloatParsing in EmptyContext succeedsWith (true)
 
-  val LocalEnvResolution = fragment ("LocalEnvResolution") {
+  val LocalEnvResolution = fragment("LocalEnvResolution") {
     """local _ENV
       |return x
     """
   }
-  LocalEnvResolution in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to index a nil value")
+  LocalEnvResolution in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to index a nil value")
 
-  val LocalReassignResolve = fragment ("LocalReassignResolve") {
+  val LocalReassignResolve = fragment("LocalReassignResolve") {
     """local f = function (i) return "f1" end
       |local a = f()
       |function f(b) return "f2" end
@@ -94,15 +94,15 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return a, b, c
     """
   }
-  LocalReassignResolve in EmptyContext succeedsWith ("f1", "f2", "f3")
+  LocalReassignResolve in EmptyContext succeedsWith("f1", "f2", "f3")
 
-  val JustAdd = fragment ("JustAdd") {
+  val JustAdd = fragment("JustAdd") {
     """return x + 1
     """
   }
-  JustAdd in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to perform arithmetic on a nil value")
+  JustAdd in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to perform arithmetic on a nil value")
 
-  val AddNumbers = fragment ("AddNumbers") {
+  val AddNumbers = fragment("AddNumbers") {
     """local a = 39
       |local b = 3.0
       |return a + b
@@ -110,19 +110,19 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   AddNumbers in EmptyContext succeedsWith (42.0)
 
-  val AddHexString = fragment ("AddHexString") {
+  val AddHexString = fragment("AddHexString") {
     """return "0x10" + 1
     """
   }
   AddHexString in EmptyContext succeedsWith (17.0)
 
-  val IfThenElse = fragment ("IfThenElse") {
+  val IfThenElse = fragment("IfThenElse") {
     """if x >= 0 and x <= 10 then print(x) end
     """
   }
-  IfThenElse in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to compare number with nil")
+  IfThenElse in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to compare number with nil")
 
-  val Or1 = fragment ("Or1") {
+  val Or1 = fragment("Or1") {
     """local assert = assert or function() return end
       |return assert
     """
@@ -130,7 +130,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   Or1 in EmptyContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
   Or1 in BasicContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
 
-  val Or2 = fragment ("Or2") {
+  val Or2 = fragment("Or2") {
     """local assert = assert or function() return end
       |return not not assert
     """
@@ -138,7 +138,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   Or2 in EmptyContext succeedsWith (true)
   Or2 in BasicContext succeedsWith (true)
 
-  val Or3 = fragment ("Or3") {
+  val Or3 = fragment("Or3") {
     """local x = true or false
       |return x or 10
     """
@@ -146,7 +146,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   Or3 in EmptyContext succeedsWith (true)
   Or3 in BasicContext succeedsWith (true)
 
-  val IfOr1 = fragment ("IfOr1") {
+  val IfOr1 = fragment("IfOr1") {
     """local x
       |if assert then x = assert else x = function() return end end
       |return x
@@ -155,7 +155,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   IfOr1 in EmptyContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
   IfOr1 in BasicContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
 
-  val IfOr2 = fragment ("IfOr2") {
+  val IfOr2 = fragment("IfOr2") {
     """local x
       |if assert then x = assert else x = function() return end end
       |return not not x
@@ -164,101 +164,101 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   IfOr2 in EmptyContext succeedsWith (true)
   IfOr2 in BasicContext succeedsWith (true)
 
-  val IntegerCmp = fragment ("IntegerCmp") {
+  val IntegerCmp = fragment("IntegerCmp") {
     """local min = 0x8000000000000000
       |local max = 0x7fffffffffffffff
       |return min < max, max + 1 == min, min < 0, max > 0
     """
   }
-  IntegerCmp in EmptyContext succeedsWith (true, true, true, true)
+  IntegerCmp in EmptyContext succeedsWith(true, true, true, true)
 
-  val NumericCmp = fragment ("NumericCmp") {
+  val NumericCmp = fragment("NumericCmp") {
     """return 1 < 1.0, 1 > 1.0, 1 <= 1.0, 1 >= 1.0, 1 == 1.0
     """
   }
-  NumericCmp in EmptyContext succeedsWith (false, false, true, true, true)
+  NumericCmp in EmptyContext succeedsWith(false, false, true, true, true)
 
-  val NaNCmp = fragment ("NaNCmp") {
+  val NaNCmp = fragment("NaNCmp") {
     """local nan = 0/0
       |return 0 < nan, 0 > nan, nan ~= nan, nan == nan, nan < nan, nan > nan, nan >= nan, nan <= nan
     """
   }
-  NaNCmp in EmptyContext succeedsWith (false, false, true, false, false, false, false, false)
+  NaNCmp in EmptyContext succeedsWith(false, false, true, false, false, false, false, false)
 
-  val StringCmp = fragment ("StringCmp") {
+  val StringCmp = fragment("StringCmp") {
     """return "hello" < "there", "1" < "1.0", "1" > "1.0", "1" == "1.0"
     """
   }
-  StringCmp in EmptyContext succeedsWith (true, true, false, false)
+  StringCmp in EmptyContext succeedsWith(true, true, false, false)
 
-  val MixedEq = fragment ("MixedEq") {
+  val MixedEq = fragment("MixedEq") {
     """return 1 == "1", "1" == 1.0, 1 == 1.0
     """
   }
-  MixedEq in EmptyContext succeedsWith (false, false, true)
+  MixedEq in EmptyContext succeedsWith(false, false, true)
 
-  val MixedCmp = fragment ("MixedCmp") {
+  val MixedCmp = fragment("MixedCmp") {
     """return 1 < "1"
     """
   }
-  MixedCmp in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to compare number with string")
+  MixedCmp in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to compare number with string")
 
-  val MixedCmpReverse = fragment ("MixedCmpReverse") {
+  val MixedCmpReverse = fragment("MixedCmpReverse") {
     """return 1 > "1"
     """
   }
-  MixedCmpReverse in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to compare string with number")
+  MixedCmpReverse in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to compare string with number")
 
-  val MultiReturn = fragment ("MultiReturn") {
+  val MultiReturn = fragment("MultiReturn") {
     """local function f() end
       |return f(), f(), f()
     """
   }
-  MultiReturn in EmptyContext succeedsWith (null, null)
+  MultiReturn in EmptyContext succeedsWith(null, null)
 
-  val LocalMultiAssign = fragment ("LocalMultiAssign") {
+  val LocalMultiAssign = fragment("LocalMultiAssign") {
     """local a, b = (function() return 1, 2 end)()
       |return a, b
     """
   }
-  LocalMultiAssign in EmptyContext succeedsWith (1, 2)
+  LocalMultiAssign in EmptyContext succeedsWith(1, 2)
 
-  val LocalMultiAssignWithPrefix = fragment ("LocalMultiAssignWithPrefix") {
+  val LocalMultiAssignWithPrefix = fragment("LocalMultiAssignWithPrefix") {
     """local a, b, c = 3, (function() return 1, 2 end)()
       |return a, b, c
     """
   }
-  LocalMultiAssignWithPrefix in EmptyContext succeedsWith (3, 1, 2)
+  LocalMultiAssignWithPrefix in EmptyContext succeedsWith(3, 1, 2)
 
-  val NonLocalMultiAssign = fragment ("NonLocalMultiAssign") {
+  val NonLocalMultiAssign = fragment("NonLocalMultiAssign") {
     """a, b = (function() return 1, 2 end)()
       |return a, b
     """
   }
-  NonLocalMultiAssign in EmptyContext succeedsWith (1, 2)
+  NonLocalMultiAssign in EmptyContext succeedsWith(1, 2)
 
-  val NonLocalMultiAssignWithPrefix = fragment ("NonLocalMultiAssignWithPrefix") {
+  val NonLocalMultiAssignWithPrefix = fragment("NonLocalMultiAssignWithPrefix") {
     """a, b, c = 3, (function() return 1, 2 end)()
       |return a, b, c
     """
   }
-  NonLocalMultiAssignWithPrefix in EmptyContext succeedsWith (3, 1, 2)
+  NonLocalMultiAssignWithPrefix in EmptyContext succeedsWith(3, 1, 2)
 
-  val SplitLocalMultiAssign = fragment ("SplitLocalMultiAssign") {
+  val SplitLocalMultiAssign = fragment("SplitLocalMultiAssign") {
     """local a, b
       |a, b = (function() return 1, 2 end)()
       |return a, b
     """
   }
-  SplitLocalMultiAssign in EmptyContext succeedsWith (1, 2)
+  SplitLocalMultiAssign in EmptyContext succeedsWith(1, 2)
 
-  val SplitLocalMultiAssignWithPrefix = fragment ("SplitLocalMultiAssignWithPrefix") {
+  val SplitLocalMultiAssignWithPrefix = fragment("SplitLocalMultiAssignWithPrefix") {
     """local a, b, c
       |a, b, c = 3, (function() return 1, 2 end)()
       |return a, b, c
     """
   }
-  SplitLocalMultiAssignWithPrefix in EmptyContext succeedsWith (3, 1, 2)
+  SplitLocalMultiAssignWithPrefix in EmptyContext succeedsWith(3, 1, 2)
 
   val SimpleForLoop = fragment("SimpleForLoop") {
     """local sum = 0
@@ -280,11 +280,13 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   expect {
     var sum = 0.0
-    for (d <- 1.0 to 9.9 by 0.4) { sum += d }
+    for (d <- 1.0 to 9.9 by 0.4) {
+      sum += d
+    }
     FloatForLoop in EmptyContext succeedsWith (sum)
   }
 
-  val MixedNumericForLoop = fragment ("MixedNumericForLoop") {
+  val MixedNumericForLoop = fragment("MixedNumericForLoop") {
     """local sum = 0
       |for i = 1, 10.0 do
       |  sum = sum + i
@@ -294,7 +296,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   MixedNumericForLoop in EmptyContext succeedsWith (55)
 
-  val RuntimeDeterminedForLoop = fragment ("RuntimeDeterminedForLoop") {
+  val RuntimeDeterminedForLoop = fragment("RuntimeDeterminedForLoop") {
     """local sum = 0
       |for i = 1, "10" do
       |  sum = sum + i
@@ -304,31 +306,31 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   RuntimeDeterminedForLoop in EmptyContext succeedsWith (55)
 
-  val IllegalForLoop1 = fragment ("IllegalForLoop1") {
+  val IllegalForLoop1 = fragment("IllegalForLoop1") {
     """for i = "a", "b", "c" do end
     """
   }
-  IllegalForLoop1 in EmptyContext failsWith (classOf[ConversionException], ""<<"'for' limit must be a number")
+  IllegalForLoop1 in EmptyContext failsWith(classOf[ConversionException], "" << "'for' limit must be a number")
 
-  val IllegalForLoop2 = fragment ("IllegalForLoop2") {
+  val IllegalForLoop2 = fragment("IllegalForLoop2") {
     """for i = "a", 0, "c" do end
     """
   }
-  IllegalForLoop2 in EmptyContext failsWith (classOf[ConversionException], ""<<"'for' step must be a number")
+  IllegalForLoop2 in EmptyContext failsWith(classOf[ConversionException], "" << "'for' step must be a number")
 
-  val IllegalForLoop3 = fragment ("IllegalForLoop3") {
+  val IllegalForLoop3 = fragment("IllegalForLoop3") {
     """for i = "a", 0, 0 do end
     """
   }
-  IllegalForLoop3 in EmptyContext failsWith (classOf[ConversionException], ""<<"'for' initial value must be a number")
+  IllegalForLoop3 in EmptyContext failsWith(classOf[ConversionException], "" << "'for' initial value must be a number")
 
-  val IllegalForLoop4 = fragment ("IllegalForLoop4") {
+  val IllegalForLoop4 = fragment("IllegalForLoop4") {
     """for i = 1, "x" do end
     """
   }
-  IllegalForLoop4 in EmptyContext failsWith (classOf[ConversionException], ""<<"'for' limit must be a number")
+  IllegalForLoop4 in EmptyContext failsWith(classOf[ConversionException], "" << "'for' limit must be a number")
 
-  val NaNForLoop = fragment ("NaNForLoop") {
+  val NaNForLoop = fragment("NaNForLoop") {
     """local n = 0
       |for i = 0, (0/0) do
       |  n = n + 1.0
@@ -338,45 +340,45 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   NaNForLoop in EmptyContext succeedsWith (0)
 
-  val ZeroStepForLoop = fragment ("ZeroStepForLoop") {
+  val ZeroStepForLoop = fragment("ZeroStepForLoop") {
     """for i = 1, 10, 0 do assert(false) end
     """
   }
-  ZeroStepForLoop in EmptyContext succeedsWith ()
-  ZeroStepForLoop in BasicContext succeedsWith ()
+  ZeroStepForLoop in EmptyContext succeedsWith()
+  ZeroStepForLoop in BasicContext succeedsWith()
 
-  val ZeroStepFloatForLoop = fragment ("ZeroStepFloatForLoop") {
+  val ZeroStepFloatForLoop = fragment("ZeroStepFloatForLoop") {
     """for i = 1, 10, 0.0 do assert(false) end
     """
   }
-  ZeroStepFloatForLoop in EmptyContext succeedsWith ()
-  ZeroStepFloatForLoop in BasicContext succeedsWith ()
+  ZeroStepFloatForLoop in EmptyContext succeedsWith()
+  ZeroStepFloatForLoop in BasicContext succeedsWith()
 
-  val NegativeStepForLoop = fragment ("NegativeStepForLoop") {
+  val NegativeStepForLoop = fragment("NegativeStepForLoop") {
     """for i = 1, 10, -1 do assert(false) end
     """
   }
-  NegativeStepForLoop in EmptyContext succeedsWith ()
-  NegativeStepForLoop in BasicContext succeedsWith ()
+  NegativeStepForLoop in EmptyContext succeedsWith()
+  NegativeStepForLoop in BasicContext succeedsWith()
 
-  val NegativeStepFloatForLoop = fragment ("NegativeStepFloatForLoop") {
+  val NegativeStepFloatForLoop = fragment("NegativeStepFloatForLoop") {
     """for i = 0, 1, -1.0 do assert(false) end
     """
   }
-  NegativeStepFloatForLoop in EmptyContext succeedsWith ()
-  NegativeStepFloatForLoop in BasicContext succeedsWith ()
+  NegativeStepFloatForLoop in EmptyContext succeedsWith()
+  NegativeStepFloatForLoop in BasicContext succeedsWith()
 
-  val SimplifiableFloatForLoop = fragment ("SimplifiableFloatForLoop") {
+  val SimplifiableFloatForLoop = fragment("SimplifiableFloatForLoop") {
     """local step = -1.0
       |for i = 0, 5, step do  -- loop type (negative, non-NaN) can be determined at compile time
       |  assert(false)
       |end
     """
   }
-  SimplifiableFloatForLoop in EmptyContext succeedsWith ()
-  SimplifiableFloatForLoop in BasicContext succeedsWith ()
+  SimplifiableFloatForLoop in EmptyContext succeedsWith()
+  SimplifiableFloatForLoop in BasicContext succeedsWith()
 
-  val DynamicIntegerForLoop = fragment ("DynamicIntegerForLoop") {
+  val DynamicIntegerForLoop = fragment("DynamicIntegerForLoop") {
     """local function forloop(init, limit, step, f)
       |  for i = init, limit, step do
       |    f(i)
@@ -390,7 +392,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   DynamicIntegerForLoop in EmptyContext succeedsWith (55)
 
-  val ForLoopMtAttempt = fragment ("ForLoopMtAttempt") {
+  val ForLoopMtAttempt = fragment("ForLoopMtAttempt") {
     """local function nt(v)
       |  local t = {}
       |  local f = function(a, b) return v end
@@ -401,10 +403,10 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |for i = nt(0), 10 do assert(false) end
     """
   }
-  ForLoopMtAttempt in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to call a nil value")
-  ForLoopMtAttempt in BasicContext failsWith (classOf[ConversionException], ""<<"'for' initial value must be a number")
+  ForLoopMtAttempt in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to call a nil value")
+  ForLoopMtAttempt in BasicContext failsWith(classOf[ConversionException], "" << "'for' initial value must be a number")
 
-  val ForLoopVarNameResolution = fragment ("ForLoopVarNameResolution") {
+  val ForLoopVarNameResolution = fragment("ForLoopVarNameResolution") {
     """local count = 0
       |local i = 2
       |for i = 1, 10 do count = count + 1 end
@@ -414,7 +416,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   ForLoopVarNameResolution in EmptyContext succeedsWith (20)
 
-  val RepeatUntil = fragment ("RepeatUntil") {
+  val RepeatUntil = fragment("RepeatUntil") {
     """local sum = 0
       |repeat
       |  sum = sum + 1
@@ -425,73 +427,73 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   RepeatUntil in EmptyContext succeedsWith (6)
 
-  val InfiniteWhileLoop1 = fragment ("InfiniteWhileLoop1") {
+  val InfiniteWhileLoop1 = fragment("InfiniteWhileLoop1") {
     """return function() while true do local a = -1 end end
     """
   }
   InfiniteWhileLoop1 in EmptyContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
 
-  val InfiniteWhileLoop2 = fragment ("InfiniteWhileLoop2") {
+  val InfiniteWhileLoop2 = fragment("InfiniteWhileLoop2") {
     """return function() while 1 do local a = -1 end end
     """
   }
   InfiniteWhileLoop2 in EmptyContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
 
-  val InfiniteWhileLoop3 = fragment ("InfiniteWhileLoop3") {
+  val InfiniteWhileLoop3 = fragment("InfiniteWhileLoop3") {
     """return function () repeat local x = 1 until true end
     """
   }
   InfiniteWhileLoop3 in EmptyContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
 
-  val BitwiseOps = fragment ("BitwiseOps") {
+  val BitwiseOps = fragment("BitwiseOps") {
     """local x = 3
       |local y = 10
       |
       |return x & y, x | y, x ~ y, ~x, ~y, x << y, x >> y
     """
   }
-  BitwiseOps in EmptyContext succeedsWith (2, 11, 9, -4, -11, 3072, 0)
+  BitwiseOps in EmptyContext succeedsWith(2, 11, 9, -4, -11, 3072, 0)
 
-  val BitwiseCoercedOps = fragment ("BitwiseCoercedOps") {
+  val BitwiseCoercedOps = fragment("BitwiseCoercedOps") {
     """local x = 3.0
       |local y = 10.0
       |return x & y, x | y
     """
   }
-  BitwiseCoercedOps in EmptyContext succeedsWith (2, 11)
+  BitwiseCoercedOps in EmptyContext succeedsWith(2, 11)
 
-  val BitwiseStringCoercedOps = fragment ("BitwiseStringCoercedOps") {
+  val BitwiseStringCoercedOps = fragment("BitwiseStringCoercedOps") {
     """local x = "3"
       |local y = "10.0"
       |return x & y, x | y, x ~ y, ~x, ~y, x << y, x >> y
     """
   }
-  BitwiseStringCoercedOps in EmptyContext succeedsWith (2, 11, 9, -4, -11, 3072, 0)
+  BitwiseStringCoercedOps in EmptyContext succeedsWith(2, 11, 9, -4, -11, 3072, 0)
 
-  val BitwiseAttemptError = fragment ("BitwiseAttemptError") {
+  val BitwiseAttemptError = fragment("BitwiseAttemptError") {
     """return x & y
     """
   }
-  BitwiseAttemptError in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to perform bitwise operation on a nil value")
+  BitwiseAttemptError in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to perform bitwise operation on a nil value")
 
-  val BitwiseRepresentationError = fragment ("BitwiseRepresentationError") {
+  val BitwiseRepresentationError = fragment("BitwiseRepresentationError") {
     """local function int(x)
       |  return x & -1
       |end
       |int(3.1)
     """
   }
-  BitwiseRepresentationError in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"number has no integer representation")
+  BitwiseRepresentationError in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "number has no integer representation")
 
-  val BitwiseError = fragment ("BitwiseError") {
+  val BitwiseError = fragment("BitwiseError") {
     """local x = print or 1.2
       |return 10 & x
     """
   }
-  BitwiseError in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"number has no integer representation")
-  BitwiseError in BasicContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to perform bitwise operation on a function value")
+  BitwiseError in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "number has no integer representation")
+  BitwiseError in BasicContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to perform bitwise operation on a function value")
 
-  val UnmOnNumbers = fragment ("UnmOnNumbers") {
+  val UnmOnNumbers = fragment("UnmOnNumbers") {
     """local i = 42
       |local f = 42.6
       |local function fun()
@@ -502,39 +504,39 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return i, -i, f, -f, n, -n
     """
   }
-  UnmOnNumbers in EmptyContext succeedsWith (42, -42, 42.6, -42.6, 0.314, -0.314)
-  UnmOnNumbers in BasicContext succeedsWith (42, -42, 42.6, -42.6, 314, -314)
+  UnmOnNumbers in EmptyContext succeedsWith(42, -42, 42.6, -42.6, 0.314, -0.314)
+  UnmOnNumbers in BasicContext succeedsWith(42, -42, 42.6, -42.6, 314, -314)
 
-  val UnmOnNumericString = fragment ("UnmOnNumericString") {
+  val UnmOnNumericString = fragment("UnmOnNumericString") {
     """local i = "42"
       |local f = "42.6"
       |
       |return i, -i, f, -f
     """
   }
-  UnmOnNumericString in EmptyContext succeedsWith ("42", -42.0, "42.6", -42.6)
+  UnmOnNumericString in EmptyContext succeedsWith("42", -42.0, "42.6", -42.6)
 
-  val UnmOnNonNumericString = fragment ("UnmOnNonNumericString") {
+  val UnmOnNonNumericString = fragment("UnmOnNonNumericString") {
     """local s = "hello"
       |return -s
     """
   }
-  UnmOnNonNumericString in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to perform arithmetic on a string value")
+  UnmOnNonNumericString in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to perform arithmetic on a string value")
 
-  val UnmOnNil = fragment ("UnmOnNil") {
+  val UnmOnNil = fragment("UnmOnNil") {
     """return -x
     """
   }
-  UnmOnNil in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to perform arithmetic on a nil value")
+  UnmOnNil in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to perform arithmetic on a nil value")
 
-  val StringLength = fragment ("StringLength") {
+  val StringLength = fragment("StringLength") {
     """local s = "hello"
       |return #s
     """
   }
   StringLength in EmptyContext succeedsWith (5)
 
-  val SeqTableLength = fragment ("SeqTableLength") {
+  val SeqTableLength = fragment("SeqTableLength") {
     """local t = {}
       |t[1] = "hi"
       |t[2] = "there"
@@ -543,58 +545,58 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   SeqTableLength in EmptyContext succeedsWith (2)
 
-  val SeqTableLengthMultiAssign = fragment ("SeqTableLengthMultiAssign") {
+  val SeqTableLengthMultiAssign = fragment("SeqTableLengthMultiAssign") {
     """local t = {}
       |t[1], t[2] = #t, #t
       |return #t, t[1], t[2]
     """
   }
-  SeqTableLengthMultiAssign in EmptyContext succeedsWith (2, 0, 0)
+  SeqTableLengthMultiAssign in EmptyContext succeedsWith(2, 0, 0)
 
-  val TableMultiAssign1 = fragment ("TableMultiAssign1") {
+  val TableMultiAssign1 = fragment("TableMultiAssign1") {
     """local t = {}
       |t["hi"], t['there'] = 1, 2
       |return t.hi, t.there
     """
   }
-  TableMultiAssign1 in EmptyContext succeedsWith (1, 2)
+  TableMultiAssign1 in EmptyContext succeedsWith(1, 2)
 
-  val TableMultiAssign2 = fragment ("TableMultiAssign2") {
+  val TableMultiAssign2 = fragment("TableMultiAssign2") {
     """local t = {}
       |t.hi, t.there = 1, 2
       |return t.hi, t.there
     """
   }
-  TableMultiAssign2 in EmptyContext succeedsWith (1, 2)
+  TableMultiAssign2 in EmptyContext succeedsWith(1, 2)
 
-  val NilTableLength = fragment ("NilTableLength") {
+  val NilTableLength = fragment("NilTableLength") {
     """return #t
     """
   }
-  NilTableLength in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to get length of a nil value")
+  NilTableLength in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to get length of a nil value")
 
-  val TableFloatKeys = fragment ("TableFloatKeys") {
+  val TableFloatKeys = fragment("TableFloatKeys") {
     """local x = -1
       |local mz = 0/x   -- minus zero
       |local t = {[0] = 10, 20, 30, 40, 50}
       |return t[mz], t[0], t[mz] == t[0], t[-0], t[0], t[-0] == t[0]
     """
   }
-  TableFloatKeys in EmptyContext succeedsWith (10, 10, true, 10, 10, true)
+  TableFloatKeys in EmptyContext succeedsWith(10, 10, true, 10, 10, true)
 
-  val ConcatStrings = fragment ("ConcatStrings") {
+  val ConcatStrings = fragment("ConcatStrings") {
     """return "hello".." ".."world"
     """
   }
   ConcatStrings in EmptyContext succeedsWith ("hello world")
 
-  val ConcatStringsAndNumbers = fragment ("ConcatStringsAndNumbers") {
+  val ConcatStringsAndNumbers = fragment("ConcatStringsAndNumbers") {
     """return (4 .. 1 + 1.0) .. " = " .. 42
     """
   }
   ConcatStringsAndNumbers in EmptyContext succeedsWith ("42.0 = 42")
 
-  val ConcatDynamic = fragment ("ConcatDynamic") {
+  val ConcatDynamic = fragment("ConcatDynamic") {
     """local function c(a, b, c)
       |  return a..b..c
       |end
@@ -605,13 +607,13 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   ConcatDynamic in EmptyContext succeedsWith ("12000")
 
-  val ConcatNil = fragment ("ConcatNil") {
+  val ConcatNil = fragment("ConcatNil") {
     """return "x = "..x
     """
   }
-  ConcatNil in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to concatenate a nil value")
+  ConcatNil in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to concatenate a nil value")
 
-  val ConcatNumeric = fragment ("ConcatNumeric") {
+  val ConcatNumeric = fragment("ConcatNumeric") {
     """local i = 1
       |local f = 1.0
       |local n
@@ -622,16 +624,16 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   ConcatNumeric in EmptyContext succeedsWith (":1.0")
   ConcatNumeric in BasicContext succeedsWith (":1")
 
-  val Upvalues1 = fragment ("Upvalues1") {
+  val Upvalues1 = fragment("Upvalues1") {
     """local x = {}
       |for i = 0, 10 do
       |  if i % 2 == 0 then x[i // 2] = function() return i, x end end
       |end
     """
   }
-  Upvalues1 in EmptyContext succeedsWith ()
+  Upvalues1 in EmptyContext succeedsWith()
 
-  val Upvalues2 = fragment ("Upvalues2") {
+  val Upvalues2 = fragment("Upvalues2") {
     """local x
       |x = 1
       |
@@ -645,7 +647,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   Upvalues2 in EmptyContext succeedsWith (9)
 
-  val Upvalues3 = fragment ("Upvalues3") {
+  val Upvalues3 = fragment("Upvalues3") {
     """local x, y
       |if g then
       |  y = function() return x end
@@ -657,7 +659,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   Upvalues3 in EmptyContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]])
 
-  val Upvalues4 = fragment ("Upvalues4") {
+  val Upvalues4 = fragment("Upvalues4") {
     """local n = 0
       |local function f() n = n + 1 end
       |f()
@@ -668,9 +670,9 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return m, l
     """
   }
-  Upvalues4 in EmptyContext succeedsWith (2, 1)
+  Upvalues4 in EmptyContext succeedsWith(2, 1)
 
-  val SetUpvalue = fragment ("SetUpvalue") {
+  val SetUpvalue = fragment("SetUpvalue") {
     """local x = 1
       |
       |local function f()
@@ -683,14 +685,14 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   SetUpvalue in EmptyContext succeedsWith (123)
 
-  val SetTabUp = fragment ("SetTabUp") {
+  val SetTabUp = fragment("SetTabUp") {
     """x = 1
       |return x
     """
   }
   SetTabUp in EmptyContext succeedsWith (1)
 
-  val Tables = fragment ("Tables") {
+  val Tables = fragment("Tables") {
     """local t = {}
       |t.self = t
       |return t.self
@@ -698,7 +700,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   Tables in EmptyContext succeedsWith (classOf[Table])
 
-  val Self = fragment ("Self") {
+  val Self = fragment("Self") {
     """local function GET(tab, k) return tab[k] end
       |local function SET(tab, k, v) tab[k] = v end
       |
@@ -713,9 +715,9 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return before, after
     """
   }
-  Self in EmptyContext succeedsWith (null, "hello")
+  Self in EmptyContext succeedsWith(null, "hello")
 
-  val BlockLocals = fragment ("BlockLocals") {
+  val BlockLocals = fragment("BlockLocals") {
     """do
       |  local a = 0
       |  local b = 1
@@ -726,9 +728,9 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |end
     """
   }
-  BlockLocals in EmptyContext succeedsWith ()
+  BlockLocals in EmptyContext succeedsWith()
 
-  val BlockLocalShadowing = fragment ("BlockLocalShadowing") {
+  val BlockLocalShadowing = fragment("BlockLocalShadowing") {
     """local a, b = 1, 2
       |local x, y
       |do
@@ -738,9 +740,9 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return x, y
     """
   }
-  BlockLocalShadowing in EmptyContext succeedsWith ("x", "y")
+  BlockLocalShadowing in EmptyContext succeedsWith("x", "y")
 
-  val Tailcalls = fragment ("Tailcalls") {
+  val Tailcalls = fragment("Tailcalls") {
     """function f(x)
       |  print(x)
       |  if x > 0 then
@@ -757,21 +759,21 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return f(3),f(-2)
     """
   }
-  Tailcalls in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to call a nil value")
+  Tailcalls in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to call a nil value")
 
-  val YesTailcall = fragment ("YesTailcall") {
+  val YesTailcall = fragment("YesTailcall") {
     """return (function () return 1, 2 end)()
     """
   }
-  YesTailcall in EmptyContext succeedsWith (1, 2)
+  YesTailcall in EmptyContext succeedsWith(1, 2)
 
-  val NoTailcall = fragment ("NoTailcall") {
+  val NoTailcall = fragment("NoTailcall") {
     """return ((function () return 1, 2 end)())
     """
   }
   NoTailcall in EmptyContext succeedsWith (1)
 
-  val FuncWith2Params = fragment ("FuncWith2Params") {
+  val FuncWith2Params = fragment("FuncWith2Params") {
     """local f = function (x, y)
       |    return x + y
       |end
@@ -780,7 +782,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   FuncWith2Params in EmptyContext succeedsWith (42)
 
-  val FuncWith3Params = fragment ("FuncWith3Params") {
+  val FuncWith3Params = fragment("FuncWith3Params") {
     """local f = function (x, y, z)
       |    return x + y + z
       |end
@@ -789,7 +791,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   FuncWith3Params in EmptyContext succeedsWith (42)
 
-  val DeterminateVarargs = fragment ("DeterminateVarargs") {
+  val DeterminateVarargs = fragment("DeterminateVarargs") {
     """local a, b = ...
       |if a > 0 then
       |  return b, a
@@ -798,15 +800,15 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |end
     """
   }
-  DeterminateVarargs in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to compare number with nil")
+  DeterminateVarargs in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to compare number with nil")
 
-  val ReturnVarargs = fragment ("ReturnVarargs") {
+  val ReturnVarargs = fragment("ReturnVarargs") {
     """return ...
     """
   }
-  ReturnVarargs in EmptyContext succeedsWith ()
+  ReturnVarargs in EmptyContext succeedsWith()
 
-  val IndeterminateVarargs = fragment ("IndeterminateVarargs") {
+  val IndeterminateVarargs = fragment("IndeterminateVarargs") {
     """local a = ...
       |if a then
       |  return ...
@@ -817,19 +819,19 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   IndeterminateVarargs in EmptyContext succeedsWith (false)
 
-  val MultiTableConstructor = fragment ("MultiTableConstructor") {
+  val MultiTableConstructor = fragment("MultiTableConstructor") {
     """return #({(function() return 3, 2, 1 end)()})
     """
   }
   MultiTableConstructor in EmptyContext succeedsWith (3)
 
-  val NoMultiTableConstructor = fragment ("NoMultiTableConstructor") {
+  val NoMultiTableConstructor = fragment("NoMultiTableConstructor") {
     """return #({((function() return 3, 2, 1 end)())})
     """
   }
   NoMultiTableConstructor in EmptyContext succeedsWith (1)
 
-  val NilTestInlining = fragment ("NilTestInlining") {
+  val NilTestInlining = fragment("NilTestInlining") {
     """local a
       |if a then
       |  return true
@@ -840,14 +842,14 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   NilTestInlining in EmptyContext succeedsWith (false)
 
-  val VarargFunctionCalls = fragment ("VarargFunctionCalls") {
+  val VarargFunctionCalls = fragment("VarargFunctionCalls") {
     """local f = function(...) return ... end
       |return true, f(...)
     """
   }
   VarargFunctionCalls in EmptyContext succeedsWith (true)
 
-  val VarargFunctionCalls2 = fragment ("VarargFunctionCalls2") {
+  val VarargFunctionCalls2 = fragment("VarargFunctionCalls2") {
     """local x = ...
       |local f = function(...) return ... end
       |if x then
@@ -859,23 +861,23 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   VarargFunctionCalls2 in EmptyContext succeedsWith (true)
 
-  val VarargDecomposition = fragment ("VarargDecomposition") {
+  val VarargDecomposition = fragment("VarargDecomposition") {
     """local a, b = ...
       |local c, d, e = a(b, ...)
       |return d(e, ...)
     """
   }
-  VarargDecomposition in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to call a nil value")
+  VarargDecomposition in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to call a nil value")
 
-  val VarargCallWithFixedPrefix = fragment ("VarargCallWithFixedPrefix") {
+  val VarargCallWithFixedPrefix = fragment("VarargCallWithFixedPrefix") {
     """x = 10
       |local function f(g, ...) return x, g(...) end
       |return f(function (a, b) return x + a, x + b end, 1, 2.3, "456")
     """
   }
-  VarargCallWithFixedPrefix in EmptyContext succeedsWith (10, 11, 12.3)
+  VarargCallWithFixedPrefix in EmptyContext succeedsWith(10, 11, 12.3)
 
-  val BigParamListFunctionCall = fragment ("BigParamListFunctionCall") {
+  val BigParamListFunctionCall = fragment("BigParamListFunctionCall") {
     """local function f(a,b,c,d,e,f,g,h)
       |  return h or g or f or e or d or c or b or a or z
       |end
@@ -883,9 +885,9 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return f(1,2,3,4), f(1,2,3), f(1,2,3,4,5,6)
     """
   }
-  BigParamListFunctionCall in EmptyContext succeedsWith (4, 3, 6)
+  BigParamListFunctionCall in EmptyContext succeedsWith(4, 3, 6)
 
-  val FunctionCalls = fragment ("FunctionCalls") {
+  val FunctionCalls = fragment("FunctionCalls") {
     """local function f(x, y)
       |  return x + y
       |end
@@ -895,7 +897,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   FunctionCalls in EmptyContext succeedsWith (3)
 
-  val FunctionCalls2 = fragment ("FunctionCalls2") {
+  val FunctionCalls2 = fragment("FunctionCalls2") {
     """local function abs(x)
       |  local function f(x, acc)
       |    if x > 0 then
@@ -915,7 +917,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   FunctionCalls2 in EmptyContext succeedsWith (20)
 
-  val FunctionCalls3 = fragment ("FunctionCalls3") {
+  val FunctionCalls3 = fragment("FunctionCalls3") {
     """local function abs(x)
       |  local function f(g, x, acc)
       |    if x > 0 then
@@ -935,7 +937,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   FunctionCalls3 in EmptyContext succeedsWith (20)
 
-  val LocalUpvalue = fragment ("LocalUpvalue") {
+  val LocalUpvalue = fragment("LocalUpvalue") {
     """local function f()
       |  local x = 1
       |  local function g()
@@ -949,7 +951,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   LocalUpvalue in EmptyContext succeedsWith (1)
 
-  val ReturningAFunction = fragment ("ReturningAFunction") {
+  val ReturningAFunction = fragment("ReturningAFunction") {
     """local function f()
       |  return function(x) return not not x, x end
       |end
@@ -957,9 +959,9 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return f()()
     """
   }
-  ReturningAFunction in EmptyContext succeedsWith (false, null)
+  ReturningAFunction in EmptyContext succeedsWith(false, null)
 
-  val IncompatibleFunctions = fragment ("IncompatibleFunctions") {
+  val IncompatibleFunctions = fragment("IncompatibleFunctions") {
     """local f
       |if x then
       |  f = function(x, y)
@@ -977,31 +979,31 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   IncompatibleFunctions in EmptyContext succeedsWith (null)
 
-  val TailcallWith21Args = fragment ("TailcallWith21Args") {
+  val TailcallWith21Args = fragment("TailcallWith21Args") {
     """local function f(...) return true, ... end
       |return f("hello", "there", "this", "is", "a", "result", "of", "a", "tail", "call",
       |   "with", "many", "arguments", "and", "it", "still", "appears", "to", "work", "quite",
       |   "well")
     """
   }
-  TailcallWith21Args in EmptyContext succeedsWith (true,
-      "hello", "there", "this", "is", "a", "result", "of", "a", "tail", "call",
-      "with", "many", "arguments", "and", "it", "still", "appears", "to", "work", "quite",
-      "well")
+  TailcallWith21Args in EmptyContext succeedsWith(true,
+    "hello", "there", "this", "is", "a", "result", "of", "a", "tail", "call",
+    "with", "many", "arguments", "and", "it", "still", "appears", "to", "work", "quite",
+    "well")
 
-  val TailcallWith21ArgsAndVarargs = fragment ("TailcallWith21ArgsAndVarargs") {
+  val TailcallWith21ArgsAndVarargs = fragment("TailcallWith21ArgsAndVarargs") {
     """local function f(...) return true, ... end
       |return f("hello", "there", "this", "is", "a", "result", "of", "a", "tail", "call",
       |   "with", "many", "arguments", "and", "it", "still", "appears", "to", "work", "quite",
       |   "well", ...)
     """
   }
-  TailcallWith21ArgsAndVarargs in EmptyContext succeedsWith (true,
-      "hello", "there", "this", "is", "a", "result", "of", "a", "tail", "call",
-      "with", "many", "arguments", "and", "it", "still", "appears", "to", "work", "quite",
-      "well")
+  TailcallWith21ArgsAndVarargs in EmptyContext succeedsWith(true,
+    "hello", "there", "this", "is", "a", "result", "of", "a", "tail", "call",
+    "with", "many", "arguments", "and", "it", "still", "appears", "to", "work", "quite",
+    "well")
 
-  val NumIterator = fragment ("NumIterator") {
+  val NumIterator = fragment("NumIterator") {
     """local called = 0
       |local looped = 0
       |
@@ -1019,32 +1021,32 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return called, looped
     """
   }
-  NumIterator in EmptyContext succeedsWith (11, 10)
+  NumIterator in EmptyContext succeedsWith(11, 10)
 
-  val BasicSetList = fragment ("BasicSetList") {
+  val BasicSetList = fragment("BasicSetList") {
     """local a = { 1, 2, 3, 4, 5 }
       |return #a, a
     """
   }
-  BasicSetList in EmptyContext succeedsWith (5, classOf[Table])
+  BasicSetList in EmptyContext succeedsWith(5, classOf[Table])
 
-  val VarLengthSetList = fragment ("VarLengthSetList") {
+  val VarLengthSetList = fragment("VarLengthSetList") {
     """local function f() return 1, 2, 3 end
       |local a = { f(), f() }  -- should return 1, 1, 2, 3
       |return #a, a
     """
   }
-  VarLengthSetList in EmptyContext succeedsWith (4, classOf[Table])
+  VarLengthSetList in EmptyContext succeedsWith(4, classOf[Table])
 
-  val VarargSetList = fragment ("VarargSetList") {
+  val VarargSetList = fragment("VarargSetList") {
     """local a = { ... }
       |return #a, a
     """
   }
-  VarargSetList in EmptyContext succeedsWith (0, classOf[Table])
+  VarargSetList in EmptyContext succeedsWith(0, classOf[Table])
 
   // test should fail
-  val GotoLocalSlot_withX = fragment ("GotoLocalSlot_withX") {
+  val GotoLocalSlot_withX = fragment("GotoLocalSlot_withX") {
     """do
       | local k = 0
       | local x
@@ -1057,10 +1059,10 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |end
     """
   }
-  GotoLocalSlot_withX in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to call a nil value")
+  GotoLocalSlot_withX in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to call a nil value")
 
   // test should fail, reported succeeding in Lua 5.2, 5.3
-  val GotoLocalSlot_withoutX = fragment ("GotoLocalSlot_withoutX") {
+  val GotoLocalSlot_withoutX = fragment("GotoLocalSlot_withoutX") {
     """do
       | local k = 0
       | ::foo::
@@ -1072,17 +1074,17 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |end
     """
   }
-  GotoLocalSlot_withoutX in EmptyContext failsWith (classOf[IllegalOperationAttemptException], ""<<"attempt to call a nil value")
+  GotoLocalSlot_withoutX in EmptyContext failsWith(classOf[IllegalOperationAttemptException], "" << "attempt to call a nil value")
 
-  val GotoLastStatementWithLocals = fragment ("GotoLastStatementWithLocals") {
+  val GotoLastStatementWithLocals = fragment("GotoLastStatementWithLocals") {
     """goto l
       |local x
       |::l::
     """
   }
-  GotoLastStatementWithLocals in EmptyContext succeedsWith ()
+  GotoLastStatementWithLocals in EmptyContext succeedsWith()
 
-  val IfsAndGotos = fragment ("IfsAndGotos") {
+  val IfsAndGotos = fragment("IfsAndGotos") {
     """local function f(a)
       |  if a == 1 then goto l1
       |  elseif a == 2 then goto l2
@@ -1096,9 +1098,9 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return f(0)
     """
   }
-  IfsAndGotos in EmptyContext succeedsWith ()
+  IfsAndGotos in EmptyContext succeedsWith()
 
-  val PureFunctionsAreReused = fragment ("PureFunctionsAreReused") {
+  val PureFunctionsAreReused = fragment("PureFunctionsAreReused") {
     """function pure(x)
       |  return function()
       |    return 1234
@@ -1109,7 +1111,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   PureFunctionsAreReused in EmptyContext succeedsWith (true)
 
-  val ClosuresWithoutOpenUpvaluesAreReused = fragment ("ClosuresWithoutOpenUpvaluesAreReused") {
+  val ClosuresWithoutOpenUpvaluesAreReused = fragment("ClosuresWithoutOpenUpvaluesAreReused") {
     """function noopen(x)
       |  a = x
       |  return function()
@@ -1121,7 +1123,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   ClosuresWithoutOpenUpvaluesAreReused in EmptyContext succeedsWith (true)
 
-  val ClosuresWithOpenUpvaluesAreNotReused = fragment ("ClosuresWithOpenUpvaluesAreNotReused") {
+  val ClosuresWithOpenUpvaluesAreNotReused = fragment("ClosuresWithOpenUpvaluesAreNotReused") {
     """function withopen(x)
       |  local a = x
       |  return function()
@@ -1133,7 +1135,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   ClosuresWithOpenUpvaluesAreNotReused in EmptyContext succeedsWith (false)
 
-  val BigForLoop = fragment ("BigForLoop") {
+  val BigForLoop = fragment("BigForLoop") {
     """local sum = 0
       |
       |for i = 1, 1000000 do
@@ -1145,32 +1147,32 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   BigForLoop in EmptyContext succeedsWith (500000500000L)
 
-  val ToStringMetamethod = fragment ("ToStringMetamethod") {
+  val ToStringMetamethod = fragment("ToStringMetamethod") {
     """local t = setmetatable({}, { __tostring = function () return end})
       |local ts = tostring(t)
       |return ts, type(ts)
     """
   }
-  ToStringMetamethod in BasicContext succeedsWith (null, "nil")
+  ToStringMetamethod in BasicContext succeedsWith(null, "nil")
 
-  val SimpleToNumber = fragment ("SimpleToNumber") {
+  val SimpleToNumber = fragment("SimpleToNumber") {
     """local a = tonumber("123.5")
       |local b = tonumber(123.5)
       |return a, type(a), b, type(b)
     """
   }
-  SimpleToNumber in BasicContext succeedsWith (123.5, "number", 123.5, "number")
+  SimpleToNumber in BasicContext succeedsWith(123.5, "number", 123.5, "number")
 
-  val ToNumberWithBase = fragment ("ToNumberWithBase") {
+  val ToNumberWithBase = fragment("ToNumberWithBase") {
     """local a = tonumber("123.5", 10)
       |local b = tonumber("123", 9)
       |local c = tonumber("helloThere", 36)
       |return a, type(a), b, type(b), c, type(c)
     """
   }
-  ToNumberWithBase in BasicContext succeedsWith (null, "nil", 102, "number", 1767707662651898L, "number")
+  ToNumberWithBase in BasicContext succeedsWith(null, "nil", 102, "number", 1767707662651898L, "number")
 
-  val GetSetMetatableWithMetatable = fragment ("GetSetMetatableWithMetatable") {
+  val GetSetMetatableWithMetatable = fragment("GetSetMetatableWithMetatable") {
     """local mt = {}
       |local t = setmetatable({}, mt)
       |local a = getmetatable(t)  -- a == mt
@@ -1179,117 +1181,117 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return a, a == mt, b, b == mt
     """
   }
-  GetSetMetatableWithMetatable in BasicContext succeedsWith (classOf[Table], true, 42, false)
+  GetSetMetatableWithMetatable in BasicContext succeedsWith(classOf[Table], true, 42, false)
 
-  val SetMetatableRefusesMetatableField = fragment ("SetMetatableRefusesMetatableField") {
+  val SetMetatableRefusesMetatableField = fragment("SetMetatableRefusesMetatableField") {
     """local t = setmetatable({}, { __metatable = 123 })
       |setmetatable(t, {})
     """
   }
-  SetMetatableRefusesMetatableField in BasicContext failsWith (classOf[IllegalOperationAttemptException], ""<<"cannot change a protected metatable")
+  SetMetatableRefusesMetatableField in BasicContext failsWith(classOf[IllegalOperationAttemptException], "" << "cannot change a protected metatable")
 
-  val TypesOfValues = fragment ("TypesOfValues") {
+  val TypesOfValues = fragment("TypesOfValues") {
     """return type(x), type(true), type(false), type(42), type(42.0), type("hello"), type({})
     """
   }
-  TypesOfValues in BasicContext succeedsWith ("nil", "boolean", "boolean", "number", "number", "string", "table")
+  TypesOfValues in BasicContext succeedsWith("nil", "boolean", "boolean", "number", "number", "string", "table")
 
-  val BasicPCall = fragment ("BasicPCall") {
+  val BasicPCall = fragment("BasicPCall") {
     """return pcall(something, "with argument", 123)
     """
   }
-  BasicPCall in BasicContext succeedsWith (false, "attempt to call a nil value")
+  BasicPCall in BasicContext succeedsWith(false, "attempt to call a nil value")
 
-  val AssertReturnsItsArguments = fragment ("AssertReturnsItsArguments") {
+  val AssertReturnsItsArguments = fragment("AssertReturnsItsArguments") {
     """return assert(true, "hello", "there", 5)
     """
   }
-  AssertReturnsItsArguments in BasicContext succeedsWith (true, "hello", "there", 5)
+  AssertReturnsItsArguments in BasicContext succeedsWith(true, "hello", "there", 5)
 
-  val AssertWithDefaultErrorObject = fragment ("AssertWithDefaultErrorObject") {
+  val AssertWithDefaultErrorObject = fragment("AssertWithDefaultErrorObject") {
     """local a, b = pcall(assert, false)
       |return b
     """
   }
   AssertWithDefaultErrorObject in BasicContext succeedsWith ("assertion failed!")
 
-  val AssertWithNilErrorObject = fragment ("AssertWithNilErrorObject") {
+  val AssertWithNilErrorObject = fragment("AssertWithNilErrorObject") {
     """local a, b = pcall(assert, false, nil)
       |return type(b)
     """
   }
   AssertWithNilErrorObject in BasicContext succeedsWith ("nil")
 
-  val AssertWithBooleanErrorObject = fragment ("AssertWithBooleanErrorObject") {
+  val AssertWithBooleanErrorObject = fragment("AssertWithBooleanErrorObject") {
     """local a, b = pcall(assert, false, true)
       |local c, d = pcall(assert, false, false)
       |return type(b), type(d)
     """
   }
-  AssertWithBooleanErrorObject in BasicContext succeedsWith ("boolean", "boolean")
+  AssertWithBooleanErrorObject in BasicContext succeedsWith("boolean", "boolean")
 
-  val AssertWithNumberErrorObjectIsCastToString = fragment ("AssertWithNumberErrorObjectIsCastToString") {
+  val AssertWithNumberErrorObjectIsCastToString = fragment("AssertWithNumberErrorObjectIsCastToString") {
     """local a, b = pcall(assert, false, 1)
       |local c, d = pcall(assert, false, 1.2)
       |return type(b), type(d)
     """
   }
-  AssertWithNumberErrorObjectIsCastToString in BasicContext succeedsWith ("string", "string")
+  AssertWithNumberErrorObjectIsCastToString in BasicContext succeedsWith("string", "string")
 
-  val AssertWithTableErrorObject = fragment ("AssertWithTableErrorObject") {
+  val AssertWithTableErrorObject = fragment("AssertWithTableErrorObject") {
     """local a, b = pcall(assert, false, {})
       |return type(b)
     """
   }
   AssertWithTableErrorObject in BasicContext succeedsWith ("table")
 
-  val AssertWithFunctionErrorObject = fragment ("AssertWithFunctionErrorObject") {
+  val AssertWithFunctionErrorObject = fragment("AssertWithFunctionErrorObject") {
     """local a, b = pcall(assert, false, assert)
       |return type(b)
     """
   }
   AssertWithFunctionErrorObject in BasicContext succeedsWith ("function")
 
-  val AssertWithCoroutineErrorObject = fragment ("AssertWithCoroutineErrorObject") {
+  val AssertWithCoroutineErrorObject = fragment("AssertWithCoroutineErrorObject") {
     """local a, b = pcall(assert, false, coroutine.create(function() end))
       |return type(b)
     """
   }
   AssertWithCoroutineErrorObject in CoroContext succeedsWith ("thread")
 
-  val ErrorThrowsAnError = fragment ("ErrorThrowsAnError") {
+  val ErrorThrowsAnError = fragment("ErrorThrowsAnError") {
     """error("boom!")
     """
   }
-  ErrorThrowsAnError in BasicContext failsWith (classOf[LuaRuntimeException], ""<<"boom!")
+  ErrorThrowsAnError in BasicContext failsWith(classOf[LuaRuntimeException], "" << "boom!")
 
-  val ErrorWithoutArguments = fragment ("ErrorWithoutArguments") {
+  val ErrorWithoutArguments = fragment("ErrorWithoutArguments") {
     """local a, b = pcall(error)
       |return a, b, type(b)
     """
   }
-  ErrorWithoutArguments in BasicContext succeedsWith (false, null, "nil")
+  ErrorWithoutArguments in BasicContext succeedsWith(false, null, "nil")
 
-  val XPCallAndError = fragment ("XPCallAndError") {
+  val XPCallAndError = fragment("XPCallAndError") {
     """local a, b, c = xpcall(error, function(e) return type(e), e end)
       |return a, b, type(b), c, type(c)
     """
   }
-  XPCallAndError in BasicContext succeedsWith (false, "nil", "string", null, "nil")
+  XPCallAndError in BasicContext succeedsWith(false, "nil", "string", null, "nil")
 
-  val XPCallWithEmptyHandler = fragment ("XPCallWithEmptyHandler") {
+  val XPCallWithEmptyHandler = fragment("XPCallWithEmptyHandler") {
     """return xpcall(error, function() end)
     """
   }
-  XPCallWithEmptyHandler in BasicContext succeedsWith (false, null)
+  XPCallWithEmptyHandler in BasicContext succeedsWith(false, null)
 
-  val XPCallWithErroneousHandler = fragment ("XPCallWithErroneousHandler") {
+  val XPCallWithErroneousHandler = fragment("XPCallWithErroneousHandler") {
     """return xpcall(error, function() error() end)
     """
   }
-  XPCallWithErroneousHandler in BasicContext succeedsWith (false, "error in error handling")
+  XPCallWithErroneousHandler in BasicContext succeedsWith(false, "error in error handling")
 
-  val XPCallMaxDepth = fragment ("XPCallMaxDepth") {
+  val XPCallMaxDepth = fragment("XPCallMaxDepth") {
     """local count = 0
       |
       |local function handler(e)
@@ -1301,53 +1303,53 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return a, b, count
     """
   }
-  XPCallMaxDepth in BasicContext succeedsWith (false, "error in error handling", 220)  // 220 in PUC-Lua 5.3
+  XPCallMaxDepth in BasicContext succeedsWith(false, "error in error handling", 220) // 220 in PUC-Lua 5.3
 
-  val RawEqualWithNoArgs = fragment ("RawEqualWithNoArgs") {
+  val RawEqualWithNoArgs = fragment("RawEqualWithNoArgs") {
     """return rawequal()
     """
   }
-  RawEqualWithNoArgs in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'rawequal' (value expected)")
+  RawEqualWithNoArgs in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'rawequal' (value expected)")
 
-  val RawEqualWithOneArg = fragment ("RawEqualWithOneArg") {
+  val RawEqualWithOneArg = fragment("RawEqualWithOneArg") {
     """return rawequal(42)
     """
   }
-  RawEqualWithOneArg in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #2 to 'rawequal' (value expected)")
+  RawEqualWithOneArg in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #2 to 'rawequal' (value expected)")
 
-  val BasicRawGet = fragment ("BasicRawGet") {
+  val BasicRawGet = fragment("BasicRawGet") {
     """local t = {}
       |t.hello = "world"
       |return rawget(t, hi), rawget(t, "hello")
     """
   }
-  BasicRawGet in BasicContext succeedsWith (null, "world")
+  BasicRawGet in BasicContext succeedsWith(null, "world")
 
-  val BasicRawGetFail = fragment ("BasicRawGetFail") {
+  val BasicRawGetFail = fragment("BasicRawGetFail") {
     """return rawget(42, "something")
     """
   }
-  BasicRawGetFail in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'rawget' (table expected, got number)")
+  BasicRawGetFail in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'rawget' (table expected, got number)")
 
-  val BasicRawGetFail2 = fragment ("BasicRawGetFail2") {
+  val BasicRawGetFail2 = fragment("BasicRawGetFail2") {
     """return rawget(42)
     """
   }
-  BasicRawGetFail2 in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'rawget' (table expected, got number)")
+  BasicRawGetFail2 in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'rawget' (table expected, got number)")
 
-  val BasicRawGetArgCountFail = fragment ("BasicRawGetArgCountFail") {
+  val BasicRawGetArgCountFail = fragment("BasicRawGetArgCountFail") {
     """return rawget({})
     """
   }
-  BasicRawGetArgCountFail in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #2 to 'rawget' (value expected)")
+  BasicRawGetArgCountFail in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #2 to 'rawget' (value expected)")
 
-  val RawGetNoArg = fragment ("RawGetNoArg") {
+  val RawGetNoArg = fragment("RawGetNoArg") {
     """return rawget()
     """
   }
-  RawGetNoArg in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'rawget' (table expected, got no value)")
+  RawGetNoArg in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'rawget' (table expected, got no value)")
 
-  val BasicRawSet = fragment ("BasicRawSet") {
+  val BasicRawSet = fragment("BasicRawSet") {
     """local t = {}
       |rawset(t, "hello", "world")
       |local a = t.hello
@@ -1356,63 +1358,63 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return a, b
     """
   }
-  BasicRawSet in BasicContext succeedsWith ("world", null)
+  BasicRawSet in BasicContext succeedsWith("world", null)
 
-  val RawSetNilFail = fragment ("RawSetNilFail") {
+  val RawSetNilFail = fragment("RawSetNilFail") {
     """rawset({}, uu, uu)
     """
   }
-  RawSetNilFail in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"table index is nil")
+  RawSetNilFail in BasicContext failsWith(classOf[IllegalArgumentException], "" << "table index is nil")
 
-  val RawSetNaNFail = fragment ("RawSetNaNFail") {
+  val RawSetNaNFail = fragment("RawSetNaNFail") {
     """rawset({}, 0/0, uu)
     """
   }
-  RawSetNaNFail in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"table index is NaN")
+  RawSetNaNFail in BasicContext failsWith(classOf[IllegalArgumentException], "" << "table index is NaN")
 
-  val RawSetArgCountFail1 = fragment ("RawSetArgCountFail1") {
+  val RawSetArgCountFail1 = fragment("RawSetArgCountFail1") {
     """rawset({})
     """
   }
-  RawSetArgCountFail1 in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #2 to 'rawset' (value expected)")
+  RawSetArgCountFail1 in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #2 to 'rawset' (value expected)")
 
-  val RawSetArgCountFail2 = fragment ("RawSetArgCountFail2") {
+  val RawSetArgCountFail2 = fragment("RawSetArgCountFail2") {
     """rawset({}, 0/0)
     """
   }
-  RawSetArgCountFail2 in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #3 to 'rawset' (value expected)")
+  RawSetArgCountFail2 in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #3 to 'rawset' (value expected)")
 
-  val RawSetNoArg = fragment ("RawSetNoArg") {
+  val RawSetNoArg = fragment("RawSetNoArg") {
     """rawset()
     """
   }
-  RawSetNoArg in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'rawset' (table expected, got no value)")
+  RawSetNoArg in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'rawset' (table expected, got no value)")
 
-  val BasicRawLen = fragment ("BasicRawLen") {
+  val BasicRawLen = fragment("BasicRawLen") {
     """return rawlen({3, 2, 1}), rawlen("hello")
     """
   }
-  BasicRawLen in BasicContext succeedsWith (3, 5)
+  BasicRawLen in BasicContext succeedsWith(3, 5)
 
-  val RawLenArgCountFail = fragment ("RawLenArgCountFail") {
+  val RawLenArgCountFail = fragment("RawLenArgCountFail") {
     """rawlen()
     """
   }
-  RawLenArgCountFail in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'rawlen' (table or string expected)")
+  RawLenArgCountFail in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'rawlen' (table or string expected)")
 
-  val RawLenBadArgFail = fragment ("RawLenBadArgFail") {
+  val RawLenBadArgFail = fragment("RawLenBadArgFail") {
     """rawlen(42)
     """
   }
-  RawLenBadArgFail in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'rawlen' (table or string expected)")
+  RawLenBadArgFail in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'rawlen' (table or string expected)")
 
-  val NextOnEmptyTable = fragment ("NextOnEmptyTable") {
+  val NextOnEmptyTable = fragment("NextOnEmptyTable") {
     """return next({})
     """
   }
   NextOnEmptyTable in BasicContext succeedsWith (null)
 
-  val NextTraversesEverything = fragment ("NextTraversesEverything") {
+  val NextTraversesEverything = fragment("NextTraversesEverything") {
     """local t = {}
       |t.hello = "world"
       |t[42] = true
@@ -1430,31 +1432,31 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   NextTraversesEverything in BasicContext succeedsWith (3)
 
-  val NextArgMustBeTable = fragment ("NextArgMustBeTable") {
+  val NextArgMustBeTable = fragment("NextArgMustBeTable") {
     """next(uu)
     """
   }
-  NextArgMustBeTable in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'next' (table expected, got nil)")
+  NextArgMustBeTable in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'next' (table expected, got nil)")
 
-  val NextNoArg = fragment ("NextNoArg") {
+  val NextNoArg = fragment("NextNoArg") {
     """next()
     """
   }
-  NextNoArg in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'next' (table expected, got no value)")
+  NextNoArg in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'next' (table expected, got no value)")
 
-  val NextNonexistentKey = fragment ("NextNonexistentKey") {
+  val NextNonexistentKey = fragment("NextNonexistentKey") {
     """next({}, "boom")
     """
   }
-  NextNonexistentKey in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"invalid key to 'next'")
+  NextNonexistentKey in BasicContext failsWith(classOf[IllegalArgumentException], "" << "invalid key to 'next'")
 
-  val NextNaNKey = fragment ("NextNaNKey") {
+  val NextNaNKey = fragment("NextNaNKey") {
     """next({}, "0/0")
     """
   }
-  NextNaNKey in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"invalid key to 'next'")
+  NextNaNKey in BasicContext failsWith(classOf[IllegalArgumentException], "" << "invalid key to 'next'")
 
-  val PairsOnTable = fragment ("PairsOnTable") {
+  val PairsOnTable = fragment("PairsOnTable") {
     """local t = {u = "hu"}
       |t[42] = {}
       |t.hello = 22/7
@@ -1470,28 +1472,28 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   PairsOnTable in BasicContext succeedsWith (3)
 
-  val PairsWithMetatable = fragment ("PairsWithMetatable") {
+  val PairsWithMetatable = fragment("PairsWithMetatable") {
     """local t = {}
       |local mt = { __pairs = function(x) return 1, 2, 3 end }
       |setmetatable(t, mt)
       |return pairs(t)
     """
   }
-  PairsWithMetatable in BasicContext succeedsWith (1, 2, 3)
+  PairsWithMetatable in BasicContext succeedsWith(1, 2, 3)
 
-  val PairsNoTable = fragment ("PairsNoTable") {
+  val PairsNoTable = fragment("PairsNoTable") {
     """pairs(42)
     """
   }
-  PairsNoTable in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'pairs' (table expected, got number)")
+  PairsNoTable in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'pairs' (table expected, got number)")
 
-  val PairsNoArg = fragment ("PairsNoArg") {
+  val PairsNoArg = fragment("PairsNoArg") {
     """pairs()
     """
   }
-  PairsNoArg in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'pairs' (table expected, got no value)")
+  PairsNoArg in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'pairs' (table expected, got no value)")
 
-  val IPairsOnList = fragment ("IPairsOnList") {
+  val IPairsOnList = fragment("IPairsOnList") {
     """local l = {5, 4, 3, 2}
       |local count = 0
       |local a = 1
@@ -1506,9 +1508,9 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return count, a, s
     """
   }
-  IPairsOnList in BasicContext succeedsWith (4, 166, "15243342")
+  IPairsOnList in BasicContext succeedsWith(4, 166, "15243342")
 
-  val IPairsRespectsIndexMetatable = fragment ("") {
+  val IPairsRespectsIndexMetatable = fragment("") {
     """local l = {5, 4, 3, 2}
       |local count = 0
       |local mt_count = 0
@@ -1530,48 +1532,48 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
       |return count, mt_count, a, s
     """
   }
-  IPairsRespectsIndexMetatable in BasicContext succeedsWith (4, 5, 166, "15243342")
+  IPairsRespectsIndexMetatable in BasicContext succeedsWith(4, 5, 166, "15243342")
 
-  val IPairsWithPairsMetatable = fragment ("IPairsWithPairsMetatable") {
+  val IPairsWithPairsMetatable = fragment("IPairsWithPairsMetatable") {
     """local t = {}
       |local mt = { __pairs = function(x) error() end }
       |setmetatable(t, mt)
       |return ipairs(t)
     """
   }
-  IPairsWithPairsMetatable in BasicContext succeedsWith (classOf[LuaFunction[_, _, _, _, _]], classOf[Table], 0)
+  IPairsWithPairsMetatable in BasicContext succeedsWith(classOf[LuaFunction[_, _, _, _, _]], classOf[Table], 0)
 
-  val IPairsNoTable = fragment ("IPairsNoTable") {
+  val IPairsNoTable = fragment("IPairsNoTable") {
     """ipairs(42)
     """
   }
-  IPairsNoTable in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'ipairs' (table expected, got number)")
+  IPairsNoTable in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'ipairs' (table expected, got number)")
 
-  val IPairsNoArg = fragment ("IPairsNoArg") {
+  val IPairsNoArg = fragment("IPairsNoArg") {
     """ipairs()
     """
   }
-  IPairsNoArg in BasicContext failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'ipairs' (table expected, got no value)")
+  IPairsNoArg in BasicContext failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'ipairs' (table expected, got no value)")
 
-  val SelectCount = fragment ("SelectCount") {
+  val SelectCount = fragment("SelectCount") {
     """return select('#', 3, 2, x)
     """
   }
   SelectCount in BasicContext succeedsWith (3)
 
-  val SelectPositiveIndex = fragment ("SelectPositiveIndex") {
+  val SelectPositiveIndex = fragment("SelectPositiveIndex") {
     """return select(2, 1, 2, 3, 4)
     """
   }
-  SelectPositiveIndex in BasicContext succeedsWith (2, 3, 4)
+  SelectPositiveIndex in BasicContext succeedsWith(2, 3, 4)
 
-  val SelectNegativeIndex = fragment ("SelectNegativeIndex") {
+  val SelectNegativeIndex = fragment("SelectNegativeIndex") {
     """return select(-2, 1, 2, 3, 4)
     """
   }
-  SelectNegativeIndex in BasicContext succeedsWith (3, 4)
+  SelectNegativeIndex in BasicContext succeedsWith(3, 4)
 
-  val VersionSniff = fragment ("VersionSniff") {
+  val VersionSniff = fragment("VersionSniff") {
     """local f, t = function()return function()end end, {nil,
       |  [false]  = 'Lua 5.1',
       |  [true]   = 'Lua 5.2',
@@ -1583,29 +1585,29 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   VersionSniff in EmptyContext succeedsWith ("Lua 5.3")
 
-  val SniffIntegerTrick = fragment ("SniffIntegerTrick") {
+  val SniffIntegerTrick = fragment("SniffIntegerTrick") {
     """return 1/'-0'
     """
   }
   SniffIntegerTrick in EmptyContext succeedsWith (Double.PositiveInfinity)
 
-  val NameMetaFieldIsUsedInLibErrorMessages = fragment ("NameMetaFieldIsUsedInLibErrorMessages") {
+  val NameMetaFieldIsUsedInLibErrorMessages = fragment("NameMetaFieldIsUsedInLibErrorMessages") {
     """local t = setmetatable({}, { __name = "elbaT" })
       |select(t)
     """
   }
   NameMetaFieldIsUsedInLibErrorMessages in BasicContext failsWith "bad argument #1 to 'select' (number expected, got elbaT)"
 
-  about ("coercions") {
-    in (EmptyContext) {
+  about("coercions") {
+    in(EmptyContext) {
 
-      program ("""return -("0")""") succeedsWith (-0.0)
-      program ("""return -("-0")""") succeedsWith (-0.0)
-      program ("""return -("-0.0")""") succeedsWith (0.0)
+      program("""return -("0")""") succeedsWith (-0.0)
+      program("""return -("-0")""") succeedsWith (-0.0)
+      program("""return -("-0.0")""") succeedsWith (0.0)
 
-      program ("""return 1 + 2""") succeedsWith (3)
-      program ("""return "1" + 2""") succeedsWith (3.0)
-      program ("""return "1" + "2"""") succeedsWith (3.0)
+      program("""return 1 + 2""") succeedsWith (3)
+      program("""return "1" + 2""") succeedsWith (3.0)
+      program("""return "1" + "2"""") succeedsWith (3.0)
 
     }
   }

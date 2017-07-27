@@ -29,31 +29,31 @@ package org.classdump.luna.runtime;
  */
 public interface SchedulingContext {
 
-	/**
-	 * Informs the scheduler that the current task is about to consume or has consumed
-	 * {@code ticks} virtual ticks.
-	 *
-	 * <p>This method only registers {@code ticks} with the scheduler, irrespective
-	 * of whether the current task should be paused. In order to check whether execution
-	 * should be paused, use {@link #shouldPause()}.</p>
-	 *
-	 * <p>The behaviour of this method is undefined if {@code ticks} is negative.</p>
-	 *
-	 * <p><b>Note</b>: this method is not meant to be used directly by Lua programs, but rather
-	 * to be called by the implementations of {@link ExecutionContext#registerTicks(int)}.</p>
-	 *
-	 * @param ticks  number of ticks to be registered with the scheduler, must not be negative
-	 */
-	void registerTicks(int ticks);
+  /**
+   * Informs the scheduler that the current task is about to consume or has consumed
+   * {@code ticks} virtual ticks.
+   *
+   * <p>This method only registers {@code ticks} with the scheduler, irrespective
+   * of whether the current task should be paused. In order to check whether execution
+   * should be paused, use {@link #shouldPause()}.</p>
+   *
+   * <p>The behaviour of this method is undefined if {@code ticks} is negative.</p>
+   *
+   * <p><b>Note</b>: this method is not meant to be used directly by Lua programs, but rather
+   * to be called by the implementations of {@link ExecutionContext#registerTicks(int)}.</p>
+   *
+   * @param ticks number of ticks to be registered with the scheduler, must not be negative
+   */
+  void registerTicks(int ticks);
 
-	/**
-	 * Polls the scheduler, returning {@code true} if the current task should be paused.
-	 *
-	 * <p><b>Note</b>: this method is not meant to be used directly by Lua programs, but rather
-	 * to be called by the implementations of {@link ExecutionContext#pauseIfRequested()}.</p>
-	 *
-	 * @return  {@code true} if the current task should be paused
-	 */
-	boolean shouldPause();
+  /**
+   * Polls the scheduler, returning {@code true} if the current task should be paused.
+   *
+   * <p><b>Note</b>: this method is not meant to be used directly by Lua programs, but rather
+   * to be called by the implementations of {@link ExecutionContext#pauseIfRequested()}.</p>
+   *
+   * @return {@code true} if the current task should be paused
+   */
+  boolean shouldPause();
 
 }

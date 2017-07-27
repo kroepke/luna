@@ -16,85 +16,80 @@
 
 package org.classdump.luna.parser;
 
-import org.classdump.luna.parser.Exprs;
-import org.classdump.luna.parser.SourceElement;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Objects;
 import org.classdump.luna.parser.ast.Expr;
 import org.classdump.luna.parser.ast.Operator;
 import org.classdump.luna.parser.ast.SourceInfo;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Objects;
-
 class ExprBuilder {
 
-	private final Deque<Expr> operandStack;
-	private final Deque<SourceElement<Operator>> operatorStack;
+  private final Deque<Expr> operandStack;
+  private final Deque<SourceElement<Operator>> operatorStack;
 
-	ExprBuilder() {
-		this.operandStack = new ArrayDeque<>();
-		this.operatorStack = new ArrayDeque<>();
-	}
+  ExprBuilder() {
+    this.operandStack = new ArrayDeque<>();
+    this.operatorStack = new ArrayDeque<>();
+  }
 
-	private static boolean isRightAssociative(Operator op) {
-		return op instanceof Operator.Binary && !((Operator.Binary) op).isLeftAssociative();
-	}
+  private static boolean isRightAssociative(Operator op) {
+    return op instanceof Operator.Binary && !((Operator.Binary) op).isLeftAssociative();
+  }
 
-	// true iff a takes precedence over b
-	private static boolean hasLesserPrecedence(Operator newOp, Operator top) {
-		Objects.requireNonNull(newOp);
-		Objects.requireNonNull(top);
+  // true iff a takes precedence over b
+  private static boolean hasLesserPrecedence(Operator newOp, Operator top) {
+    Objects.requireNonNull(newOp);
+    Objects.requireNonNull(top);
 
-		return !(newOp instanceof Operator.Unary)
-				&& (isRightAssociative(newOp)
-						? newOp.precedence() < top.precedence()
-						: newOp.precedence() <= top.precedence());
-	}
+    return !(newOp instanceof Operator.Unary)
+        && (isRightAssociative(newOp)
+        ? newOp.precedence() < top.precedence()
+        : newOp.precedence() <= top.precedence());
+  }
 
-	private void makeOp(SourceElement<Operator> srcOp) {
-		SourceInfo src = srcOp.sourceInfo();
-		Operator op = srcOp.element();
+  private void makeOp(SourceElement<Operator> srcOp) {
+    SourceInfo src = srcOp.sourceInfo();
+    Operator op = srcOp.element();
 
-		if (op instanceof Operator.Binary) {
-			Expr r = operandStack.pop();
-			Expr l = operandStack.pop();
-			operandStack.push(Exprs.binaryOperation(src, (Operator.Binary) op, l, r));
-		}
-		else if (op instanceof Operator.Unary) {
-			Expr a = operandStack.pop();
-			operandStack.push(Exprs.unaryOperation(src, (Operator.Unary) op, a));
-		}
-		else {
-			throw new IllegalStateException("Illegal operator: " + op);
-		}
-	}
+    if (op instanceof Operator.Binary) {
+      Expr r = operandStack.pop();
+      Expr l = operandStack.pop();
+      operandStack.push(Exprs.binaryOperation(src, (Operator.Binary) op, l, r));
+    } else if (op instanceof Operator.Unary) {
+      Expr a = operandStack.pop();
+      operandStack.push(Exprs.unaryOperation(src, (Operator.Unary) op, a));
+    } else {
+      throw new IllegalStateException("Illegal operator: " + op);
+    }
+  }
 
-	public void addOp(SourceInfo src, Operator op) {
-		Objects.requireNonNull(src);
-		Objects.requireNonNull(op);
+  public void addOp(SourceInfo src, Operator op) {
+    Objects.requireNonNull(src);
+    Objects.requireNonNull(op);
 
-		while (!operatorStack.isEmpty() && hasLesserPrecedence(op, operatorStack.peek().element())) {
-			makeOp(operatorStack.pop());
-		}
-		operatorStack.push(SourceElement.of(src, op));
-	}
+    while (!operatorStack.isEmpty() && hasLesserPrecedence(op, operatorStack.peek().element())) {
+      makeOp(operatorStack.pop());
+    }
+    operatorStack.push(SourceElement.of(src, op));
+  }
 
-	public void addExpr(Expr expr) {
-		Objects.requireNonNull(expr);
-		operandStack.push(expr);
-	}
+  public void addExpr(Expr expr) {
+    Objects.requireNonNull(expr);
+    operandStack.push(expr);
+  }
 
-	public Expr build() {
-		while (!operatorStack.isEmpty()) {
-			makeOp(operatorStack.pop());
-		}
+  public Expr build() {
+    while (!operatorStack.isEmpty()) {
+      makeOp(operatorStack.pop());
+    }
 
-		Expr result = operandStack.pop();
+    Expr result = operandStack.pop();
 
-		assert (operandStack.isEmpty());
-		assert (operatorStack.isEmpty());
+    assert (operandStack.isEmpty());
+    assert (operatorStack.isEmpty());
 
-		return result;
-	}
+    return result;
+  }
 
 }

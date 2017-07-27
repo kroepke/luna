@@ -16,33 +16,29 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.BodyNode;
-import org.classdump.luna.compiler.ir.UpVar;
-import org.classdump.luna.compiler.ir.Val;
-
 import java.util.Objects;
 
 public class UpStore extends BodyNode {
 
-	private final UpVar uv;
-	private final Val src;
+  private final UpVar uv;
+  private final Val src;
 
-	public UpStore(UpVar uv, Val src) {
-		this.uv = Objects.requireNonNull(uv);
-		this.src = Objects.requireNonNull(src);
-	}
+  public UpStore(UpVar uv, Val src) {
+    this.uv = Objects.requireNonNull(uv);
+    this.src = Objects.requireNonNull(src);
+  }
 
-	public UpVar upval() {
-		return uv;
-	}
+  public UpVar upval() {
+    return uv;
+  }
 
-	public Val src() {
-		return src;
-	}
+  public Val src() {
+    return src;
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

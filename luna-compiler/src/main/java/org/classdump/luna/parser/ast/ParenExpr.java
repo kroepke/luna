@@ -16,38 +16,32 @@
 
 package org.classdump.luna.parser.ast;
 
-import org.classdump.luna.parser.ast.Attributes;
-import org.classdump.luna.parser.ast.Expr;
-import org.classdump.luna.parser.ast.MultiExpr;
-import org.classdump.luna.parser.ast.Transformer;
-
 import java.util.Objects;
 
 public class ParenExpr extends Expr {
 
-	private final MultiExpr multiExpr;
+  private final MultiExpr multiExpr;
 
-	public ParenExpr(Attributes attr, MultiExpr multiExpr) {
-		super(attr);
-		this.multiExpr = Objects.requireNonNull(multiExpr);
-	}
+  public ParenExpr(Attributes attr, MultiExpr multiExpr) {
+    super(attr);
+    this.multiExpr = Objects.requireNonNull(multiExpr);
+  }
 
-	public MultiExpr multiExpr() {
-		return multiExpr;
-	}
+  public MultiExpr multiExpr() {
+    return multiExpr;
+  }
 
-	public ParenExpr update(MultiExpr multiExpr) {
-		if (this.multiExpr.equals(multiExpr)) {
-			return this;
-		}
-		else {
-			return new ParenExpr(attributes(), multiExpr);
-		}
-	}
+  public ParenExpr update(MultiExpr multiExpr) {
+    if (this.multiExpr.equals(multiExpr)) {
+      return this;
+    } else {
+      return new ParenExpr(attributes(), multiExpr);
+    }
+  }
 
-	@Override
-	public Expr accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public Expr accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

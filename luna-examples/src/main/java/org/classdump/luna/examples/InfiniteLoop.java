@@ -32,29 +32,28 @@ import org.classdump.luna.runtime.LuaFunction;
 
 public class InfiniteLoop {
 
-	public static void main(String[] args)
-			throws InterruptedException, CallException, LoaderException {
+  public static void main(String[] args)
+      throws InterruptedException, CallException, LoaderException {
 
-		String program = "n = 0; while true do n = n + 1 end";
+    String program = "n = 0; while true do n = n + 1 end";
 
-		StateContext state = StateContexts.newDefaultInstance();
-		Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
+    StateContext state = StateContexts.newDefaultInstance();
+    Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
 
-		ChunkLoader loader = CompilerChunkLoader.of("infinite_loop");
-		LuaFunction main = loader.loadTextChunk(new Variable(env), "loop", program);
+    ChunkLoader loader = CompilerChunkLoader.of("infinite_loop");
+    LuaFunction main = loader.loadTextChunk(new Variable(env), "loop", program);
 
-		// execute at most one million ops
-		DirectCallExecutor executor = DirectCallExecutor.newExecutorWithTickLimit(1000000);
+    // execute at most one million ops
+    DirectCallExecutor executor = DirectCallExecutor.newExecutorWithTickLimit(1000000);
 
-		try {
-			executor.call(state, main);
-			throw new AssertionError();  // never reaches this point
-		}
-		catch (CallPausedException ex) {
-			System.out.println("n = " + env.rawget("n"));
-		}
+    try {
+      executor.call(state, main);
+      throw new AssertionError();  // never reaches this point
+    } catch (CallPausedException ex) {
+      System.out.println("n = " + env.rawget("n"));
+    }
 
-	}
+  }
 
 
 }

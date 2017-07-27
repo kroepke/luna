@@ -20,28 +20,28 @@ import java.util.Objects;
 
 public class ResolvedVariable {
 
-	private final boolean upvalue;
-	private final Variable var;
+  private final boolean upvalue;
+  private final Variable var;
 
-	private ResolvedVariable(boolean upvalue, Variable var) {
-		this.upvalue = upvalue;
-		this.var = Objects.requireNonNull(var);
-	}
+  private ResolvedVariable(boolean upvalue, Variable var) {
+    this.upvalue = upvalue;
+    this.var = Objects.requireNonNull(var);
+  }
 
-	public static ResolvedVariable local(Variable v) {
-		return new ResolvedVariable(false, v);
-	}
+  public static ResolvedVariable local(Variable v) {
+    return new ResolvedVariable(false, v);
+  }
 
-	public static ResolvedVariable upvalue(Variable v) {
-		return new ResolvedVariable(true, v);
-	}
+  public static ResolvedVariable upvalue(Variable v) {
+    return new ResolvedVariable(true, v);
+  }
 
-	public boolean isUpvalue() {
-		return upvalue;
-	}
+  public boolean isUpvalue() {
+    return upvalue;
+  }
 
-	public Variable variable() {
-		return var;
-	}
+  public Variable variable() {
+    return var;
+  }
 
 }

@@ -21,12 +21,12 @@ package org.classdump.luna;
  */
 public interface ValueTypeNamer {
 
-	/**
-	 * Returns the type name (a byte string) of the value {@code instance}.
-	 *
-	 * @param instance  the object in question, may be {@code null}
-	 * @return  the type name of {@code instance}
-	 */
-	ByteString typeNameOf(Object instance);
+  /**
+   * Returns the type name (a byte string) of the value {@code instance}.
+   *
+   * @param instance the object in question, may be {@code null}
+   * @return the type name of {@code instance}
+   */
+  ByteString typeNameOf(Object instance);
 
 }

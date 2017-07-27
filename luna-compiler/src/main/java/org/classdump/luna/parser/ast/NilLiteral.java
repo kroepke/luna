@@ -18,14 +18,14 @@ package org.classdump.luna.parser.ast;
 
 public class NilLiteral extends Literal {
 
-	public static final NilLiteral INSTANCE = new NilLiteral();
+  public static final NilLiteral INSTANCE = new NilLiteral();
 
-	private NilLiteral() {
-	}
+  private NilLiteral() {
+  }
 
-	@Override
-	public Literal accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public Literal accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

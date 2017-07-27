@@ -16,8 +16,6 @@
 
 package org.classdump.luna.util;
 
-import org.classdump.luna.util.ByteIterator;
-
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -26,43 +24,41 @@ import java.util.Objects;
  */
 public class ArrayByteIterator implements ByteIterator {
 
-	private final byte[] bytes;
-	private int idx;
+  private final byte[] bytes;
+  private int idx;
 
-	/**
-	 * Constructs a new byte iterator of the array {@code bytes}.
-	 *
-	 * @param bytes  the byte iterator to iterate over, must not be {@code null}
-	 *
-	 * @throws NullPointerException  if {@code bytes} is {@code null}
-	 */
-	public ArrayByteIterator(byte[] bytes) {
-		this.bytes = Objects.requireNonNull(bytes);
-	}
+  /**
+   * Constructs a new byte iterator of the array {@code bytes}.
+   *
+   * @param bytes the byte iterator to iterate over, must not be {@code null}
+   * @throws NullPointerException if {@code bytes} is {@code null}
+   */
+  public ArrayByteIterator(byte[] bytes) {
+    this.bytes = Objects.requireNonNull(bytes);
+  }
 
-	@Override
-	public byte nextByte() {
-		if (idx < bytes.length) {
-			return bytes[idx++];
-		}
-		else {
-			throw new NoSuchElementException();
-		}
-	}
+  @Override
+  public byte nextByte() {
+    if (idx < bytes.length) {
+      return bytes[idx++];
+    } else {
+      throw new NoSuchElementException();
+    }
+  }
 
-	@Override
-	public boolean hasNext() {
-		return idx < bytes.length;
-	}
+  @Override
+  public boolean hasNext() {
+    return idx < bytes.length;
+  }
 
-	@Override
-	public Byte next() {
-		return Byte.valueOf(nextByte());
-	}
+  @Override
+  public Byte next() {
+    return Byte.valueOf(nextByte());
+  }
 
-	@Override
-	public void remove() {
-		throw new UnsupportedOperationException("read-only iterator");
-	}
+  @Override
+  public void remove() {
+    throw new UnsupportedOperationException("read-only iterator");
+  }
 
 }

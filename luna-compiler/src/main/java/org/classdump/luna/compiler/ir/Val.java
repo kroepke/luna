@@ -18,15 +18,15 @@ package org.classdump.luna.compiler.ir;
 
 public class Val extends AbstractVal {
 
-	private final int idx;
+  private final int idx;
 
-	public Val(int idx) {
-		this.idx = idx;
-	}
+  public Val(int idx) {
+    this.idx = idx;
+  }
 
-	@Override
-	public String toString() {
-		return ":" + idx;
-	}
+  @Override
+  public String toString() {
+    return ":" + idx;
+  }
 
 }

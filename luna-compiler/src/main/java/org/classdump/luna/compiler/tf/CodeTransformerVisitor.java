@@ -16,6 +16,10 @@
 
 package org.classdump.luna.compiler.tf;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import org.classdump.luna.compiler.ir.BasicBlock;
 import org.classdump.luna.compiler.ir.BlockTermNode;
 import org.classdump.luna.compiler.ir.BodyNode;
@@ -24,88 +28,82 @@ import org.classdump.luna.compiler.ir.CodeVisitor;
 import org.classdump.luna.compiler.ir.IRVisitor;
 import org.classdump.luna.compiler.ir.Label;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
 class CodeTransformerVisitor extends CodeVisitor {
 
-	private final List<BasicBlock> basicBlocks;
+  private final List<BasicBlock> basicBlocks;
 
-	private Label label;
-	private List<BodyNode> body;
-	private BlockTermNode end;
+  private Label label;
+  private List<BodyNode> body;
+  private BlockTermNode end;
 
-	public CodeTransformerVisitor(IRVisitor visitor) {
-		super(visitor);
-		this.basicBlocks = new ArrayList<>();
-	}
+  public CodeTransformerVisitor(IRVisitor visitor) {
+    super(visitor);
+    this.basicBlocks = new ArrayList<>();
+  }
 
-	public CodeTransformerVisitor() {
-		this(null);
-	}
+  public CodeTransformerVisitor() {
+    this(null);
+  }
 
-	public Code result() {
-		return Code.of(basicBlocks);
-	}
+  public Code result() {
+    return Code.of(basicBlocks);
+  }
 
-	@Override
-	public void visit(Code code) {
-		basicBlocks.clear();
-		super.visit(code);
-	}
+  @Override
+  public void visit(Code code) {
+    basicBlocks.clear();
+    super.visit(code);
+  }
 
-	@Override
-	public void visit(BasicBlock block) {
-		label = block.label();
-		body = new ArrayList<>(block.body());
-		end = block.end();
+  @Override
+  public void visit(BasicBlock block) {
+    label = block.label();
+    body = new ArrayList<>(block.body());
+    end = block.end();
 
-		BasicBlock bb = block;
-		try {
-			preVisit(block);
-			super.visit(block);
-			postVisit(block);
-			bb = new BasicBlock(label, Collections.unmodifiableList(body), end);
-		}
-		finally {
-			label = null;
-			body = null;
-			end = null;
-		}
+    BasicBlock bb = block;
+    try {
+      preVisit(block);
+      super.visit(block);
+      postVisit(block);
+      bb = new BasicBlock(label, Collections.unmodifiableList(body), end);
+    } finally {
+      label = null;
+      body = null;
+      end = null;
+    }
 
-		basicBlocks.add(block.equals(bb) ? block : bb);
-	}
+    basicBlocks.add(block.equals(bb) ? block : bb);
+  }
 
-	protected Label currentLabel() {
-		return label;
-	}
+  protected Label currentLabel() {
+    return label;
+  }
 
-	protected void setLabel(Label l) {
-		Objects.requireNonNull(l);
-		label = l;
-	}
+  protected void setLabel(Label l) {
+    Objects.requireNonNull(l);
+    label = l;
+  }
 
-	protected List<BodyNode> currentBody() {
-		return body;
-	}
+  protected List<BodyNode> currentBody() {
+    return body;
+  }
 
-	protected BlockTermNode currentEnd() {
-		return end;
-	}
+  protected BlockTermNode currentEnd() {
+    return end;
+  }
 
-	protected void setEnd(BlockTermNode node) {
-		Objects.requireNonNull(node);
-		end = node;
-	}
+  protected void setEnd(BlockTermNode node) {
+    Objects.requireNonNull(node);
+    end = node;
+  }
 
-	protected void preVisit(BasicBlock block) {
+  protected void preVisit(BasicBlock block) {
 
-	}
+  }
 
-	protected void postVisit(BasicBlock block) {
+  protected void postVisit(BasicBlock block) {
 
-	}
+  }
 
 }

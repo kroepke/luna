@@ -20,38 +20,40 @@ import java.util.Objects;
 
 public class LabelStatement extends BodyStatement {
 
-	private final Name labelName;
+  private final Name labelName;
 
-	public LabelStatement(Attributes attr, Name labelName) {
-		super(attr);
-		this.labelName = Objects.requireNonNull(labelName);
-	}
+  public LabelStatement(Attributes attr, Name labelName) {
+    super(attr);
+    this.labelName = Objects.requireNonNull(labelName);
+  }
 
-	public Name labelName() {
-		return labelName;
-	}
+  public Name labelName() {
+    return labelName;
+  }
 
-	public LabelStatement update(Name labelName) {
-		if (this.labelName.equals(labelName)) {
-			return this;
-		}
-		else {
-			return new LabelStatement(attributes(), labelName);
-		}
-	}
+  public LabelStatement update(Name labelName) {
+    if (this.labelName.equals(labelName)) {
+      return this;
+    } else {
+      return new LabelStatement(attributes(), labelName);
+    }
+  }
 
-	public LabelStatement withAttributes(Attributes attr) {
-		if (attributes().equals(attr)) return this;
-		else return new LabelStatement(attr, labelName);
-	}
+  public LabelStatement withAttributes(Attributes attr) {
+    if (attributes().equals(attr)) {
+      return this;
+    } else {
+      return new LabelStatement(attr, labelName);
+    }
+  }
 
-	public LabelStatement with(Object o) {
-		return this.withAttributes(attributes().with(o));
-	}
+  public LabelStatement with(Object o) {
+    return this.withAttributes(attributes().with(o));
+  }
 
-	@Override
-	public BodyStatement accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public BodyStatement accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

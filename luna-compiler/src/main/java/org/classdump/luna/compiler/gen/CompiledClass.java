@@ -16,43 +16,46 @@
 
 package org.classdump.luna.compiler.gen;
 
-import org.classdump.luna.util.ByteVector;
-
 import java.util.Objects;
+import org.classdump.luna.util.ByteVector;
 
 public class CompiledClass {
 
-	protected final String name;
-	protected final ByteVector bytes;
+  protected final String name;
+  protected final ByteVector bytes;
 
-	public CompiledClass(String name, ByteVector bytes) {
-		this.name = Objects.requireNonNull(name);
-		this.bytes = Objects.requireNonNull(bytes);
-	}
+  public CompiledClass(String name, ByteVector bytes) {
+    this.name = Objects.requireNonNull(name);
+    this.bytes = Objects.requireNonNull(bytes);
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
-		CompiledClass that = (CompiledClass) o;
+    CompiledClass that = (CompiledClass) o;
 
-		return name.equals(that.name) && bytes.equals(that.bytes);
-	}
+    return name.equals(that.name) && bytes.equals(that.bytes);
+  }
 
-	@Override
-	public int hashCode() {
-		int result = name.hashCode();
-		result = 31 * result + bytes.hashCode();
-		return result;
-	}
+  @Override
+  public int hashCode() {
+    int result = name.hashCode();
+    result = 31 * result + bytes.hashCode();
+    return result;
+  }
 
-	public String name() {
-		return name;
-	}
+  public String name() {
+    return name;
+  }
 
-	public ByteVector bytes() {
-		return bytes;
-	}
+  public ByteVector bytes() {
+    return bytes;
+  }
 
 }

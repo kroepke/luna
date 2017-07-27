@@ -16,35 +16,32 @@
 
 package org.classdump.luna.parser.ast;
 
-import org.classdump.luna.parser.ast.CallExpr;
-
 import java.util.Objects;
 
 public class CallStatement extends BodyStatement {
 
-	private final CallExpr callExpr;
+  private final CallExpr callExpr;
 
-	public CallStatement(Attributes attr, CallExpr callExpr) {
-		super(attr);
-		this.callExpr = Objects.requireNonNull(callExpr);
-	}
+  public CallStatement(Attributes attr, CallExpr callExpr) {
+    super(attr);
+    this.callExpr = Objects.requireNonNull(callExpr);
+  }
 
-	public CallExpr callExpr() {
-		return callExpr;
-	}
+  public CallExpr callExpr() {
+    return callExpr;
+  }
 
-	public CallStatement update(CallExpr callExpr) {
-		if (this.callExpr.equals(callExpr)) {
-			return this;
-		}
-		else {
-			return new CallStatement(attributes(), callExpr);
-		}
-	}
+  public CallStatement update(CallExpr callExpr) {
+    if (this.callExpr.equals(callExpr)) {
+      return this;
+    } else {
+      return new CallStatement(attributes(), callExpr);
+    }
+  }
 
-	@Override
-	public BodyStatement accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public BodyStatement accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

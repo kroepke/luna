@@ -16,34 +16,33 @@
 
 package org.classdump.luna.compiler;
 
+import java.util.Map;
+import java.util.Objects;
 import org.classdump.luna.load.CompiledChunk;
 import org.classdump.luna.util.ByteVector;
 
-import java.util.Map;
-import java.util.Objects;
-
 public class CompiledModule implements CompiledChunk {
 
-	private final Map<String, ByteVector> classMap;
-	private final String mainClassName;
+  private final Map<String, ByteVector> classMap;
+  private final String mainClassName;
 
-	public CompiledModule(Map<String, ByteVector> classMap, String mainClassName) {
-		this.classMap = Objects.requireNonNull(classMap);
-		this.mainClassName = Objects.requireNonNull(mainClassName);
+  public CompiledModule(Map<String, ByteVector> classMap, String mainClassName) {
+    this.classMap = Objects.requireNonNull(classMap);
+    this.mainClassName = Objects.requireNonNull(mainClassName);
 
-		if (!classMap.containsKey(mainClassName)) {
-			throw new IllegalStateException("No main class in class map");
-		}
-	}
+    if (!classMap.containsKey(mainClassName)) {
+      throw new IllegalStateException("No main class in class map");
+    }
+  }
 
-	@Override
-	public Map<String, ByteVector> classMap() {
-		return classMap;
-	}
+  @Override
+  public Map<String, ByteVector> classMap() {
+    return classMap;
+  }
 
-	@Override
-	public String mainClassName() {
-		return mainClassName;
-	}
+  @Override
+  public String mainClassName() {
+    return mainClassName;
+  }
 
 }

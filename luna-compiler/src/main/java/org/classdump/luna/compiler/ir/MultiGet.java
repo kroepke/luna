@@ -16,39 +16,35 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.BodyNode;
-import org.classdump.luna.compiler.ir.MultiVal;
-import org.classdump.luna.compiler.ir.Val;
-
 import java.util.Objects;
 
 public class MultiGet extends BodyNode {
 
-	private final Val dest;
-	private final MultiVal src;
-	private final int idx;
+  private final Val dest;
+  private final MultiVal src;
+  private final int idx;
 
-	public MultiGet(Val dest, MultiVal src, int idx) {
-		this.dest = Objects.requireNonNull(dest);
-		this.src = Objects.requireNonNull(src);
-		this.idx = idx;
-	}
+  public MultiGet(Val dest, MultiVal src, int idx) {
+    this.dest = Objects.requireNonNull(dest);
+    this.src = Objects.requireNonNull(src);
+    this.idx = idx;
+  }
 
-	public Val dest() {
-		return dest;
-	}
+  public Val dest() {
+    return dest;
+  }
 
-	public MultiVal src() {
-		return src;
-	}
+  public MultiVal src() {
+    return src;
+  }
 
-	public int idx() {
-		return idx;
-	}
+  public int idx() {
+    return idx;
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

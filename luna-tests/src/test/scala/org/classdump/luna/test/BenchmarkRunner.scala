@@ -18,76 +18,79 @@ package org.classdump.luna.test
 
 import java.util.Scanner
 
-import org.classdump.luna.compiler.CompilerSettings.CPUAccountingMode
 import org.classdump.luna.compiler.{CompilerChunkLoader, CompilerSettings}
+import org.classdump.luna.compiler.CompilerSettings.CPUAccountingMode
 import org.classdump.luna.env.RuntimeEnvironments
 import org.classdump.luna.exec.DirectCallExecutor
 import org.classdump.luna.impl.StateContexts
-import org.classdump.luna.lib._
+import org.classdump.luna.lib.{TableLib, _}
 import org.classdump.luna.load.{ChunkClassLoader, ChunkLoader}
 import org.classdump.luna.runtime.LuaFunction
 import org.classdump.luna.{StateContext, Table, Variable}
-import org.classdump.luna.compiler.CompilerChunkLoader
-import org.classdump.luna.lib.TableLib
-import org.classdump.luna.load.ChunkLoader
 
 import scala.util.Try
 
 object BenchmarkRunner {
 
-  case class RequestedCompilerSettings(
-      noCPUAccounting: Boolean,
-      constFolding: Option[Boolean],
-      constCaching: Option[Boolean]
-  ) {
+  val dirPrefix = "/benchmarksgame/"
+  val NumOfRunsPropertyName = "numRuns"
+  val DefaultNumOfRuns = 3
+  val StepSizePropertyName = "stepSize"
+  val DefaultStepSize = 1000000
+  val NoCPUAccountingPropertyName = "noCPUAccounting"
+  val DefaultNoCPUAccounting = false
+  val ConstFoldingPropertyName = "constFolding"
+  val ConstCachingPropertyName = "constCaching"
 
-    def toCompilerSettings: CompilerSettings = {
-      val s0 = CompilerSettings.defaultSettings()
+  def doFile(prefix: String, stepSize: Int, settings: CompilerSettings, filename: String, args: String*): Unit = {
 
-      val s1 = if (noCPUAccounting) s0.withCPUAccountingMode(CompilerSettings.CPUAccountingMode.NO_CPU_ACCOUNTING) else s0
-
-      val s2 = constFolding match {
-        case Some(v) => s1.withConstFolding(v)
-        case _ => s1
-      }
-
-      val s3 = constCaching match {
-        case Some(v) => s2.withConstCaching(v)
-        case _ => s2
-      }
-
-      s3
+    def initCall() = timed(prefix + "init") {
+      init(settings, filename, args: _*)
     }
 
-  }
+    val c = initCall()
 
-  case class Benchmark(fileName: String) {
-    def go(prefix: String, stepSize: Int, settings: CompilerSettings, args: String*): Unit = {
-      doFile(prefix, stepSize, settings, fileName, args:_*)
+
+    val executor = DirectCallExecutor.newExecutor()
+
+    val before = System.nanoTime()
+    executor.call(c.state, c.fn)
+    val after = System.nanoTime()
+
+    val totalTimeMillis = (after - before) / 1000000.0
+    //    val totalCPUUnitsSpent = pc.totalCost
+    //    val avgTimePerCPUUnitNanos = (after - before).toDouble / totalCPUUnitsSpent.toDouble
+    //    val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
+
+    println(prefix + "Execution took %.1f ms".format(totalTimeMillis))
+    if (settings.cpuAccountingMode() != CPUAccountingMode.NO_CPU_ACCOUNTING) {
+      //      println(prefix + "Total CPU cost: " + pc.totalCost + " LI")
+      //      println(prefix)
+      //      println(prefix + "Step size: " + stepSize + " LI")
+      //      println(prefix + "Num of steps: " + steps)
+      //      println(prefix + "Avg time per step: %.3f ms".format(totalTimeMillis / steps))
+      //      println(prefix)
+      //      println(prefix + "Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
+      //      println(prefix + "Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
     }
+    println()
   }
 
-  protected def stringProperty(key: String, default: String): String = {
-    Option(System.getProperty(key)) getOrElse default
-  }
+  def init(settings: CompilerSettings, filename: String, args: String*) = {
+    val resourceStream = getClass.getResourceAsStream(filename)
+    require(resourceStream != null, "resource must exist, is null")
+    val sourceContents = new Scanner(resourceStream, "UTF-8").useDelimiter("\\A").next()
+    require(sourceContents != null, "source contents must not be null")
 
-  protected def intProperty(key: String, default: Int): Int = {
-    Option(System.getProperty(key)) flatMap { s => Try(s.toInt).toOption } getOrElse default
-  }
+    val ldr = CompilerChunkLoader.of(new ChunkClassLoader(), settings, "benchmark_")
 
-  protected def booleanProperty(key: String, default: Boolean): Boolean = {
-    Option(System.getProperty(key)) match {
-      case Some("true") => true
-      case _ => false
-    }
-  }
+    val state = StateContexts.newDefaultInstance()
 
-  protected def optBooleanProperty(key: String): Option[Boolean] = {
-    Option(System.getProperty(key)) match {
-      case Some("true") => Some(true)
-      case Some("false") => Some(false)
-      case _ => None
-    }
+    val env = initEnv(state, ldr, args)
+
+    val func = ldr.loadTextChunk(new Variable(env), "benchmarkMain", sourceContents)
+
+    EnvWithMainChunk(state, func)
   }
 
   def initEnv(context: StateContext, loader: ChunkLoader, args: Seq[String]): Table = {
@@ -115,25 +118,6 @@ object BenchmarkRunner {
     env
   }
 
-  case class EnvWithMainChunk(state: StateContext, fn: LuaFunction[_, _, _, _, _])
-
-  def init(settings: CompilerSettings, filename: String, args: String*) = {
-    val resourceStream = getClass.getResourceAsStream(filename)
-    require (resourceStream != null, "resource must exist, is null")
-    val sourceContents = new Scanner(resourceStream, "UTF-8").useDelimiter("\\A").next()
-    require (sourceContents != null, "source contents must not be null")
-
-    val ldr = CompilerChunkLoader.of(new ChunkClassLoader(), settings, "benchmark_")
-
-    val state = StateContexts.newDefaultInstance()
-
-    val env = initEnv(state, ldr, args)
-
-    val func = ldr.loadTextChunk(new Variable(env), "benchmarkMain", sourceContents)
-
-    EnvWithMainChunk(state, func)
-  }
-
   def timed[A](name: String)(body: => A): A = {
     val before = System.nanoTime()
     val result = body
@@ -143,65 +127,6 @@ object BenchmarkRunner {
     println("%s took %.1f ms".format(name, totalTimeMillis))
     result
   }
-
-  def doFile(prefix: String, stepSize: Int, settings: CompilerSettings, filename: String, args: String*): Unit = {
-
-    def initCall() = timed (prefix + "init") {
-      init(settings, filename, args:_*)
-    }
-
-    val c = initCall()
-
-
-    val executor = DirectCallExecutor.newExecutor()
-
-    val before = System.nanoTime()
-    executor.call(c.state, c.fn)
-    val after = System.nanoTime()
-
-    val totalTimeMillis = (after - before) / 1000000.0
-//    val totalCPUUnitsSpent = pc.totalCost
-//    val avgTimePerCPUUnitNanos = (after - before).toDouble / totalCPUUnitsSpent.toDouble
-//    val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
-
-    println(prefix + "Execution took %.1f ms".format(totalTimeMillis))
-    if (settings.cpuAccountingMode() != CPUAccountingMode.NO_CPU_ACCOUNTING) {
-//      println(prefix + "Total CPU cost: " + pc.totalCost + " LI")
-//      println(prefix)
-//      println(prefix + "Step size: " + stepSize + " LI")
-//      println(prefix + "Num of steps: " + steps)
-//      println(prefix + "Avg time per step: %.3f ms".format(totalTimeMillis / steps))
-//      println(prefix)
-//      println(prefix + "Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
-//      println(prefix + "Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
-    }
-    println()
-  }
-
-  val dirPrefix = "/benchmarksgame/"
-
-  private case class Setup(benchmarkFile: String, args: Seq[String]) {
-
-  }
-
-  private def getSetup(args: Array[String]): Option[Setup] = {
-    args.toList match {
-      case fileName :: tail => Some(Setup(fileName, tail))
-      case _ => None
-    }
-  }
-
-  val NumOfRunsPropertyName = "numRuns"
-  val DefaultNumOfRuns = 3
-
-  val StepSizePropertyName = "stepSize"
-  val DefaultStepSize = 1000000
-
-  val NoCPUAccountingPropertyName = "noCPUAccounting"
-  val DefaultNoCPUAccounting = false
-
-  val ConstFoldingPropertyName = "constFolding"
-  val ConstCachingPropertyName = "constCaching"
 
   def main(args: Array[String]): Unit = {
 
@@ -238,7 +163,7 @@ object BenchmarkRunner {
 
         for (i <- 1 to numRuns) {
           val prefix = s"#$i\t"
-          bm.go(prefix, stepSize, actualSettings, setup.args:_*)
+          bm.go(prefix, stepSize, actualSettings, setup.args: _*)
         }
 
 
@@ -251,6 +176,73 @@ object BenchmarkRunner {
     }
 
 
+  }
+
+  protected def intProperty(key: String, default: Int): Int = {
+    Option(System.getProperty(key)) flatMap { s => Try(s.toInt).toOption } getOrElse default
+  }
+
+  protected def booleanProperty(key: String, default: Boolean): Boolean = {
+    Option(System.getProperty(key)) match {
+      case Some("true") => true
+      case _ => false
+    }
+  }
+
+  protected def optBooleanProperty(key: String): Option[Boolean] = {
+    Option(System.getProperty(key)) match {
+      case Some("true") => Some(true)
+      case Some("false") => Some(false)
+      case _ => None
+    }
+  }
+
+  private def getSetup(args: Array[String]): Option[Setup] = {
+    args.toList match {
+      case fileName :: tail => Some(Setup(fileName, tail))
+      case _ => None
+    }
+  }
+
+  protected def stringProperty(key: String, default: String): String = {
+    Option(System.getProperty(key)) getOrElse default
+  }
+
+  case class RequestedCompilerSettings(
+                                        noCPUAccounting: Boolean,
+                                        constFolding: Option[Boolean],
+                                        constCaching: Option[Boolean]
+                                      ) {
+
+    def toCompilerSettings: CompilerSettings = {
+      val s0 = CompilerSettings.defaultSettings()
+
+      val s1 = if (noCPUAccounting) s0.withCPUAccountingMode(CompilerSettings.CPUAccountingMode.NO_CPU_ACCOUNTING) else s0
+
+      val s2 = constFolding match {
+        case Some(v) => s1.withConstFolding(v)
+        case _ => s1
+      }
+
+      val s3 = constCaching match {
+        case Some(v) => s2.withConstCaching(v)
+        case _ => s2
+      }
+
+      s3
+    }
+
+  }
+
+  case class Benchmark(fileName: String) {
+    def go(prefix: String, stepSize: Int, settings: CompilerSettings, args: String*): Unit = {
+      doFile(prefix, stepSize, settings, fileName, args: _*)
+    }
+  }
+
+  case class EnvWithMainChunk(state: StateContext, fn: LuaFunction[_, _, _, _, _])
+
+  private case class Setup(benchmarkFile: String, args: Seq[String]) {
 
   }
 

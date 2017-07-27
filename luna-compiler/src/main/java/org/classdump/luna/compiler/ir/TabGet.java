@@ -16,37 +16,35 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.IRVisitor;
-
 import java.util.Objects;
 
 public class TabGet extends BodyNode {
 
-	private final Val dest;
-	private final Val obj;
-	private final Val key;
+  private final Val dest;
+  private final Val obj;
+  private final Val key;
 
-	public TabGet(Val dest, Val obj, Val key) {
-		this.dest = Objects.requireNonNull(dest);
-		this.obj = Objects.requireNonNull(obj);
-		this.key = Objects.requireNonNull(key);
-	}
+  public TabGet(Val dest, Val obj, Val key) {
+    this.dest = Objects.requireNonNull(dest);
+    this.obj = Objects.requireNonNull(obj);
+    this.key = Objects.requireNonNull(key);
+  }
 
-	public Val dest() {
-		return dest;
-	}
+  public Val dest() {
+    return dest;
+  }
 
-	public Val obj() {
-		return obj;
-	}
+  public Val obj() {
+    return obj;
+  }
 
-	public Val key() {
-		return key;
-	}
+  public Val key() {
+    return key;
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

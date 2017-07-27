@@ -16,165 +16,163 @@
 
 package org.classdump.luna.parser.analysis;
 
-import org.classdump.luna.parser.ast.Name;
-import org.classdump.luna.parser.analysis.FunctionVarInfo;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
+import org.classdump.luna.parser.ast.Name;
 
 class FunctionVarInfoBuilder {
 
-	private final FunctionVarInfoBuilder parent;
+  private final FunctionVarInfoBuilder parent;
 
-	// Used as a stack: not using Stack so as to iterate from top to bottom (see JDK bug [JDK-4475301])
-	private final Deque<BlockScope> blockScopes;
-	private final List<Variable> params;
-	private final List<Variable> locals;
-	private final List<Variable.Ref> upvals;
-	private boolean varargsUsed;
+  // Used as a stack: not using Stack so as to iterate from top to bottom (see JDK bug [JDK-4475301])
+  private final Deque<BlockScope> blockScopes;
+  private final List<Variable> params;
+  private final List<Variable> locals;
+  private final List<Variable.Ref> upvals;
+  private boolean varargsUsed;
 
-	public FunctionVarInfoBuilder(FunctionVarInfoBuilder parent) {
-		this.parent = parent;
-		this.blockScopes = new ArrayDeque<>();
-		this.params = new ArrayList<>();
-		this.locals = new ArrayList<>();
-		this.upvals = new ArrayList<>();
-		this.varargsUsed = false;
+  public FunctionVarInfoBuilder(FunctionVarInfoBuilder parent) {
+    this.parent = parent;
+    this.blockScopes = new ArrayDeque<>();
+    this.params = new ArrayList<>();
+    this.locals = new ArrayList<>();
+    this.upvals = new ArrayList<>();
+    this.varargsUsed = false;
 
-		if (parent == null) {
-			upvals.add(Variable.ENV.ref());
-		}
-	}
+    if (parent == null) {
+      upvals.add(Variable.ENV.ref());
+    }
+  }
 
-	public FunctionVarInfoBuilder parent() {
-		return parent;
-	}
+  public FunctionVarInfoBuilder parent() {
+    return parent;
+  }
 
-	public BlockScope enterBlock() {
-		BlockScope b = new BlockScope();
-		blockScopes.push(b);
-		return b;
-	}
+  public BlockScope enterBlock() {
+    BlockScope b = new BlockScope();
+    blockScopes.push(b);
+    return b;
+  }
 
-	public void leaveBlock() {
-		blockScopes.pop();
-	}
+  public void leaveBlock() {
+    blockScopes.pop();
+  }
 
-	public Variable addParam(Name n) {
-		Variable v = addLocal(n);
-		params.add(v);
-		return v;
-	}
+  public Variable addParam(Name n) {
+    Variable v = addLocal(n);
+    params.add(v);
+    return v;
+  }
 
-	public Variable addLocal(Name n) {
-		Variable v = blockScopes.peek().addLocal(n);
-		locals.add(v);
-		return v;
-	}
+  public Variable addLocal(Name n) {
+    Variable v = blockScopes.peek().addLocal(n);
+    locals.add(v);
+    return v;
+  }
 
-	public void setVararg() {
-		varargsUsed = true;
-	}
+  public void setVararg() {
+    varargsUsed = true;
+  }
 
-	public boolean isVararg() {
-		return varargsUsed;
-	}
+  public boolean isVararg() {
+    return varargsUsed;
+  }
 
-	private Variable findLocal(Name n) {
-		for (BlockScope b : blockScopes) {
-			Variable v = b.find(n);
-			if (v != null) {
-				return v;
-			}
-		}
-		return null;
-	}
+  private Variable findLocal(Name n) {
+    for (BlockScope b : blockScopes) {
+      Variable v = b.find(n);
+      if (v != null) {
+        return v;
+      }
+    }
+    return null;
+  }
 
-	// returns null if n is a not bound to a declaration and is not _ENV
-	public ResolvedVariable resolve(Name n) {
-		Variable v = findLocal(n);
-		if (v != null) {
-			return ResolvedVariable.local(v);
-		}
-		else {
-			// an upvalue -- but from where?
+  // returns null if n is a not bound to a declaration and is not _ENV
+  public ResolvedVariable resolve(Name n) {
+    Variable v = findLocal(n);
+    if (v != null) {
+      return ResolvedVariable.local(v);
+    } else {
+      // an upvalue -- but from where?
 
-			ResolvedVariable result = null;
+      ResolvedVariable result = null;
 
-			if (parent != null) {
-				ResolvedVariable p = parent.resolve(n);
-				if (p != null) {
-					result = ResolvedVariable.upvalue(p.variable());
-				}
-			}
+      if (parent != null) {
+        ResolvedVariable p = parent.resolve(n);
+        if (p != null) {
+          result = ResolvedVariable.upvalue(p.variable());
+        }
+      }
 
-			if (result == null && n.equals(Variable.ENV_NAME)) {
-				result = ResolvedVariable.upvalue(Variable.ENV);
-			}
+      if (result == null && n.equals(Variable.ENV_NAME)) {
+        result = ResolvedVariable.upvalue(Variable.ENV);
+      }
 
-			if (result != null) {
-				registerUpvalue(result);
-			}
+      if (result != null) {
+        registerUpvalue(result);
+      }
 
-			return result;
-		}
-	}
+      return result;
+    }
+  }
 
-	private void registerUpvalue(ResolvedVariable rv) {
-		Variable.Ref ref = rv.variable().ref();
-		if (rv.isUpvalue() && !upvals.contains(ref)) {
-			upvals.add(ref);
-		}
-	}
+  private void registerUpvalue(ResolvedVariable rv) {
+    Variable.Ref ref = rv.variable().ref();
+    if (rv.isUpvalue() && !upvals.contains(ref)) {
+      upvals.add(ref);
+    }
+  }
 
-	public FunctionVarInfo toVarInfo() {
-		return new FunctionVarInfo(
-				Collections.unmodifiableList(params),
-				Collections.unmodifiableList(locals),
-				Collections.unmodifiableList(upvals),
-				varargsUsed);
-	}
+  public FunctionVarInfo toVarInfo() {
+    return new FunctionVarInfo(
+        Collections.unmodifiableList(params),
+        Collections.unmodifiableList(locals),
+        Collections.unmodifiableList(upvals),
+        varargsUsed);
+  }
 
-	private static class BlockScope {
-		// NOTE: we're using a Deque rather than Stack in order to get the correct
-		// iteration order (top to bottom) (see JDK bug [JDK-4475301])
-		public final Deque<Local> locals;
+  private static class BlockScope {
 
-		public BlockScope() {
-			this.locals = new ArrayDeque<>();
-		}
+    // NOTE: we're using a Deque rather than Stack in order to get the correct
+    // iteration order (top to bottom) (see JDK bug [JDK-4475301])
+    public final Deque<Local> locals;
 
-		public Variable addLocal(Name n) {
-			Variable v = new Variable(n);
-			locals.push(new Local(n, v));
-			return v;
-		}
+    public BlockScope() {
+      this.locals = new ArrayDeque<>();
+    }
 
-		public Variable find(Name n) {
-			for (Local l : locals) {
-				if (l.name.equals(n)) {
-					return l.var;
-				}
-			}
-			return null;
-		}
+    public Variable addLocal(Name n) {
+      Variable v = new Variable(n);
+      locals.push(new Local(n, v));
+      return v;
+    }
 
-	}
+    public Variable find(Name n) {
+      for (Local l : locals) {
+        if (l.name.equals(n)) {
+          return l.var;
+        }
+      }
+      return null;
+    }
 
-	private static class Local {
+  }
 
-		public final Name name;
-		public final Variable var;
+  private static class Local {
 
-		public Local(Name name, Variable var) {
-			this.name = Objects.requireNonNull(name);
-			this.var = Objects.requireNonNull(var);
-		}
+    public final Name name;
+    public final Variable var;
 
-	}
+    public Local(Name name, Variable var) {
+      this.name = Objects.requireNonNull(name);
+      this.var = Objects.requireNonNull(var);
+    }
+
+  }
 
 }

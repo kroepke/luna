@@ -24,43 +24,43 @@ import org.classdump.luna.Userdata;
  */
 public abstract class DefaultUserdata<T> extends Userdata<T> {
 
-	private Table mt;
-	private T userValue;
+  private Table mt;
+  private T userValue;
 
-	/**
-	 * Constructs a new instance of this userdata with the specified initial {@code metatable}
-	 * and {@code userValue}.
-	 *
-	 * @param metatable  initial metatable, may be {@code null}
-	 * @param userValue  initial user value, may be {@code null}
-	 */
-	public DefaultUserdata(Table metatable, T userValue) {
-		this.mt = metatable;
-		this.userValue = userValue;
-	}
+  /**
+   * Constructs a new instance of this userdata with the specified initial {@code metatable}
+   * and {@code userValue}.
+   *
+   * @param metatable initial metatable, may be {@code null}
+   * @param userValue initial user value, may be {@code null}
+   */
+  public DefaultUserdata(Table metatable, T userValue) {
+    this.mt = metatable;
+    this.userValue = userValue;
+  }
 
-	@Override
-	public Table getMetatable() {
-		return mt;
-	}
+  @Override
+  public Table getMetatable() {
+    return mt;
+  }
 
-	@Override
-	public Table setMetatable(Table mt) {
-		Table old = this.mt;
-		this.mt = mt;
-		return old;
-	}
+  @Override
+  public Table setMetatable(Table mt) {
+    Table old = this.mt;
+    this.mt = mt;
+    return old;
+  }
 
-	@Override
-	public T getUserValue() {
-		return userValue;
-	}
+  @Override
+  public T getUserValue() {
+    return userValue;
+  }
 
-	@Override
-	public T setUserValue(T value) {
-		T oldValue = userValue;
-		this.userValue = value;
-		return oldValue;
-	}
+  @Override
+  public T setUserValue(T value) {
+    T oldValue = userValue;
+    this.userValue = value;
+    return oldValue;
+  }
 
 }

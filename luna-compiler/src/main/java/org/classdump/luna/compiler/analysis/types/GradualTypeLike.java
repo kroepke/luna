@@ -18,8 +18,8 @@ package org.classdump.luna.compiler.analysis.types;
 
 public interface GradualTypeLike<T> {
 
-	boolean isConsistentWith(T that);
+  boolean isConsistentWith(T that);
 
-	boolean isConsistentSubtypeOf(T that);
+  boolean isConsistentSubtypeOf(T that);
 
 }

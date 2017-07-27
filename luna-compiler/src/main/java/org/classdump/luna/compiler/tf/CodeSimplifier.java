@@ -16,13 +16,6 @@
 
 package org.classdump.luna.compiler.tf;
 
-import org.classdump.luna.compiler.IRFunc;
-import org.classdump.luna.compiler.ir.BasicBlock;
-import org.classdump.luna.compiler.ir.BodyNode;
-import org.classdump.luna.compiler.ir.Code;
-import org.classdump.luna.compiler.ir.Label;
-import org.classdump.luna.compiler.ir.ToNext;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -32,122 +25,124 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import org.classdump.luna.compiler.IRFunc;
+import org.classdump.luna.compiler.ir.BasicBlock;
+import org.classdump.luna.compiler.ir.BodyNode;
+import org.classdump.luna.compiler.ir.Code;
+import org.classdump.luna.compiler.ir.Label;
+import org.classdump.luna.compiler.ir.ToNext;
 
 public abstract class CodeSimplifier {
 
-	private CodeSimplifier() {
-		// not to be instantiated or extended
-	}
+  private CodeSimplifier() {
+    // not to be instantiated or extended
+  }
 
-	private static boolean visit(Map<Label, Integer> uses, Label l) {
-		Integer n = uses.get(l);
-		if (n != null) {
-			uses.put(l, n + 1);
-			return false;
-		}
-		else {
-			uses.put(l, 1);
-			return true;
-		}
-	}
+  private static boolean visit(Map<Label, Integer> uses, Label l) {
+    Integer n = uses.get(l);
+    if (n != null) {
+      uses.put(l, n + 1);
+      return false;
+    } else {
+      uses.put(l, 1);
+      return true;
+    }
+  }
 
-	private static Map<Label, Integer> uses(Code code) {
-		Map<Label, Integer> uses = new HashMap<>();
-		Deque<Label> open = new ArrayDeque<>();
-		open.add(code.entryLabel());
+  private static Map<Label, Integer> uses(Code code) {
+    Map<Label, Integer> uses = new HashMap<>();
+    Deque<Label> open = new ArrayDeque<>();
+    open.add(code.entryLabel());
 
-		while (!open.isEmpty()) {
-			Label l = open.pop();
-			if (visit(uses, l)) {
-				BasicBlock b = code.block(l);
-				for (Label n : b.end().nextLabels()) {
-					open.add(n);
-				}
-			}
-		}
+    while (!open.isEmpty()) {
+      Label l = open.pop();
+      if (visit(uses, l)) {
+        BasicBlock b = code.block(l);
+        for (Label n : b.end().nextLabels()) {
+          open.add(n);
+        }
+      }
+    }
 
-		return uses;
-	}
+    return uses;
+  }
 
-	static Code pruneUnreachableCode(Code code) {
-		Objects.requireNonNull(code);
+  static Code pruneUnreachableCode(Code code) {
+    Objects.requireNonNull(code);
 
-		Set<Label> reachable = uses(code).keySet();
+    Set<Label> reachable = uses(code).keySet();
 
-		List<BasicBlock> result = new ArrayList<>();
-		Iterator<BasicBlock> it = code.blockIterator();
-		while (it.hasNext()) {
-			BasicBlock b = it.next();
-			if (reachable.contains(b.label())) {
-				result.add(b);
-			}
-		}
+    List<BasicBlock> result = new ArrayList<>();
+    Iterator<BasicBlock> it = code.blockIterator();
+    while (it.hasNext()) {
+      BasicBlock b = it.next();
+      if (reachable.contains(b.label())) {
+        result.add(b);
+      }
+    }
 
-		return Code.of(result);
-	}
+    return Code.of(result);
+  }
 
-	public static IRFunc pruneUnreachableCode(IRFunc fn) {
-		return fn.update(pruneUnreachableCode(fn.code()));
-	}
+  public static IRFunc pruneUnreachableCode(IRFunc fn) {
+    return fn.update(pruneUnreachableCode(fn.code()));
+  }
 
-	private static BasicBlock merge(BasicBlock a, BasicBlock b) {
-		Objects.requireNonNull(a);
-		Objects.requireNonNull(b);
+  private static BasicBlock merge(BasicBlock a, BasicBlock b) {
+    Objects.requireNonNull(a);
+    Objects.requireNonNull(b);
 
-		if (a.end() instanceof ToNext) {
-			List<BodyNode> body = new ArrayList<>();
-			body.addAll(a.body());
-			body.addAll(b.body());
-			return new BasicBlock(a.label(), body, b.end());
-		}
-		else {
-			return null;
-		}
-	}
+    if (a.end() instanceof ToNext) {
+      List<BodyNode> body = new ArrayList<>();
+      body.addAll(a.body());
+      body.addAll(b.body());
+      return new BasicBlock(a.label(), body, b.end());
+    } else {
+      return null;
+    }
+  }
 
-	private static <T> T nextOrNull(Iterator<T> it) {
-		return it.hasNext() ? it.next() : null;
-	}
+  private static <T> T nextOrNull(Iterator<T> it) {
+    return it.hasNext() ? it.next() : null;
+  }
 
-	static Code mergeBlocks(Code code) {
-		Objects.requireNonNull(code);
+  static Code mergeBlocks(Code code) {
+    Objects.requireNonNull(code);
 
-		Map<Label, Integer> uses = uses(code);
-		List<BasicBlock> result = new ArrayList<>();
+    Map<Label, Integer> uses = uses(code);
+    List<BasicBlock> result = new ArrayList<>();
 
-		Iterator<BasicBlock> it = code.blockIterator();
+    Iterator<BasicBlock> it = code.blockIterator();
 
-		BasicBlock a = it.next();  // must be non-null
-		BasicBlock b = nextOrNull(it);
+    BasicBlock a = it.next();  // must be non-null
+    BasicBlock b = nextOrNull(it);
 
-		while (b != null) {
-			if (uses.get(b.label()) < 2) {
-				BasicBlock ab = merge(a, b);
-				if (ab != null) {
-					a = ab;
-				}
-				else {
-					result.add(a);
-					a = b;
-				}
-			}
-			else {
-				result.add(a);
-				a = b;
-			}
-			b = nextOrNull(it);
-		}
+    while (b != null) {
+      if (uses.get(b.label()) < 2) {
+        BasicBlock ab = merge(a, b);
+        if (ab != null) {
+          a = ab;
+        } else {
+          result.add(a);
+          a = b;
+        }
+      } else {
+        result.add(a);
+        a = b;
+      }
+      b = nextOrNull(it);
+    }
 
-		assert (a != null);
-		assert (b == null);
+    assert (a != null);
+    assert (b == null);
 
-		result.add(a);
+    result.add(a);
 
-		return Code.of(result);
-	}
+    return Code.of(result);
+  }
 
-	public static IRFunc mergeBlocks(IRFunc fn) {
-		return fn.update(mergeBlocks(fn.code()));
-	}
+  public static IRFunc mergeBlocks(IRFunc fn) {
+    return fn.update(mergeBlocks(fn.code()));
+  }
 
 }

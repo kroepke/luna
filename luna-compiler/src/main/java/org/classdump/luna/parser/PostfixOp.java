@@ -16,59 +16,56 @@
 
 package org.classdump.luna.parser;
 
-import org.classdump.luna.parser.Exprs;
-import org.classdump.luna.parser.SourceElement;
+import java.util.List;
+import java.util.Objects;
 import org.classdump.luna.parser.ast.CallExpr;
 import org.classdump.luna.parser.ast.Expr;
 import org.classdump.luna.parser.ast.IndexExpr;
 import org.classdump.luna.parser.ast.Name;
 import org.classdump.luna.parser.ast.SourceInfo;
 
-import java.util.List;
-import java.util.Objects;
-
 abstract class PostfixOp {
 
-	public abstract Expr on(Expr exp);
+  public abstract Expr on(Expr exp);
 
-	static class FieldAccess extends PostfixOp {
+  static class FieldAccess extends PostfixOp {
 
-		private final SourceInfo src;
-		private final Expr keyExpr;
+    private final SourceInfo src;
+    private final Expr keyExpr;
 
-		public FieldAccess(SourceInfo src, Expr keyExpr) {
-			this.src = Objects.requireNonNull(src);
-			this.keyExpr = Objects.requireNonNull(keyExpr);
-		}
+    public FieldAccess(SourceInfo src, Expr keyExpr) {
+      this.src = Objects.requireNonNull(src);
+      this.keyExpr = Objects.requireNonNull(keyExpr);
+    }
 
-		public Expr keyExpr() {
-			return keyExpr;
-		}
+    public Expr keyExpr() {
+      return keyExpr;
+    }
 
-		@Override
-		public IndexExpr on(Expr exp) {
-			return Exprs.index(src, exp, keyExpr);
-		}
+    @Override
+    public IndexExpr on(Expr exp) {
+      return Exprs.index(src, exp, keyExpr);
+    }
 
-	}
+  }
 
-	static class Invoke extends PostfixOp {
+  static class Invoke extends PostfixOp {
 
-		private final Name method;  // may be null
-		private final SourceElement<List<Expr>> args;
+    private final Name method;  // may be null
+    private final SourceElement<List<Expr>> args;
 
-		public Invoke(SourceElement<List<Expr>> args, Name method) {
-			this.args = Objects.requireNonNull(args);
-			this.method = method;
-		}
+    public Invoke(SourceElement<List<Expr>> args, Name method) {
+      this.args = Objects.requireNonNull(args);
+      this.method = method;
+    }
 
-		@Override
-		public CallExpr on(Expr exp) {
-			return method != null
-					? Exprs.methodCall(args.sourceInfo(), exp, method, args.element())
-					: Exprs.functionCall(args.sourceInfo(), exp, args.element());
-		}
+    @Override
+    public CallExpr on(Expr exp) {
+      return method != null
+          ? Exprs.methodCall(args.sourceInfo(), exp, method, args.element())
+          : Exprs.functionCall(args.sourceInfo(), exp, args.element());
+    }
 
-	}
+  }
 
 }

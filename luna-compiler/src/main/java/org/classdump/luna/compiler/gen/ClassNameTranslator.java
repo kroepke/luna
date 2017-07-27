@@ -18,8 +18,8 @@ package org.classdump.luna.compiler.gen;
 
 public interface ClassNameTranslator {
 
-	String className();
+  String className();
 
-	ClassNameTranslator child(int idx);
+  ClassNameTranslator child(int idx);
 
 }

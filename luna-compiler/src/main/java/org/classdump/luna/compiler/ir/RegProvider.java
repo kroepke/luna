@@ -17,41 +17,40 @@
 package org.classdump.luna.compiler.ir;
 
 import org.classdump.luna.parser.ast.Name;
-import org.classdump.luna.compiler.ir.PhiVal;
 
 public class RegProvider {
 
-	private int valIdx;
-	private int phiValIdx;
-	private int multiValIdx;
+  private int valIdx;
+  private int phiValIdx;
+  private int multiValIdx;
 
-	private int varIdx;
+  private int varIdx;
 
-	public RegProvider() {
-		this.valIdx = 0;
-		this.phiValIdx = 0;
-		this.varIdx = 0;
-		this.multiValIdx = 0;
-	}
+  public RegProvider() {
+    this.valIdx = 0;
+    this.phiValIdx = 0;
+    this.varIdx = 0;
+    this.multiValIdx = 0;
+  }
 
-	public Val newVal() {
-		return new Val(valIdx++);
-	}
+  public Val newVal() {
+    return new Val(valIdx++);
+  }
 
-	public PhiVal newPhiVal() {
-		return new PhiVal(phiValIdx++);
-	}
+  public PhiVal newPhiVal() {
+    return new PhiVal(phiValIdx++);
+  }
 
-	public MultiVal newMultiVal() {
-		return new MultiVal(multiValIdx++);
-	}
+  public MultiVal newMultiVal() {
+    return new MultiVal(multiValIdx++);
+  }
 
-	public Var newVar() {
-		return new Var(varIdx++);
-	}
+  public Var newVar() {
+    return new Var(varIdx++);
+  }
 
-	public UpVar newUpVar(Name name) {
-		return new UpVar(name);
-	}
+  public UpVar newUpVar(Name name) {
+    return new UpVar(name);
+  }
 
 }

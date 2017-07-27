@@ -5,6 +5,7 @@ package org.classdump.luna.shaded;
  */
 @SuppressWarnings("unused")
 public class Shaded {
-    private Shaded() {
-    }
+
+  private Shaded() {
+  }
 }

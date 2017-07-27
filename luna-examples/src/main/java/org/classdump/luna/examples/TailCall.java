@@ -33,41 +33,43 @@ import org.classdump.luna.runtime.UnresolvedControlThrowable;
 
 public class TailCall {
 
-	// equivalent to:
-	//   function (a, b, c) return a(b + c) end
-	static class ExampleFunction extends AbstractUntypedFunction3 {
+  public static void main(String[] args)
+      throws InterruptedException, CallPausedException, CallException, LoaderException {
 
-		@Override
-		public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ResolvedControlThrowable {
-			try {
-				// b + c
-				Dispatch.add(context, arg2, arg3);
-			}
-			catch (UnresolvedControlThrowable ct) {
-				throw ct.resolve(this, arg1);
-			}
+    StateContext state = StateContexts.newDefaultInstance();
+    Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
 
-			resume(context, arg1);
-		}
+    // prints 123.4
+    DirectCallExecutor.newExecutor()
+        .call(state, new ExampleFunction(), env.rawget("print"), "100", 23.4);
+  }
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-			Object additionResult = context.getReturnBuffer().get0();
+  // equivalent to:
+  //   function (a, b, c) return a(b + c) end
+  static class ExampleFunction extends AbstractUntypedFunction3 {
 
-			// a(b + c)
-			context.getReturnBuffer().setToCall(suspendedState, additionResult);
-		}
+    @Override
+    public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3)
+        throws ResolvedControlThrowable {
+      try {
+        // b + c
+        Dispatch.add(context, arg2, arg3);
+      } catch (UnresolvedControlThrowable ct) {
+        throw ct.resolve(this, arg1);
+      }
 
-	}
+      resume(context, arg1);
+    }
 
-	public static void main(String[] args)
-			throws InterruptedException, CallPausedException, CallException, LoaderException {
+    @Override
+    public void resume(ExecutionContext context, Object suspendedState)
+        throws ResolvedControlThrowable {
+      Object additionResult = context.getReturnBuffer().get0();
 
-		StateContext state = StateContexts.newDefaultInstance();
-		Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
+      // a(b + c)
+      context.getReturnBuffer().setToCall(suspendedState, additionResult);
+    }
 
-		// prints 123.4
-		DirectCallExecutor.newExecutor().call(state, new ExampleFunction(), env.rawget("print"), "100", 23.4);
-	}
+  }
 
 }

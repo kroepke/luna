@@ -20,35 +20,34 @@ import java.util.Objects;
 
 public class WhileStatement extends BodyStatement {
 
-	private final Expr condition;
-	private final Block block;
+  private final Expr condition;
+  private final Block block;
 
-	public WhileStatement(Attributes attr, Expr condition, Block block) {
-		super(attr);
-		this.condition = Objects.requireNonNull(condition);
-		this.block = Objects.requireNonNull(block);
-	}
+  public WhileStatement(Attributes attr, Expr condition, Block block) {
+    super(attr);
+    this.condition = Objects.requireNonNull(condition);
+    this.block = Objects.requireNonNull(block);
+  }
 
-	public Expr condition() {
-		return condition;
-	}
+  public Expr condition() {
+    return condition;
+  }
 
-	public Block block() {
-		return block;
-	}
+  public Block block() {
+    return block;
+  }
 
-	public WhileStatement update(Expr condition, Block block) {
-		if (this.condition.equals(condition) && this.block.equals(block)) {
-			return this;
-		}
-		else {
-			return new WhileStatement(attributes(), condition, block);
-		}
-	}
+  public WhileStatement update(Expr condition, Block block) {
+    if (this.condition.equals(condition) && this.block.equals(block)) {
+      return this;
+    } else {
+      return new WhileStatement(attributes(), condition, block);
+    }
+  }
 
-	@Override
-	public BodyStatement accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public BodyStatement accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

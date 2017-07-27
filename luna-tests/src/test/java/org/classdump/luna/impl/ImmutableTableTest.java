@@ -16,31 +16,30 @@
 
 package org.classdump.luna.impl;
 
-import org.junit.Test;
-
-import java.util.HashMap;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.HashMap;
+import org.junit.Test;
+
 public class ImmutableTableTest {
 
-    @Test
-    public void bothEmpty() {
-        ImmutableTable first = new ImmutableTable.Builder().build();
-        ImmutableTable second = new ImmutableTable.Builder().build();
+  @Test
+  public void bothEmpty() {
+    ImmutableTable first = new ImmutableTable.Builder().build();
+    ImmutableTable second = new ImmutableTable.Builder().build();
 
-        assertTrue(first.equals(second));
-        assertEquals(first.hashCode(), second.hashCode());
-    }
+    assertTrue(first.equals(second));
+    assertEquals(first.hashCode(), second.hashCode());
+  }
 
-    @Test
-    public void emptyTableHashcodeWorks() {
-        try {
-            new HashMap<>().put(new ImmutableTable.Builder().build(), "foo");
-        } catch (Exception ex) {
-            fail("Should not throw exception");
-        }
+  @Test
+  public void emptyTableHashcodeWorks() {
+    try {
+      new HashMap<>().put(new ImmutableTable.Builder().build(), "foo");
+    } catch (Exception ex) {
+      fail("Should not throw exception");
     }
+  }
 }

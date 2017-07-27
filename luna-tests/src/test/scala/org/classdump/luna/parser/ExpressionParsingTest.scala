@@ -20,7 +20,6 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, PrintWriter}
 
 import org.classdump.luna.parser.ast.Expr
 import org.classdump.luna.parser.util.FormattingPrinterVisitor
-import org.classdump.luna.parser.Expressions
 import org.classdump.luna.test.Util
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -53,13 +52,15 @@ class ExpressionParsingTest extends FunSpec with MustMatchers {
     val visitor = new FormattingPrinterVisitor(pw)
     expr.accept(visitor)
     pw.flush()
-    String.valueOf(baos.toByteArray map { _.toChar })
+    String.valueOf(baos.toByteArray map {
+      _.toChar
+    })
   }
 
-  describe ("expr") {
+  describe("expr") {
 
     def ok(s: String): Unit = {
-      it ("ok: " + s) {
+      it("ok: " + s) {
         Util.silenced {
           tryParseExpr(s)
         }
@@ -67,7 +68,7 @@ class ExpressionParsingTest extends FunSpec with MustMatchers {
     }
 
     def nok(s: String): Unit = {
-      it ("not-ok: " + s) {
+      it("not-ok: " + s) {
         Util.silenced {
           intercept[ParseException] {
             tryParseExpr(s)

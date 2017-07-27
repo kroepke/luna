@@ -24,33 +24,33 @@ import java.io.OutputStream;
  */
 public final class RuntimeEnvironments {
 
-	private RuntimeEnvironments() {
-		// not to be instantiated
-	}
+  private RuntimeEnvironments() {
+    // not to be instantiated
+  }
 
-	/**
-	 * Returns the system runtime environment.
-	 *
-	 * <p>Methods in this environment methods delegate to the system environment accessible
-	 * by the Java Virtual Machine.</p>
-	 *
-	 * @return  the system runtime environment
-	 */
-	public static RuntimeEnvironment system() {
-		return SystemRuntimeEnvironment.getInstance();
-	}
+  /**
+   * Returns the system runtime environment.
+   *
+   * <p>Methods in this environment methods delegate to the system environment accessible
+   * by the Java Virtual Machine.</p>
+   *
+   * @return the system runtime environment
+   */
+  public static RuntimeEnvironment system() {
+    return SystemRuntimeEnvironment.getInstance();
+  }
 
-	/**
-	 * Returns the system runtime environment that uses the specified standard input,
-	 * output and error streams.
-	 *
-	 * @param in  the standard input stream, may be {@code null}
-	 * @param out  the standard output stream, may be {@code null}
-	 * @param err  the standard error stream, may be {@code null}
-	 * @return  a system runtime environment that uses the specified streams for its I/O
-	 */
-	public static RuntimeEnvironment system(InputStream in, OutputStream out, OutputStream err) {
-		return new SystemRuntimeEnvironment(in, out, err);
-	}
+  /**
+   * Returns the system runtime environment that uses the specified standard input,
+   * output and error streams.
+   *
+   * @param in the standard input stream, may be {@code null}
+   * @param out the standard output stream, may be {@code null}
+   * @param err the standard error stream, may be {@code null}
+   * @return a system runtime environment that uses the specified streams for its I/O
+   */
+  public static RuntimeEnvironment system(InputStream in, OutputStream out, OutputStream err) {
+    return new SystemRuntimeEnvironment(in, out, err);
+  }
 
 }

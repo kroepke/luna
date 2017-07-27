@@ -16,63 +16,60 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.IRVisitor;
-
 import java.util.Objects;
 
 public class BinOp extends BodyNode {
 
-	public enum Op {
-		ADD,
-		SUB,
-		MUL,
-		DIV,
-		MOD,
-		IDIV,
-		POW,
-		CONCAT,
-		BAND,
-		BOR,
-		BXOR,
-		SHL,
-		SHR,
-		EQ,
-		NEQ,
-		LT,
-		LE
-	}
+  private final Op op;
+  private final Val dest;
+  private final Val left;
+  private final Val right;
+  public BinOp(Op op, Val dest, Val left, Val right) {
+    this.op = Objects.requireNonNull(op);
+    this.dest = Objects.requireNonNull(dest);
+    this.left = Objects.requireNonNull(left);
+    this.right = Objects.requireNonNull(right);
+  }
 
-	private final Op op;
-	private final Val dest;
-	private final Val left;
-	private final Val right;
+  public Op op() {
+    return op;
+  }
 
-	public BinOp(Op op, Val dest, Val left, Val right) {
-		this.op = Objects.requireNonNull(op);
-		this.dest = Objects.requireNonNull(dest);
-		this.left = Objects.requireNonNull(left);
-		this.right = Objects.requireNonNull(right);
-	}
+  public Val dest() {
+    return dest;
+  }
 
-	public Op op() {
-		return op;
-	}
+  public Val left() {
+    return left;
+  }
 
-	public Val dest() {
-		return dest;
-	}
+  public Val right() {
+    return right;
+  }
 
-	public Val left() {
-		return left;
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
-	public Val right() {
-		return right;
-	}
-
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  public enum Op {
+    ADD,
+    SUB,
+    MUL,
+    DIV,
+    MOD,
+    IDIV,
+    POW,
+    CONCAT,
+    BAND,
+    BOR,
+    BXOR,
+    SHL,
+    SHR,
+    EQ,
+    NEQ,
+    LT,
+    LE
+  }
 
 }

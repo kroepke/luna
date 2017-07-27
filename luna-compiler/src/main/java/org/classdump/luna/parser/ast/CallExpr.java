@@ -16,90 +16,83 @@
 
 package org.classdump.luna.parser.ast;
 
-import org.classdump.luna.parser.ast.Attributes;
-import org.classdump.luna.parser.ast.Expr;
-import org.classdump.luna.parser.ast.MultiExpr;
-import org.classdump.luna.parser.ast.Name;
-import org.classdump.luna.parser.ast.Transformer;
-
 import java.util.List;
 import java.util.Objects;
 
 public abstract class CallExpr extends MultiExpr {
 
-	protected final List<Expr> args;
+  protected final List<Expr> args;
 
-	protected CallExpr(Attributes attr, List<Expr> args) {
-		super(attr);
-		this.args = Objects.requireNonNull(args);
-	}
+  protected CallExpr(Attributes attr, List<Expr> args) {
+    super(attr);
+    this.args = Objects.requireNonNull(args);
+  }
 
-	public List<Expr> args() {
-		return args;
-	}
+  public List<Expr> args() {
+    return args;
+  }
 
-	public static class FunctionCallExpr extends CallExpr {
+  public static class FunctionCallExpr extends CallExpr {
 
-		private final Expr fn;
+    private final Expr fn;
 
-		public FunctionCallExpr(Attributes attr, Expr fn, List<Expr> args) {
-			super(attr, args);
-			this.fn = Objects.requireNonNull(fn);
-		}
+    public FunctionCallExpr(Attributes attr, Expr fn, List<Expr> args) {
+      super(attr, args);
+      this.fn = Objects.requireNonNull(fn);
+    }
 
-		public Expr fn() {
-			return fn;
-		}
+    public Expr fn() {
+      return fn;
+    }
 
-		public FunctionCallExpr update(Expr fn, List<Expr> args) {
-			if (this.fn.equals(fn) && this.args.equals(args)) {
-				return this;
-			}
-			else {
-				return new FunctionCallExpr(attributes(), fn, args);
-			}
-		}
+    public FunctionCallExpr update(Expr fn, List<Expr> args) {
+      if (this.fn.equals(fn) && this.args.equals(args)) {
+        return this;
+      } else {
+        return new FunctionCallExpr(attributes(), fn, args);
+      }
+    }
 
-		@Override
-		public Expr accept(Transformer tf) {
-			return tf.transform(this);
-		}
+    @Override
+    public Expr accept(Transformer tf) {
+      return tf.transform(this);
+    }
 
-	}
+  }
 
-	public static class MethodCallExpr extends CallExpr {
+  public static class MethodCallExpr extends CallExpr {
 
-		private final Expr target;
-		private final Name methodName;
+    private final Expr target;
+    private final Name methodName;
 
-		public MethodCallExpr(Attributes attr, Expr target, Name methodName, List<Expr> args) {
-			super(attr, args);
-			this.target = Objects.requireNonNull(target);
-			this.methodName = Objects.requireNonNull(methodName);
-		}
+    public MethodCallExpr(Attributes attr, Expr target, Name methodName, List<Expr> args) {
+      super(attr, args);
+      this.target = Objects.requireNonNull(target);
+      this.methodName = Objects.requireNonNull(methodName);
+    }
 
-		public Expr target() {
-			return target;
-		}
+    public Expr target() {
+      return target;
+    }
 
-		public Name methodName() {
-			return methodName;
-		}
+    public Name methodName() {
+      return methodName;
+    }
 
-		public MethodCallExpr update(Expr target, Name methodName, List<Expr> args) {
-			if (this.target.equals(target) && this.methodName.equals(methodName) && this.args.equals(args)) {
-				return this;
-			}
-			else {
-				return new MethodCallExpr(attributes(), target, methodName, args);
-			}
-		}
+    public MethodCallExpr update(Expr target, Name methodName, List<Expr> args) {
+      if (this.target.equals(target) && this.methodName.equals(methodName) && this.args
+          .equals(args)) {
+        return this;
+      } else {
+        return new MethodCallExpr(attributes(), target, methodName, args);
+      }
+    }
 
-		@Override
-		public Expr accept(Transformer tf) {
-			return tf.transform(this);
-		}
+    @Override
+    public Expr accept(Transformer tf) {
+      return tf.transform(this);
+    }
 
-	}
+  }
 
 }

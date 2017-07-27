@@ -21,25 +21,24 @@ package org.classdump.luna;
  */
 public abstract class LuaObject {
 
-	/**
-	 * Returns the metatable of this object, or {@code null} if this object does not have
-	 * a metatable.
-	 *
-	 * @return  this object's metatable, or {@code null} if this object does not have
-	 *          a metatable
-	 */
-	public abstract Table getMetatable();
+  /**
+   * Returns the metatable of this object, or {@code null} if this object does not have
+   * a metatable.
+   *
+   * @return this object's metatable, or {@code null} if this object does not have a metatable
+   */
+  public abstract Table getMetatable();
 
-	/**
-	 * Sets the metatable of this object to {@code mt}. {@code mt} may be {@code null}:
-	 * in that case, removes the metatable from this object.
-	 *
-	 * <p>Returns the metatable previously associated with this object (i.e., the metatable
-	 * before the call of this method; possibly {@code null}).</p>
-	 *
-	 * @param mt  new metatable to attach to this object, may be {@code null}
-	 * @return  previous metatable associated with this object
-	 */
-	public abstract Table setMetatable(Table mt);
+  /**
+   * Sets the metatable of this object to {@code mt}. {@code mt} may be {@code null}:
+   * in that case, removes the metatable from this object.
+   *
+   * <p>Returns the metatable previously associated with this object (i.e., the metatable
+   * before the call of this method; possibly {@code null}).</p>
+   *
+   * @param mt new metatable to attach to this object, may be {@code null}
+   * @return previous metatable associated with this object
+   */
+  public abstract Table setMetatable(Table mt);
 
 }

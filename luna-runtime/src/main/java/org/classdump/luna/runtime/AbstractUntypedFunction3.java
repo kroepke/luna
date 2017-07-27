@@ -23,4 +23,5 @@ package org.classdump.luna.runtime;
  */
 @SuppressWarnings("unused")
 public abstract class AbstractUntypedFunction3 extends AbstractFunction3<Object, Object, Object> {
+
 }

@@ -23,14 +23,14 @@ import org.classdump.luna.runtime.LuaFunction;
 
 public class LuaJavaLoaderProvider implements LoaderProvider {
 
-	@Override
-	public String name() {
-		return "luajava";
-	}
+  @Override
+  public String name() {
+    return "luajava";
+  }
 
-	@Override
-	public LuaFunction newLoader(RuntimeEnvironment runtimeEnvironment, Table env) {
-		return new LuaJavaLib.LoaderFunction(env);
-	}
+  @Override
+  public LuaFunction newLoader(RuntimeEnvironment runtimeEnvironment, Table env) {
+    return new LuaJavaLib.LoaderFunction(env);
+  }
 
 }

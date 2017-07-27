@@ -16,39 +16,38 @@
 
 package org.classdump.luna.parser;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import org.classdump.luna.parser.ast.AssignStatement;
 import org.classdump.luna.parser.ast.Expr;
 import org.classdump.luna.parser.ast.LValueExpr;
 import org.classdump.luna.parser.ast.SourceInfo;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
 class AssignRest {
 
-	public final SourceInfo src;
+  public final SourceInfo src;
 
-	public final List<LValueExpr> vars;
-	public final List<Expr> exprs;
+  public final List<LValueExpr> vars;
+  public final List<Expr> exprs;
 
-	AssignRest(SourceInfo src, List<LValueExpr> vars, List<Expr> exprs) {
-		this.src = Objects.requireNonNull(src);
-		this.vars = Objects.requireNonNull(vars);
-		this.exprs = Objects.requireNonNull(exprs);
-	}
+  AssignRest(SourceInfo src, List<LValueExpr> vars, List<Expr> exprs) {
+    this.src = Objects.requireNonNull(src);
+    this.vars = Objects.requireNonNull(vars);
+    this.exprs = Objects.requireNonNull(exprs);
+  }
 
-	AssignRest(SourceInfo src, List<Expr> exprs) {
-		this(src, Collections.<LValueExpr>emptyList(), exprs);
-	}
+  AssignRest(SourceInfo src, List<Expr> exprs) {
+    this(src, Collections.<LValueExpr>emptyList(), exprs);
+  }
 
-	AssignStatement prepend(LValueExpr v) {
-		Objects.requireNonNull(v);
-		List<LValueExpr> vs = new ArrayList<>();
-		vs.add(v);
-		vs.addAll(vars);
-		return Statements.assignStatement(src, Collections.unmodifiableList(vs), exprs);
-	}
+  AssignStatement prepend(LValueExpr v) {
+    Objects.requireNonNull(v);
+    List<LValueExpr> vs = new ArrayList<>();
+    vs.add(v);
+    vs.addAll(vars);
+    return Statements.assignStatement(src, Collections.unmodifiableList(vs), exprs);
+  }
 
 }

@@ -16,10 +16,6 @@
 
 package org.classdump.luna.compiler.gen;
 
-import org.classdump.luna.compiler.ir.BasicBlock;
-import org.classdump.luna.compiler.ir.Code;
-import org.classdump.luna.compiler.ir.Label;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,77 +23,79 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.classdump.luna.compiler.ir.BasicBlock;
+import org.classdump.luna.compiler.ir.Code;
+import org.classdump.luna.compiler.ir.Label;
 
 public class SegmentedCode {
 
-	private final List<List<BasicBlock>> segments;
+  private final List<List<BasicBlock>> segments;
 
-	private final Map<Label, LabelEntry> index;
+  private final Map<Label, LabelEntry> index;
 
-	public static class LabelEntry {
+  private SegmentedCode(List<List<BasicBlock>> segments, Map<Label, LabelEntry> index) {
+    this.segments = Objects.requireNonNull(segments);
+    this.index = Objects.requireNonNull(index);
+  }
 
-		public final Label label;
-		public final int segmentIdx;
-		public final int idx;
+  public static SegmentedCode singleton(Code code) {
+    List<List<BasicBlock>> blocks = new ArrayList<>();
 
-		public LabelEntry(Label label, int segmentIdx, int idx) {
-			this.label = Objects.requireNonNull(label);
-			this.segmentIdx = segmentIdx;
-			this.idx = idx;
-		}
+    List<BasicBlock> blks = new ArrayList<>();
+    Iterator<BasicBlock> bit = code.blockIterator();
+    while (bit.hasNext()) {
+      blks.add(bit.next());
+    }
+    blocks.add(Collections.unmodifiableList(blks));
 
-	}
+    return of(blocks);
+  }
 
-	private SegmentedCode(List<List<BasicBlock>> segments, Map<Label, LabelEntry> index) {
-		this.segments = Objects.requireNonNull(segments);
-		this.index = Objects.requireNonNull(index);
-	}
+  public static SegmentedCode of(List<List<BasicBlock>> segments) {
+    List<List<BasicBlock>> segs = Collections.unmodifiableList(segments);
 
-	public static SegmentedCode singleton(Code code) {
-		List<List<BasicBlock>> blocks = new ArrayList<>();
+    // build index
+    Map<Label, LabelEntry> index = new HashMap<>();
+    for (int i = 0; i < segs.size(); i++) {
+      int j = 0;
+      for (BasicBlock blk : segs.get(i)) {
+        index.put(blk.label(), new LabelEntry(blk.label(), i, j));
+        j++;
+      }
+    }
 
-		List<BasicBlock> blks = new ArrayList<>();
-		Iterator<BasicBlock> bit = code.blockIterator();
-		while (bit.hasNext()) {
-			blks.add(bit.next());
-		}
-		blocks.add(Collections.unmodifiableList(blks));
+    return new SegmentedCode(segs, Collections.unmodifiableMap(index));
+  }
 
-		return of(blocks);
-	}
+  public List<List<BasicBlock>> segments() {
+    return segments;
+  }
 
-	public static SegmentedCode of(List<List<BasicBlock>> segments) {
-		List<List<BasicBlock>> segs = Collections.unmodifiableList(segments);
+  public LabelEntry labelEntry(Label l) {
+    LabelEntry le = index.get(Objects.requireNonNull(l));
+    if (le == null) {
+      throw new IllegalStateException("Label not found: " + l);
+    } else {
+      return le;
+    }
+  }
 
-		// build index
-		Map<Label, LabelEntry> index = new HashMap<>();
-		for (int i = 0; i < segs.size(); i++) {
-			int j = 0;
-			for (BasicBlock blk : segs.get(i)) {
-				index.put(blk.label(), new LabelEntry(blk.label(), i, j));
-				j++;
-			}
-		}
+  public boolean isSingleton() {
+    return segments.size() == 1;
+  }
 
-		return new SegmentedCode(segs, Collections.unmodifiableMap(index));
-	}
+  public static class LabelEntry {
 
-	public List<List<BasicBlock>> segments() {
-		return segments;
-	}
+    public final Label label;
+    public final int segmentIdx;
+    public final int idx;
 
-	public LabelEntry labelEntry(Label l) {
-		LabelEntry le = index.get(Objects.requireNonNull(l));
-		if (le == null) {
-			throw new IllegalStateException("Label not found: " + l);
-		}
-		else {
-			return le;
-		}
-	}
+    public LabelEntry(Label label, int segmentIdx, int idx) {
+      this.label = Objects.requireNonNull(label);
+      this.segmentIdx = segmentIdx;
+      this.idx = idx;
+    }
 
-	public boolean isSingleton() {
-		return segments.size() == 1;
-	}
+  }
 
 }

@@ -21,16 +21,16 @@ import org.classdump.luna.LuaRuntimeException;
 
 public class AssertionFailedException extends LuaRuntimeException {
 
-	public AssertionFailedException(ByteString message) {
-		super(message);
-	}
+  public AssertionFailedException(ByteString message) {
+    super(message);
+  }
 
-	public AssertionFailedException(String message) {
-		super(ByteString.of(message));
-	}
+  public AssertionFailedException(String message) {
+    super(ByteString.of(message));
+  }
 
-	public AssertionFailedException(Object errorObject) {
-		super(errorObject);
-	}
+  public AssertionFailedException(Object errorObject) {
+    super(errorObject);
+  }
 
 }

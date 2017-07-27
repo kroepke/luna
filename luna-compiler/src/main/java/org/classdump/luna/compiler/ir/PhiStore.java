@@ -16,32 +16,29 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.IRVisitor;
-import org.classdump.luna.compiler.ir.PhiVal;
-
 import java.util.Objects;
 
 public class PhiStore extends BodyNode {
 
-	private final PhiVal dest;
-	private final Val src;
+  private final PhiVal dest;
+  private final Val src;
 
-	public PhiStore(PhiVal dest, Val src) {
-		this.dest = Objects.requireNonNull(dest);
-		this.src = Objects.requireNonNull(src);
-	}
+  public PhiStore(PhiVal dest, Val src) {
+    this.dest = Objects.requireNonNull(dest);
+    this.src = Objects.requireNonNull(src);
+  }
 
-	public PhiVal dest() {
-		return dest;
-	}
+  public PhiVal dest() {
+    return dest;
+  }
 
-	public Val src() {
-		return src;
-	}
+  public Val src() {
+    return src;
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

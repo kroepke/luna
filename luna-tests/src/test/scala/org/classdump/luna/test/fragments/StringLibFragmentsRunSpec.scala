@@ -17,8 +17,6 @@
 package org.classdump.luna.test.fragments
 
 import org.classdump.luna.test.FragmentExecTestSuite
-import org.classdump.luna.test.fragments.StringLibFragments
-import org.classdump.luna.test.FragmentExecTestSuite
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
@@ -26,7 +24,9 @@ import org.scalatest.junit.JUnitRunner
 class StringLibFragmentsRunSpec extends FragmentExecTestSuite {
 
   override def bundles = Seq(StringLibFragments)
+
   override def expectations = Seq(StringLibFragments)
+
   override def contexts = Seq(Str, Full)
 
   override def steps = Seq(1, Int.MaxValue)

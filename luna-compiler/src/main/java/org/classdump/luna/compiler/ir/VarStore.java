@@ -16,31 +16,29 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.IRVisitor;
-
 import java.util.Objects;
 
 public class VarStore extends BodyNode {
 
-	private final Var var;
-	private final Val src;
+  private final Var var;
+  private final Val src;
 
-	public VarStore(Var var, Val src) {
-		this.var = Objects.requireNonNull(var);
-		this.src = Objects.requireNonNull(src);
-	}
+  public VarStore(Var var, Val src) {
+    this.var = Objects.requireNonNull(var);
+    this.src = Objects.requireNonNull(src);
+  }
 
-	public Var var() {
-		return var;
-	}
+  public Var var() {
+    return var;
+  }
 
-	public Val src() {
-		return src;
-	}
+  public Val src() {
+    return src;
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

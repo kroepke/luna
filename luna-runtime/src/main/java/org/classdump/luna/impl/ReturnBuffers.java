@@ -16,12 +16,11 @@
 
 package org.classdump.luna.impl;
 
+import java.util.Collection;
+import java.util.Objects;
 import org.classdump.luna.Conversions;
 import org.classdump.luna.runtime.ReturnBuffer;
 import org.classdump.luna.runtime.ReturnBufferFactory;
-
-import java.util.Collection;
-import java.util.Objects;
 
 /**
  * Static factory for instantiating return buffers.
@@ -31,138 +30,139 @@ import java.util.Objects;
  */
 public final class ReturnBuffers {
 
-	private ReturnBuffers() {
-		// not to be instantiated
-	}
+  private static final ReturnBufferFactory DEFAULT_FACTORY_INSTANCE = new ReturnBufferFactory() {
+    @Override
+    public ReturnBuffer newInstance() {
+      return newDefaultReturnBuffer();
+    }
+  };
+  private static final Canonicaliser CANONICALISER = new Canonicaliser();
 
-	/**
-	 * Returns a new instance of the default return buffer implementation.
-	 *
-	 * <p>This implementation optimises access to the first two values in the
-	 * buffer.</p>
-	 *
-	 * @return  a new instance of the default return buffer
-	 */
-	public static ReturnBuffer newDefaultReturnBuffer() {
-		return new PairCachingReturnBuffer();
-	}
+  private ReturnBuffers() {
+    // not to be instantiated
+  }
 
-	private static final ReturnBufferFactory DEFAULT_FACTORY_INSTANCE = new ReturnBufferFactory() {
-		@Override
-		public ReturnBuffer newInstance() {
-			return newDefaultReturnBuffer();
-		}
-	};
+  /**
+   * Returns a new instance of the default return buffer implementation.
+   *
+   * <p>This implementation optimises access to the first two values in the
+   * buffer.</p>
+   *
+   * @return a new instance of the default return buffer
+   */
+  public static ReturnBuffer newDefaultReturnBuffer() {
+    return new PairCachingReturnBuffer();
+  }
 
-	/**
-	 * Returns a factory for constructing instances of the default return buffer implementation.
-	 *
-	 * @return  a factory for default return buffers
-	 */
-	public static ReturnBufferFactory defaultFactory() {
-		return DEFAULT_FACTORY_INSTANCE;
-	}
+  /**
+   * Returns a factory for constructing instances of the default return buffer implementation.
+   *
+   * @return a factory for default return buffers
+   */
+  public static ReturnBufferFactory defaultFactory() {
+    return DEFAULT_FACTORY_INSTANCE;
+  }
 
-	interface ReadMapper {
+  static ReturnBuffer mapped(ReturnBuffer buffer, ReadMapper reads, WriteMapper writes) {
+    Objects.requireNonNull(buffer);
+    if (reads == null && writes == null) {
+      return buffer;
+    } else {
+      return new MappedDelegatingReturnBuffer(buffer, reads, writes);
+    }
+  }
 
-		Object mapReadValue(Object object);
+  // TODO: clean up and make public
+  static ReturnBufferFactory mapping(final ReturnBufferFactory factory, final ReadMapper reads,
+      final WriteMapper writes) {
+    Objects.requireNonNull(factory);
+    return new ReturnBufferFactory() {
+      @Override
+      public ReturnBuffer newInstance() {
+        return mapped(factory.newInstance(), reads, writes);
+      }
+    };
+  }
 
-		Object[] mapReadArray(Object[] array);
+  // TODO: clean up and make public
+  static ReturnBufferFactory canonical(final ReturnBufferFactory factory, boolean reads,
+      boolean writes) {
+    return mapping(factory, reads ? CANONICALISER : null, writes ? CANONICALISER : null);
+  }
 
-	}
+  interface ReadMapper {
 
-	interface WriteMapper {
+    Object mapReadValue(Object object);
 
-		Object mapWrittenValue(Object object);
+    Object[] mapReadArray(Object[] array);
 
-		Object[] mapWrittenArray(Object[] array);
+  }
 
-		Collection<?> mapWrittenCollection(Collection<?> array);
+  interface WriteMapper {
 
-	}
+    Object mapWrittenValue(Object object);
 
-	abstract static class AbstractMapper implements ReturnBuffers.ReadMapper, ReturnBuffers.WriteMapper {
+    Object[] mapWrittenArray(Object[] array);
 
-		protected abstract Object map(Object object);
+    Collection<?> mapWrittenCollection(Collection<?> array);
 
-		private Object[] mapArray(Object[] array, Object[] copy) {
-			for (int i = 0; i < copy.length; i++) {
-				copy[i] = map(array[i]);
-			}
-			return copy;
-		}
+  }
 
-		public Collection<Object> mapCollection(final Collection<?> collection) {
-			return new AbstractMappedCollectionView<Object>(collection) {
-				@Override
-				protected Object map(Object object) {
-					return AbstractMapper.this.map(object);
-				}
-			};
-		}
+  abstract static class AbstractMapper implements ReturnBuffers.ReadMapper,
+      ReturnBuffers.WriteMapper {
 
-		@Override
-		public Object mapReadValue(Object object) {
-			return map(object);
-		}
+    protected abstract Object map(Object object);
 
-		@Override
-		public Object[] mapReadArray(Object[] array) {
-			return mapArray(array, array);
-		}
+    private Object[] mapArray(Object[] array, Object[] copy) {
+      for (int i = 0; i < copy.length; i++) {
+        copy[i] = map(array[i]);
+      }
+      return copy;
+    }
 
-		@Override
-		public Object mapWrittenValue(Object object) {
-			return map(object);
-		}
+    public Collection<Object> mapCollection(final Collection<?> collection) {
+      return new AbstractMappedCollectionView<Object>(collection) {
+        @Override
+        protected Object map(Object object) {
+          return AbstractMapper.this.map(object);
+        }
+      };
+    }
 
-		@Override
-		public Object[] mapWrittenArray(Object[] array) {
-			return mapArray(array, new Object[array.length]);
-		}
+    @Override
+    public Object mapReadValue(Object object) {
+      return map(object);
+    }
 
-		@Override
-		public Collection<?> mapWrittenCollection(Collection<?> array) {
-			return mapCollection(array);
-		}
+    @Override
+    public Object[] mapReadArray(Object[] array) {
+      return mapArray(array, array);
+    }
 
-	}
+    @Override
+    public Object mapWrittenValue(Object object) {
+      return map(object);
+    }
 
-	private static final Canonicaliser CANONICALISER = new Canonicaliser();
+    @Override
+    public Object[] mapWrittenArray(Object[] array) {
+      return mapArray(array, new Object[array.length]);
+    }
 
-	static class Canonicaliser extends ReturnBuffers.AbstractMapper {
+    @Override
+    public Collection<?> mapWrittenCollection(Collection<?> array) {
+      return mapCollection(array);
+    }
 
-		@Override
-		protected Object map(Object object) {
-			return Conversions.canonicalRepresentationOf(object);
-		}
+  }
 
-	}
+  static class Canonicaliser extends ReturnBuffers.AbstractMapper {
 
-	static ReturnBuffer mapped(ReturnBuffer buffer, ReadMapper reads, WriteMapper writes) {
-		Objects.requireNonNull(buffer);
-		if (reads == null && writes == null) {
-			return buffer;
-		}
-		else {
-			return new MappedDelegatingReturnBuffer(buffer, reads, writes);
-		}
-	}
+    @Override
+    protected Object map(Object object) {
+      return Conversions.canonicalRepresentationOf(object);
+    }
 
-	// TODO: clean up and make public
-	static ReturnBufferFactory mapping(final ReturnBufferFactory factory, final ReadMapper reads, final WriteMapper writes) {
-		Objects.requireNonNull(factory);
-		return new ReturnBufferFactory() {
-			@Override
-			public ReturnBuffer newInstance() {
-				return mapped(factory.newInstance(), reads, writes);
-			}
-		};
-	}
-
-	// TODO: clean up and make public
-	static ReturnBufferFactory canonical(final ReturnBufferFactory factory, boolean reads, boolean writes) {
-		return mapping(factory, reads ? CANONICALISER : null, writes ? CANONICALISER : null);
-	}
+  }
 
 }

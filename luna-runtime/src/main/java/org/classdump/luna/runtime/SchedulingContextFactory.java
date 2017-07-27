@@ -21,11 +21,11 @@ package org.classdump.luna.runtime;
  */
 public interface SchedulingContextFactory {
 
-	/**
-	 * Returns a new scheduling context.
-	 *
-	 * @return  a new scheduling context
-	 */
-	SchedulingContext newInstance();
+  /**
+   * Returns a new scheduling context.
+   *
+   * @return a new scheduling context
+   */
+  SchedulingContext newInstance();
 
 }

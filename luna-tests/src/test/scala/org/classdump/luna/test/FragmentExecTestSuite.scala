@@ -16,37 +16,24 @@
 
 package org.classdump.luna.test
 
-import org.classdump.luna.compiler.CompilerSettings.CPUAccountingMode
 import org.classdump.luna.compiler.{CompilerChunkLoader, CompilerSettings}
+import org.classdump.luna.compiler.CompilerSettings.CPUAccountingMode
 import org.classdump.luna.env.RuntimeEnvironments
-import org.classdump.luna.exec._
+import org.classdump.luna.exec.{Continuation, _}
 import org.classdump.luna.impl.StateContexts
-import org.classdump.luna.lib._
+import org.classdump.luna.lib.{TableLib, _}
 import org.classdump.luna.load.{ChunkClassLoader, ChunkLoader}
 import org.classdump.luna.runtime.RuntimeCallInitialiser
-import org.classdump.luna.test.{FragmentBundle, FragmentExpectations}
 import org.classdump.luna.test.FragmentExpectations.Env
 import org.classdump.luna.test.Util.{BufferPrinter, Printer}
 import org.classdump.luna.{Conversions, StateContext, Table, Variable}
-import org.classdump.luna.compiler.CompilerChunkLoader
-import org.classdump.luna.exec.Continuation
-import org.classdump.luna.lib.TableLib
-import org.classdump.luna.load.ChunkLoader
-import org.classdump.luna.test.Util.Printer
 import org.scalatest.{FunSpec, MustMatchers}
 
 import scala.util.{Failure, Success}
 
 trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
-  def bundles: Seq[FragmentBundle]
-  def expectations: Seq[FragmentExpectations]
-  def contexts: Seq[FragmentExpectations.Env]
-
-  def steps: Seq[Int]
-
-  def compilerConfigs: CompilerConfigs = CompilerConfigs.DefaultOnly
-
+  val ldrs = compilerConfigs.loaders
   protected val Empty = FragmentExpectations.Env.Empty
   protected val Basic = FragmentExpectations.Env.Basic
   protected val Mod = FragmentExpectations.Env.Module
@@ -59,14 +46,44 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
   protected val Debug = FragmentExpectations.Env.Debug
   protected val Full = FragmentExpectations.Env.Full
 
+  def bundles: Seq[FragmentBundle]
+
+  def expectations: Seq[FragmentExpectations]
+
+  def contexts: Seq[FragmentExpectations.Env]
+
+  def steps: Seq[Int]
+
+  def compilerConfigs: CompilerConfigs = CompilerConfigs.DefaultOnly
+
+  def compilerSettingsToString(settings: CompilerSettings): String = {
+    val cpu = settings.cpuAccountingMode() match {
+      case CPUAccountingMode.NO_CPU_ACCOUNTING => "n"
+      case CPUAccountingMode.IN_EVERY_BASIC_BLOCK => "a"
+    }
+    val cfold = settings.constFolding() match {
+      case true => "t"
+      case false => "f"
+    }
+    val ccache = settings.constCaching() match {
+      case true => "t"
+      case false => "f"
+    }
+    val nlimit = settings.nodeSizeLimit() match {
+      case 0 => "0"
+      case n => n.toString
+    }
+    cpu + cfold + ccache + "_" + nlimit
+  }
+
   protected def envForContext(state: StateContext, ctx: Env, ldr: ChunkLoader, printer: Printer): Table = {
     val env = state.newTable()
-    val runtimeEnv = RuntimeEnvironments.system()  // FIXME
+    val runtimeEnv = RuntimeEnvironments.system() // FIXME
     val moduleClassLoader = this.getClass().getClassLoader
 
     ctx match {
       case Empty =>
-        // no-op
+      // no-op
 
       case Basic =>
         BasicLib.installInto(state, env, runtimeEnv, ldr)
@@ -121,41 +138,24 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
   sealed trait ChkLoader {
     def name: String
-    def loader(): ChunkLoader
-  }
 
-  def compilerSettingsToString(settings: CompilerSettings): String = {
-    val cpu = settings.cpuAccountingMode() match {
-      case CPUAccountingMode.NO_CPU_ACCOUNTING => "n"
-      case CPUAccountingMode.IN_EVERY_BASIC_BLOCK => "a"
-    }
-    val cfold = settings.constFolding() match {
-      case true => "t"
-      case false => "f"
-    }
-    val ccache = settings.constCaching() match {
-      case true => "t"
-      case false => "f"
-    }
-    val nlimit = settings.nodeSizeLimit() match {
-      case 0 => "0"
-      case n => n.toString
-    }
-    cpu + cfold + ccache + "_" + nlimit
+    def loader(): ChunkLoader
   }
 
   case class LunaChkLoader(settings: CompilerSettings) extends ChkLoader {
     def name = "RemC" + "_" + compilerSettingsToString(settings)
+
     def loader() = CompilerChunkLoader.of(new ChunkClassLoader(), settings, "fragment_test_")
   }
 
-  class CompilerConfigs private (configs: Seq[CompilerSettings]) {
+  class CompilerConfigs private(configs: Seq[CompilerSettings]) {
     def loaders: Seq[LunaChkLoader] = configs.distinct map LunaChkLoader
   }
+
   object CompilerConfigs {
     val bools = Seq(true, false)
     val limits = Seq(0, 10)
-//    val limits = Seq(0)
+    //    val limits = Seq(0)
 
     val allConfigs = for (
       cpu <- CPUAccountingMode.values();
@@ -163,16 +163,16 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
       ccache <- bools;
       nlimit <- limits
     ) yield CompilerSettings.defaultSettings()
-        .withCPUAccountingMode(cpu)
-        .withConstFolding(cfold)
-        .withConstCaching(ccache)
-        .withNodeSizeLimit(nlimit)
+      .withCPUAccountingMode(cpu)
+      .withConstFolding(cfold)
+      .withConstCaching(ccache)
+      .withNodeSizeLimit(nlimit)
 
     case object DefaultOnly extends CompilerConfigs(Seq(CompilerSettings.defaultSettings()))
-    case object All extends CompilerConfigs(allConfigs)
-  }
 
-  val ldrs = compilerConfigs.loaders
+    case object All extends CompilerConfigs(allConfigs)
+
+  }
 
   for (bundle <- bundles;
        fragment <- bundle.all;
@@ -180,7 +180,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
     val prefix = ""
 
-    describe (prefix + fragment.description + " in " + ctx + ":") {
+    describe(prefix + fragment.description + " in " + ctx + ":") {
 
       for (s <- steps; l <- ldrs) {
 
@@ -189,7 +189,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
           case i => i.toString
         }
 
-        it (l.name + " / " + stepDesc) {
+        it(l.name + " / " + stepDesc) {
 
           val printer = new BufferPrinter()
 
@@ -230,23 +230,23 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
             Failure(error.getCause)
           }
           else {
-            require (resultValues != null, "result must not be null")
+            require(resultValues != null, "result must not be null")
             Success(resultValues.toSeq)
           }
 
           val after = System.nanoTime()
 
           val totalTimeMillis = (after - before) / 1000000.0
-//          val totalCPUUnitsSpent = preemptionContext.totalCost
-//          val avgTimePerCPUUnitNanos = (after - before).toDouble / totalCPUUnitsSpent.toDouble
-//          val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
+          //          val totalCPUUnitsSpent = preemptionContext.totalCost
+          //          val avgTimePerCPUUnitNanos = (after - before).toDouble / totalCPUUnitsSpent.toDouble
+          //          val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
 
           printer.println("Execution took %.1f ms".format(totalTimeMillis))
-//          println("Total CPU cost: " + preemptionContext.totalCost + " LI")
+          //          println("Total CPU cost: " + preemptionContext.totalCost + " LI")
           printer.println("Computation steps: " + steps)
-//          println()
-//          println("Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
-//          println("Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
+          //          println()
+          //          println("Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
+          //          println("Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
           printer.println()
 
           res match {

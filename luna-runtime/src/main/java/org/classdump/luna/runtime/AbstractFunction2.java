@@ -19,45 +19,51 @@ package org.classdump.luna.runtime;
 /**
  * Abstract function of two arguments.
  */
-public abstract class AbstractFunction2<T1, T2> extends LuaFunction<T1, T2, Object, Object, Object> {
+public abstract class AbstractFunction2<T1, T2> extends
+    LuaFunction<T1, T2, Object, Object, Object> {
 
-	@Override
-	public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
-		invoke(context, null, null);
-	}
+  @Override
+  public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
+    invoke(context, null, null);
+  }
 
-	@Override
-	public void invoke(ExecutionContext context, T1 arg1) throws ResolvedControlThrowable {
-		invoke(context, arg1, null);
-	}
+  @Override
+  public void invoke(ExecutionContext context, T1 arg1) throws ResolvedControlThrowable {
+    invoke(context, arg1, null);
+  }
 
-	@Override
-	public void invoke(ExecutionContext context, T1 arg1, T2 arg2, Object arg3) throws ResolvedControlThrowable {
-		invoke(context, arg1, arg2);
-	}
+  @Override
+  public void invoke(ExecutionContext context, T1 arg1, T2 arg2, Object arg3)
+      throws ResolvedControlThrowable {
+    invoke(context, arg1, arg2);
+  }
 
-	@Override
-	public void invoke(ExecutionContext context, T1 arg1, T2 arg2, Object arg3, Object arg4) throws ResolvedControlThrowable {
-		invoke(context, arg1, arg2);
-	}
+  @Override
+  public void invoke(ExecutionContext context, T1 arg1, T2 arg2, Object arg3, Object arg4)
+      throws ResolvedControlThrowable {
+    invoke(context, arg1, arg2);
+  }
 
-	@Override
-	public void invoke(ExecutionContext context, T1 arg1, T2 arg2, Object arg3, Object arg4, Object arg5) throws ResolvedControlThrowable {
-		invoke(context, arg1, arg2);
-	}
+  @Override
+  public void invoke(ExecutionContext context, T1 arg1, T2 arg2, Object arg3, Object arg4,
+      Object arg5) throws ResolvedControlThrowable {
+    invoke(context, arg1, arg2);
+  }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public void invoke(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
-		T1 a = null;
-		T2 b = null;
-		switch (args.length) {
-			default:             // fall through
-			case 2: b = (T2) args[1]; // fall through
-			case 1: a = (T1) args[0]; // fall through
-			case 0:
-		}
-		invoke(context, a, b);
-	}
+  @SuppressWarnings("unchecked")
+  @Override
+  public void invoke(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
+    T1 a = null;
+    T2 b = null;
+    switch (args.length) {
+      default:             // fall through
+      case 2:
+        b = (T2) args[1]; // fall through
+      case 1:
+        a = (T1) args[0]; // fall through
+      case 0:
+    }
+    invoke(context, a, b);
+  }
 
 }

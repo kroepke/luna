@@ -22,48 +22,48 @@ import java.util.Iterator;
 
 abstract class AbstractMappedCollectionView<T> extends AbstractCollection<T> {
 
-	private final Collection<?> collection;
+  private final Collection<?> collection;
 
-	public AbstractMappedCollectionView(Collection<?> collection) {
-		this.collection = collection;
-	}
+  public AbstractMappedCollectionView(Collection<?> collection) {
+    this.collection = collection;
+  }
 
-	protected abstract T map(Object object);
+  protected abstract T map(Object object);
 
-	class MappingIterator implements Iterator<T> {
+  @Override
+  public Iterator<T> iterator() {
+    return new MappingIterator(collection.iterator());
+  }
 
-		private final Iterator<?> iterator;
+  @Override
+  public int size() {
+    return collection.size();
+  }
 
-		private MappingIterator(Iterator<?> iterator) {
-			this.iterator = iterator;
-		}
+  class MappingIterator implements Iterator<T> {
 
-		@Override
-		public boolean hasNext() {
-			return iterator.hasNext();
-		}
+    private final Iterator<?> iterator;
 
-		@Override
-		public T next() {
-			Object o = iterator.next();
-			return map(o);
-		}
+    private MappingIterator(Iterator<?> iterator) {
+      this.iterator = iterator;
+    }
 
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException("read-only view");
-		}
+    @Override
+    public boolean hasNext() {
+      return iterator.hasNext();
+    }
 
-	}
+    @Override
+    public T next() {
+      Object o = iterator.next();
+      return map(o);
+    }
 
-	@Override
-	public Iterator<T> iterator() {
-		return new MappingIterator(collection.iterator());
-	}
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException("read-only view");
+    }
 
-	@Override
-	public int size() {
-		return collection.size();
-	}
+  }
 
 }

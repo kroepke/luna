@@ -16,104 +16,114 @@
 
 package org.classdump.luna.compiler.ir;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Set;
 import org.classdump.luna.parser.util.Util;
-import org.classdump.luna.compiler.ir.Label;
-
-import java.util.*;
 
 public class Code {
 
-	private final List<BasicBlock> blocks;
+  private final List<BasicBlock> blocks;
 
-	private final Map<Label, BasicBlock> index;
+  private final Map<Label, BasicBlock> index;
 
-	private Code(List<BasicBlock> blocks) {
-		verify(blocks);
-		this.blocks = Objects.requireNonNull(blocks);
-		this.index = index(blocks);
-	}
+  private Code(List<BasicBlock> blocks) {
+    verify(blocks);
+    this.blocks = Objects.requireNonNull(blocks);
+    this.index = index(blocks);
+  }
 
-	public static Code of(List<BasicBlock> blocks) {
-		return new Code(
-				new ArrayList<>(Objects.requireNonNull(blocks)));
-	}
+  public static Code of(List<BasicBlock> blocks) {
+    return new Code(
+        new ArrayList<>(Objects.requireNonNull(blocks)));
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		Code that = (Code) o;
-		return this.blocks.equals(that.blocks);
-	}
+  private static List<BasicBlock> verify(List<BasicBlock> blocks) {
+    Objects.requireNonNull(blocks);
+    if (blocks.isEmpty()) {
+      throw new IllegalArgumentException("Empty block sequence");
+    }
+    Set<Label> defs = new HashSet<>();
+    Set<Label> pending = new HashSet<>();
+    for (BasicBlock b : blocks) {
+      Label l = b.label();
+      if (!defs.add(l)) {
+        throw new IllegalArgumentException("Label " + l + " defined more than once");
+      } else {
+        pending.remove(l);
+      }
 
-	@Override
-	public int hashCode() {
-		return blocks.hashCode();
-	}
+      for (Label nxt : b.end().nextLabels()) {
+        if (!defs.contains(nxt)) {
+          pending.add(nxt);
+        }
+      }
+    }
 
-	private static List<BasicBlock> verify(List<BasicBlock> blocks) {
-		Objects.requireNonNull(blocks);
-		if (blocks.isEmpty()) {
-			throw new IllegalArgumentException("Empty block sequence");
-		}
-		Set<Label> defs = new HashSet<>();
-		Set<Label> pending = new HashSet<>();
-		for (BasicBlock b : blocks) {
-			Label l = b.label();
-			if (!defs.add(l)) {
-				throw new IllegalArgumentException("Label " + l + " defined more than once");
-			}
-			else {
-				pending.remove(l);
-			}
+    if (!pending.isEmpty()) {
+      throw new IllegalStateException(
+          "Label(s) not defined: " + Util.iterableToString(pending, ", "));
+    }
 
-			for (Label nxt : b.end().nextLabels()) {
-				if (!defs.contains(nxt)) {
-					pending.add(nxt);
-				}
-			}
-		}
+    return blocks;
+  }
 
-		if (!pending.isEmpty()) {
-			throw new IllegalStateException("Label(s) not defined: " + Util.iterableToString(pending, ", "));
-		}
+  private static Map<Label, BasicBlock> index(Iterable<BasicBlock> blocks) {
+    Map<Label, BasicBlock> result = new HashMap<>();
+    for (BasicBlock b : blocks) {
+      result.put(b.label(), b);
+    }
+    return Collections.unmodifiableMap(result);
+  }
 
-		return blocks;
-	}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Code that = (Code) o;
+    return this.blocks.equals(that.blocks);
+  }
 
-	private static Map<Label, BasicBlock> index(Iterable<BasicBlock> blocks) {
-		Map<Label, BasicBlock> result = new HashMap<>();
-		for (BasicBlock b : blocks) {
-			result.put(b.label(), b);
-		}
-		return Collections.unmodifiableMap(result);
-	}
+  @Override
+  public int hashCode() {
+    return blocks.hashCode();
+  }
 
-	public BasicBlock entryBlock() {
-		return blocks.get(0);
-	}
+  public BasicBlock entryBlock() {
+    return blocks.get(0);
+  }
 
-	public Label entryLabel() {
-		return entryBlock().label();
-	}
+  public Label entryLabel() {
+    return entryBlock().label();
+  }
 
-	public BasicBlock block(Label label) {
-		Objects.requireNonNull(label);
-		BasicBlock result = index.get(label);
-		if (result != null) {
-			return result;
-		}
-		else {
-			throw new NoSuchElementException("Label not found: " + label);
-		}
-	}
+  public BasicBlock block(Label label) {
+    Objects.requireNonNull(label);
+    BasicBlock result = index.get(label);
+    if (result != null) {
+      return result;
+    } else {
+      throw new NoSuchElementException("Label not found: " + label);
+    }
+  }
 
-	public Iterable<Label> labels() {
-		return index.keySet();
-	}
+  public Iterable<Label> labels() {
+    return index.keySet();
+  }
 
-	public Iterator<BasicBlock> blockIterator() {
-		return blocks.iterator();
-	}
+  public Iterator<BasicBlock> blockIterator() {
+    return blocks.iterator();
+  }
 
 }

@@ -16,9 +16,6 @@
 
 package org.classdump.luna.compiler;
 
-import org.classdump.luna.compiler.IRFunc;
-import org.classdump.luna.compiler.Module;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,18 +23,18 @@ import java.util.Objects;
 
 public class ModuleBuilder {
 
-	private final List<IRFunc> fns;
+  private final List<IRFunc> fns;
 
-	public ModuleBuilder() {
-		this.fns = new ArrayList<>();
-	}
+  public ModuleBuilder() {
+    this.fns = new ArrayList<>();
+  }
 
-	public void add(IRFunc fn) {
-		fns.add(Objects.requireNonNull(fn));
-	}
+  public void add(IRFunc fn) {
+    fns.add(Objects.requireNonNull(fn));
+  }
 
-	public Module build() {
-		return new Module(Collections.unmodifiableList(fns));
-	}
+  public Module build() {
+    return new Module(Collections.unmodifiableList(fns));
+  }
 
 }

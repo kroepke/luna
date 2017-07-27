@@ -18,12 +18,12 @@ package org.classdump.luna.lib;
 
 public class UnexpectedArgumentException extends IllegalArgumentException {
 
-	public UnexpectedArgumentException(String message) {
-		super(message);
-	}
+  public UnexpectedArgumentException(String message) {
+    super(message);
+  }
 
-	public UnexpectedArgumentException(String expected, String actual) {
-		this(expected + " expected, got " + actual);
-	}
+  public UnexpectedArgumentException(String expected, String actual) {
+    this(expected + " expected, got " + actual);
+  }
 
 }

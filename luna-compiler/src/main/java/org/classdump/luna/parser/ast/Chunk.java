@@ -20,43 +20,41 @@ import java.util.Objects;
 
 public class Chunk {
 
-	private final Attributes attr;
-	private final Block block;
+  private final Attributes attr;
+  private final Block block;
 
-	public Chunk(Attributes attr, Block block) {
-		this.attr = Objects.requireNonNull(attr);
-		this.block = Objects.requireNonNull(block);
-	}
+  public Chunk(Attributes attr, Block block) {
+    this.attr = Objects.requireNonNull(attr);
+    this.block = Objects.requireNonNull(block);
+  }
 
-	public Chunk(Block block) {
-		this(Attributes.empty(), block);
-	}
+  public Chunk(Block block) {
+    this(Attributes.empty(), block);
+  }
 
-	public Attributes attributes() {
-		return attr;
-	}
+  public Attributes attributes() {
+    return attr;
+  }
 
-	public Block block() {
-		return block;
-	}
+  public Block block() {
+    return block;
+  }
 
-	public Chunk update(Block block) {
-		if (this.block.equals(block)) {
-			return this;
-		}
-		else {
-			return new Chunk(attributes(), block);
-		}
-	}
+  public Chunk update(Block block) {
+    if (this.block.equals(block)) {
+      return this;
+    } else {
+      return new Chunk(attributes(), block);
+    }
+  }
 
-	public Chunk with(Object o) {
-		Attributes as = attr.with(o);
-		if (this.attributes().equals(as)) {
-			return this;
-		}
-		else {
-			return new Chunk(as, block);
-		}
-	}
+  public Chunk with(Object o) {
+    Attributes as = attr.with(o);
+    if (this.attributes().equals(as)) {
+      return this;
+    } else {
+      return new Chunk(as, block);
+    }
+  }
 
 }

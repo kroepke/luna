@@ -16,31 +16,31 @@
 
 package org.classdump.luna.test.fragments
 
-import org.classdump.luna.test.{FragmentBundle, FragmentExpectations, OneLiners}
 import org.classdump.luna.Userdata
+import org.classdump.luna.test.{FragmentBundle, FragmentExpectations, OneLiners}
 
 object IOLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
-  in (IOContext) {
+  in(IOContext) {
 
-    about ("io.output") {
+    about("io.output") {
 
-      program ("return io.output()") succeedsWith (classOf[Userdata[Object]])
-
-    }
-
-    about ("file:__tostring") {
-
-      program ("return tostring(io.output())") succeedsWith stringStartingWith("file (0x")
+      program("return io.output()") succeedsWith (classOf[Userdata[Object]])
 
     }
 
-    about ("io.write") {
+    about("file:__tostring") {
+
+      program("return tostring(io.output())") succeedsWith stringStartingWith("file (0x")
+
+    }
+
+    about("io.write") {
 
       // TODO: check what is written to the output
 
-      program ("return io.write(1, 2)") succeedsWith (classOf[Userdata[Object]])
-      program ("""return io.write({})""") failsWith "bad argument #"<<"1">>" to 'write' (string expected, got table)"
+      program("return io.write(1, 2)") succeedsWith (classOf[Userdata[Object]])
+      program("""return io.write({})""") failsWith "bad argument #" << "1" >> " to 'write' (string expected, got table)"
 
     }
 

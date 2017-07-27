@@ -16,41 +16,41 @@
 
 package org.classdump.luna.parser;
 
+import java.util.Objects;
 import org.classdump.luna.parser.ast.LValueExpr;
 import org.classdump.luna.parser.ast.Name;
 import org.classdump.luna.parser.ast.SourceInfo;
 import org.classdump.luna.parser.ast.StringLiteral;
 
-import java.util.Objects;
-
 class FunctionNameBuilder {
 
-	private LValueExpr lv;
-	private boolean method;
+  private LValueExpr lv;
+  private boolean method;
 
-	public FunctionNameBuilder(SourceElement<Name> srcName) {
-		Objects.requireNonNull(srcName);
-		this.lv = Exprs.var(srcName.sourceInfo(), srcName.element());
-		this.method = false;
-	}
+  public FunctionNameBuilder(SourceElement<Name> srcName) {
+    Objects.requireNonNull(srcName);
+    this.lv = Exprs.var(srcName.sourceInfo(), srcName.element());
+    this.method = false;
+  }
 
-	public void addDotName(SourceInfo srcDot, SourceElement<Name> srcName) {
-		Objects.requireNonNull(srcDot);
-		Objects.requireNonNull(srcName);
-		lv = Exprs.index(srcDot, lv, Exprs.literal(srcName.sourceInfo(), StringLiteral.fromName(srcName.element())));
-	}
+  public void addDotName(SourceInfo srcDot, SourceElement<Name> srcName) {
+    Objects.requireNonNull(srcDot);
+    Objects.requireNonNull(srcName);
+    lv = Exprs.index(srcDot, lv,
+        Exprs.literal(srcName.sourceInfo(), StringLiteral.fromName(srcName.element())));
+  }
 
-	public void addColonName(SourceInfo srcColon, SourceElement<Name> srcName) {
-		addDotName(srcColon, srcName);
-		method = true;
-	}
+  public void addColonName(SourceInfo srcColon, SourceElement<Name> srcName) {
+    addDotName(srcColon, srcName);
+    method = true;
+  }
 
-	public boolean isMethod() {
-		return method;
-	}
+  public boolean isMethod() {
+    return method;
+  }
 
-	public LValueExpr get() {
-		return lv;
-	}
+  public LValueExpr get() {
+    return lv;
+  }
 
 }

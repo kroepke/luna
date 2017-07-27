@@ -18,10 +18,10 @@ package org.classdump.luna.lib.io;
 
 public interface SeekableStream {
 
-	long getPosition();
+  long getPosition();
 
-	long setPosition(long newPosition);
+  long setPosition(long newPosition);
 
-	long addPosition(long offset);
+  long addPosition(long offset);
 
 }

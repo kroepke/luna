@@ -16,6 +16,9 @@
 
 package org.classdump.luna.exec;
 
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.classdump.luna.Conversions;
 import org.classdump.luna.StateContext;
 import org.classdump.luna.impl.ReturnBuffers;
@@ -26,10 +29,6 @@ import org.classdump.luna.runtime.RuntimeCallInitialiser;
 import org.classdump.luna.runtime.SchedulingContext;
 import org.classdump.luna.runtime.SchedulingContextFactory;
 
-import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * A call executor that executes Lua calls and asynchronous tasks scheduled by these
  * calls in the current thread. The executor uses a {@link SchedulingContextFactory}
@@ -37,342 +36,326 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class DirectCallExecutor {
 
-	private final SchedulingContextFactory schedulingContextFactory;
-	private final ReturnBufferFactory returnBufferFactory;
-	private final boolean performJavaConversions;
+  private static final ReturnBufferFactory DEFAULT_RETURN_BUFFER_FACTORY =
+      ReturnBuffers.defaultFactory();
+  private static final DirectCallExecutor NEVER_PAUSING_EXECUTOR
+      = new DirectCallExecutor(SchedulingContexts.neverPauseFactory());
+  private final SchedulingContextFactory schedulingContextFactory;
+  private final ReturnBufferFactory returnBufferFactory;
+  private final boolean performJavaConversions;
 
-	DirectCallExecutor(SchedulingContextFactory schedulingContextFactory) {
-		this.schedulingContextFactory = Objects.requireNonNull(schedulingContextFactory);
-		this.returnBufferFactory = DEFAULT_RETURN_BUFFER_FACTORY;
-		this.performJavaConversions = true;
-	}
+  DirectCallExecutor(SchedulingContextFactory schedulingContextFactory) {
+    this.schedulingContextFactory = Objects.requireNonNull(schedulingContextFactory);
+    this.returnBufferFactory = DEFAULT_RETURN_BUFFER_FACTORY;
+    this.performJavaConversions = true;
+  }
 
-	private static final ReturnBufferFactory DEFAULT_RETURN_BUFFER_FACTORY =
-			ReturnBuffers.defaultFactory();
+  /**
+   * Returns a new direct call executor with a scheduler that never requests executions
+   * to be paused.
+   *
+   * @return a direct call executor that never asks continuations to be paused
+   */
+  public static DirectCallExecutor newExecutor() {
+    return NEVER_PAUSING_EXECUTOR;
+  }
 
-	private static final DirectCallExecutor NEVER_PAUSING_EXECUTOR
-			= new DirectCallExecutor(SchedulingContexts.neverPauseFactory());
+  /**
+   * Returns a new direct call executor with the specified scheduling context factory used
+   * to instantiate a new scheduling context on each resume.
+   *
+   * @param schedulingContextFactory the scheduling context factory, must not be {@code null}
+   * @return a direct call executor that uses the specified scheduling context factory
+   * @throws NullPointerException if {@code schedulingContextFactory} is {@code null}
+   */
+  public static DirectCallExecutor newExecutor(SchedulingContextFactory schedulingContextFactory) {
+    return new DirectCallExecutor(schedulingContextFactory);
+  }
 
-	/**
-	 * Returns a new direct call executor with a scheduler that never requests executions
-	 * to be paused.
-	 *
-	 * @return  a direct call executor that never asks continuations to be paused
-	 */
-	public static DirectCallExecutor newExecutor() {
-		return NEVER_PAUSING_EXECUTOR;
-	}
+  /**
+   * Returns a new direct call executor that uses that asks each continuation it resumes
+   * to pause after it has registered {@code ticksLimit} ticks.
+   *
+   * @param ticksLimit the tick limit for resumes, must be positive
+   * @return a direct call executor that caps resumes at the given tick limit
+   * @throws IllegalArgumentException if {@code ticksLimit} is not positive
+   */
+  public static DirectCallExecutor newExecutorWithTickLimit(long ticksLimit) {
+    return newExecutor(SchedulingContexts.countDownContextFactory(ticksLimit));
+  }
 
-	/**
-	 * Returns a new direct call executor with the specified scheduling context factory used
-	 * to instantiate a new scheduling context on each resume.
-	 *
-	 * @param schedulingContextFactory  the scheduling context factory, must not be {@code null}
-	 * @return  a direct call executor that uses the specified scheduling context factory
-	 *
-	 * @throws NullPointerException  if {@code schedulingContextFactory} is {@code null}
-	 */
-	public static DirectCallExecutor newExecutor(SchedulingContextFactory schedulingContextFactory) {
-		return new DirectCallExecutor(schedulingContextFactory);
-	}
+  /**
+   * Resumes {@code continuation} in the current thread in the scheduling context
+   * {@code schedulingContext}, returning the call result once the call completes.
+   *
+   * <p>The call result will be passed in a freshly-allocated array, and may therefore
+   * be manipulated freely by the caller of this method. If {@code convertResultsToJava}
+   * is {@code true}, the result values will be converted to Java using
+   * {@link Conversions#toJavaValues(Object[])}.</p>
+   *
+   * @param continuation the continuation to resume, must not be {@code null}
+   * @param schedulingContext the scheduling context, must not be {@code null}
+   * @param convertResultsToJava flag controlling the conversion of result values to their Java
+   * representations
+   * @return the call result, converted to Java representations if {@code convertResults} is {@code
+   * true}
+   * @throws CallException if the call terminated abnormally
+   * @throws CallPausedException if the call initiated a pause
+   * @throws InterruptedException when the current thread is interrupted while waiting for an
+   * asynchronous operation to be completed
+   * @throws InvalidContinuationException when {@code continuation} is invalid
+   * @throws NullPointerException if {@code continuation} or {@code schedulingContext} is {@code
+   * null}
+   */
+  public static Object[] execute(
+      Continuation continuation,
+      SchedulingContext schedulingContext,
+      boolean convertResultsToJava)
+      throws CallException, CallPausedException, InterruptedException {
 
-	/**
-	 * Returns a new direct call executor that uses that asks each continuation it resumes
-	 * to pause after it has registered {@code ticksLimit} ticks.
-	 *
-	 * @param ticksLimit  the tick limit for resumes, must be positive
-	 * @return   a direct call executor that caps resumes at the given tick limit
-	 *
-	 * @throws IllegalArgumentException  if {@code ticksLimit} is not positive
-	 */
-	public static DirectCallExecutor newExecutorWithTickLimit(long ticksLimit) {
-		return newExecutor(SchedulingContexts.countDownContextFactory(ticksLimit));
-	}
+    Objects.requireNonNull(continuation);
+    Objects.requireNonNull(schedulingContext);
 
-	private static class Result implements CallEventHandler {
+    while (true) {
+      Result result = new Result();
+      continuation.resume(result, schedulingContext);
 
-		private final AtomicBoolean wasSet;
+      if (result.wasSet.get() && result.task != null && result.cont != null) {
+        // an asynchronous task
 
-		// if wasSet.get() == true, then at most one of the next three fields may be null;
-		// otherwise, all must be null.
+        final CountDownLatch latch = new CountDownLatch(1);
+        AsyncTask.ContinueCallback callback = new AsyncTask.ContinueCallback() {
+          @Override
+          public void finished() {
+            latch.countDown();
+          }
+        };
 
-		private Continuation cont;
-		private Object[] values;
-		private Throwable error;
+        continuation = result.cont;
+        result.task.execute(callback);
 
-		// may only be non-null if wasSet.get() == true and cont != null
-		private AsyncTask task;
+        // TODO: handle interrupts while waiting, and give the user a chance to try again?
+        latch.await();
+      } else {
+        Object[] values = result.get();
+        if (convertResultsToJava) {
+          Conversions.toJavaValues(values);
+        }
 
-		Result() {
-			this.wasSet = new AtomicBoolean(false);
-			this.cont = null;
-			this.values = null;
-			this.error = null;
-			this.task = null;
-		}
+        return values;
+      }
+    }
+  }
 
-		@Override
-		public void returned(Object id, Object[] result) {
-			if (result != null) {
-				if (wasSet.compareAndSet(false, true)) {
-					this.values = result;
-				}
-				else {
-					throw new IllegalStateException("Call result already set");
-				}
-			}
-			else {
-				throw new IllegalArgumentException("Return values array must not be null");
-			}
-		}
+  /**
+   * Resumes {@code continuation} in the current thread in the scheduling context
+   * {@code schedulingContext}, returning the call result once the call completes.
+   *
+   * <p>The call result will be passed in a freshly-allocated array, and may therefore
+   * be manipulated freely by the caller of this method.</p>
+   *
+   * <p>This method converts return values to Java values using
+   * {@link Conversions#toJavaValues(Object[])}. For a greater control over this behaviour,
+   * use {@link #execute(Continuation, SchedulingContext, boolean)} instead.</p>
+   *
+   * @param continuation the continuation to resume, must not be {@code null}
+   * @param schedulingContext the scheduling context, must not be {@code null}
+   * @return the call result
+   * @throws CallException if the call terminated abnormally
+   * @throws CallPausedException if the call initiated a pause
+   * @throws InterruptedException when the current thread is interrupted while waiting for an
+   * asynchronous operation to be completed
+   * @throws InvalidContinuationException when {@code continuation} is invalid
+   * @throws NullPointerException if {@code continuation} or {@code schedulingContext} is {@code
+   * null}
+   */
+  public static Object[] execute(
+      Continuation continuation,
+      SchedulingContext schedulingContext)
+      throws CallException, CallPausedException, InterruptedException {
 
-		@Override
-		public void failed(Object id, Throwable error) {
-			if (error != null) {
-				if (wasSet.compareAndSet(false, true)) {
-					this.error = error;
-				}
-				else {
-					throw new IllegalStateException("Call result already set");
-				}
-			}
-			else {
-				throw new IllegalArgumentException("Error must not be null");
-			}
-		}
+    return execute(continuation, schedulingContext, true);
+  }
 
-		@Override
-		public void paused(Object id, Continuation cont) {
-			if (cont != null) {
-				if (wasSet.compareAndSet(false, true)) {
-					this.cont = cont;
-				}
-				else {
-					throw new IllegalStateException("Call result already set");
-				}
-			}
-			else {
-				throw new IllegalArgumentException("Continuation must not be null");
-			}
-		}
+  /**
+   * Executes {@code continuation} in the current thread in a scheduling context
+   * that never asks the execution to pause, returning the call result once the call completes.
+   *
+   * <p>The call result will be passed in a freshly-allocated array, and may therefore
+   * be manipulated freely by the caller of this method.</p>
+   *
+   * <p>This method converts return values to Java values using
+   * {@link Conversions#toJavaValues(Object[])}. For a greater control over this behaviour,
+   * use {@link #execute(Continuation, SchedulingContext, boolean)} instead.</p>
+   *
+   * @param continuation the continuation to resume, must not be {@code null}
+   * @return the call result
+   * @throws CallException if the call terminated abnormally
+   * @throws CallPausedException if the call initiated a pause
+   * @throws InterruptedException when the current thread is interrupted while waiting for an
+   * asynchronous operation to be completed
+   * @throws InvalidContinuationException when {@code continuation} is invalid
+   * @throws NullPointerException if {@code continuation} or {@code schedulingContext} is {@code
+   * null}
+   */
+  public static Object[] execute(Continuation continuation)
+      throws CallException, CallPausedException, InterruptedException {
+    return execute(continuation, SchedulingContexts.neverPause());
+  }
 
-		@Override
-		public void async(Object id, final Continuation cont, AsyncTask task) {
-			if (cont != null && task != null) {
-				if (wasSet.compareAndSet(false, true)) {
-					this.cont = cont;
-					this.task = task;
-				}
-				else {
-					throw new IllegalStateException("Call result already set");
-				}
-			}
-			else {
-				throw new IllegalArgumentException("Continuation and task must not be null");
-			}
-		}
+  /**
+   * Returns the scheduling context factory used by this executor.
+   *
+   * @return the scheduling context factory used by this executor
+   */
+  public SchedulingContextFactory schedulingContextFactory() {
+    return schedulingContextFactory;
+  }
 
-		public Object[] get()
-				throws CallException, CallPausedException {
+  /**
+   * Calls {@code fn(args...)} in the current thread in the state context {@code stateContext},
+   * returning the call result once the call completes.
+   *
+   * <p>The call result will be passed in a freshly-allocated array, and may therefore
+   * be manipulated freely by the caller of this method.</p>
+   *
+   * @param stateContext state context of the call, must not be {@code null}
+   * @param fn the call target, may be {@code null}
+   * @param args call arguments, must not be {@code null}
+   * @return the call result
+   * @throws CallException if the call terminated abnormally
+   * @throws CallPausedException if the call initiated a pause
+   * @throws InterruptedException when the current thread is interrupted while waiting for an
+   * asynchronous operation to be completed
+   * @throws NullPointerException if {@code stateContext} or {@code args} is {@code null}
+   */
+  public Object[] call(StateContext stateContext, Object fn, Object... args)
+      throws CallException, CallPausedException, InterruptedException {
 
-			if (!wasSet.get()) {
-				throw new IllegalStateException("Call result has not been set");
-			}
-			else {
-				if (values != null) return values;
-				else if (cont != null) throw new CallPausedException(cont);
-				else if (error != null) throw new CallException(error);
-				else {
-					// should not happen
-					throw new AssertionError();
-				}
-			}
-		}
+    CallInitialiser initialiser = RuntimeCallInitialiser.forState(
+        stateContext,
+        returnBufferFactory);
 
-	}
+    return resume(initialiser.newCall(
+        performJavaConversions ? Conversions.canonicalRepresentationOf(fn) : fn,
+        performJavaConversions ? Conversions.copyAsCanonicalValues(args) : args));
+  }
 
-	/**
-	 * Returns the scheduling context factory used by this executor.
-	 *
-	 * @return  the scheduling context factory used by this executor
-	 */
-	public SchedulingContextFactory schedulingContextFactory() {
-		return schedulingContextFactory;
-	}
+  /**
+   * Resumes {@code continuation} in the current thread, returning the call result once
+   * the call completes.
+   *
+   * <p>The call result will be passed in a freshly-allocated array, and may therefore
+   * be manipulated freely by the caller of this method.</p>
+   *
+   * @param continuation the continuation to resume, must not be {@code null}
+   * @return the call result
+   * @throws CallException if the call terminated abnormally
+   * @throws CallPausedException if the call initiated a pause
+   * @throws InterruptedException when the current thread is interrupted while waiting for an
+   * asynchronous operation to be completed
+   * @throws InvalidContinuationException when {@code continuation} is invalid
+   * @throws NullPointerException if {@code continuation} is {@code null}
+   */
+  public Object[] resume(Continuation continuation)
+      throws CallException, CallPausedException, InterruptedException {
+    return execute(continuation, schedulingContextFactory.newInstance(), performJavaConversions);
+  }
 
-	/**
-	 * Calls {@code fn(args...)} in the current thread in the state context {@code stateContext},
-	 * returning the call result once the call completes.
-	 *
-	 * <p>The call result will be passed in a freshly-allocated array, and may therefore
-	 * be manipulated freely by the caller of this method.</p>
-	 *
-	 * @param stateContext  state context of the call, must not be {@code null}
-	 * @param fn  the call target, may be {@code null}
-	 * @param args  call arguments, must not be {@code null}
-	 * @return  the call result
-	 *
-	 * @throws CallException  if the call terminated abnormally
-	 * @throws CallPausedException  if the call initiated a pause
-	 * @throws InterruptedException  when the current thread is interrupted while waiting
-	 *                               for an asynchronous operation to be completed
-	 * @throws NullPointerException  if {@code stateContext} or {@code args} is {@code null}
-	 */
-	public Object[] call(StateContext stateContext, Object fn, Object... args)
-			throws CallException, CallPausedException, InterruptedException {
+  private static class Result implements CallEventHandler {
 
-		CallInitialiser initialiser = RuntimeCallInitialiser.forState(
-				stateContext,
-				returnBufferFactory);
+    private final AtomicBoolean wasSet;
 
-		return resume(initialiser.newCall(
-				performJavaConversions ? Conversions.canonicalRepresentationOf(fn) : fn,
-				performJavaConversions ? Conversions.copyAsCanonicalValues(args) : args));
-	}
+    // if wasSet.get() == true, then at most one of the next three fields may be null;
+    // otherwise, all must be null.
 
-	/**
-	 * Resumes {@code continuation} in the current thread, returning the call result once
-	 * the call completes.
-	 *
-	 * <p>The call result will be passed in a freshly-allocated array, and may therefore
-	 * be manipulated freely by the caller of this method.</p>
-	 *
-	 * @param continuation  the continuation to resume, must not be {@code null}
-	 * @return  the call result
-	 *
-	 * @throws CallException  if the call terminated abnormally
-	 * @throws CallPausedException  if the call initiated a pause
-	 * @throws InterruptedException  when the current thread is interrupted while waiting
-	 *                               for an asynchronous operation to be completed
-	 * @throws InvalidContinuationException  when {@code continuation} is invalid
-	 * @throws NullPointerException  if {@code continuation} is {@code null}
-	 */
-	public Object[] resume(Continuation continuation)
-			throws CallException, CallPausedException, InterruptedException {
-		return execute(continuation, schedulingContextFactory.newInstance(), performJavaConversions);
-	}
+    private Continuation cont;
+    private Object[] values;
+    private Throwable error;
 
-	/**
-	 * Resumes {@code continuation} in the current thread in the scheduling context
-	 * {@code schedulingContext}, returning the call result once the call completes.
-	 *
-	 * <p>The call result will be passed in a freshly-allocated array, and may therefore
-	 * be manipulated freely by the caller of this method. If {@code convertResultsToJava}
-	 * is {@code true}, the result values will be converted to Java using
-	 * {@link Conversions#toJavaValues(Object[])}.</p>
-	 *
-	 * @param continuation  the continuation to resume, must not be {@code null}
-	 * @param schedulingContext  the scheduling context, must not be {@code null}
-	 * @param convertResultsToJava  flag controlling the conversion of result values to
-	 *                              their Java representations
-	 * @return  the call result, converted to Java representations
-	 *          if {@code convertResults} is {@code true}
-	 *
-	 * @throws CallException  if the call terminated abnormally
-	 * @throws CallPausedException  if the call initiated a pause
-	 * @throws InterruptedException  when the current thread is interrupted while waiting
-	 *                               for an asynchronous operation to be completed
-	 * @throws InvalidContinuationException  when {@code continuation} is invalid
-	 * @throws NullPointerException  if {@code continuation} or {@code schedulingContext}
-	 *                               is {@code null}
-	 */
-	public static Object[] execute(
-			Continuation continuation,
-			SchedulingContext schedulingContext,
-			boolean convertResultsToJava)
-			throws CallException, CallPausedException, InterruptedException {
+    // may only be non-null if wasSet.get() == true and cont != null
+    private AsyncTask task;
 
-		Objects.requireNonNull(continuation);
-		Objects.requireNonNull(schedulingContext);
+    Result() {
+      this.wasSet = new AtomicBoolean(false);
+      this.cont = null;
+      this.values = null;
+      this.error = null;
+      this.task = null;
+    }
 
-		while (true) {
-			Result result = new Result();
-			continuation.resume(result, schedulingContext);
+    @Override
+    public void returned(Object id, Object[] result) {
+      if (result != null) {
+        if (wasSet.compareAndSet(false, true)) {
+          this.values = result;
+        } else {
+          throw new IllegalStateException("Call result already set");
+        }
+      } else {
+        throw new IllegalArgumentException("Return values array must not be null");
+      }
+    }
 
-			if (result.wasSet.get() && result.task != null && result.cont != null) {
-				// an asynchronous task
+    @Override
+    public void failed(Object id, Throwable error) {
+      if (error != null) {
+        if (wasSet.compareAndSet(false, true)) {
+          this.error = error;
+        } else {
+          throw new IllegalStateException("Call result already set");
+        }
+      } else {
+        throw new IllegalArgumentException("Error must not be null");
+      }
+    }
 
-				final CountDownLatch latch = new CountDownLatch(1);
-				AsyncTask.ContinueCallback callback = new AsyncTask.ContinueCallback() {
-					@Override
-					public void finished() {
-						latch.countDown();
-					}
-				};
+    @Override
+    public void paused(Object id, Continuation cont) {
+      if (cont != null) {
+        if (wasSet.compareAndSet(false, true)) {
+          this.cont = cont;
+        } else {
+          throw new IllegalStateException("Call result already set");
+        }
+      } else {
+        throw new IllegalArgumentException("Continuation must not be null");
+      }
+    }
 
-				continuation = result.cont;
-				result.task.execute(callback);
+    @Override
+    public void async(Object id, final Continuation cont, AsyncTask task) {
+      if (cont != null && task != null) {
+        if (wasSet.compareAndSet(false, true)) {
+          this.cont = cont;
+          this.task = task;
+        } else {
+          throw new IllegalStateException("Call result already set");
+        }
+      } else {
+        throw new IllegalArgumentException("Continuation and task must not be null");
+      }
+    }
 
-				// TODO: handle interrupts while waiting, and give the user a chance to try again?
-				latch.await();
-			}
-			else {
-				Object[] values = result.get();
-				if (convertResultsToJava) {
-					Conversions.toJavaValues(values);
-				}
+    public Object[] get()
+        throws CallException, CallPausedException {
 
-				return values;
-			}
-		}
-	}
+      if (!wasSet.get()) {
+        throw new IllegalStateException("Call result has not been set");
+      } else {
+        if (values != null) {
+          return values;
+        } else if (cont != null) {
+          throw new CallPausedException(cont);
+        } else if (error != null) {
+          throw new CallException(error);
+        } else {
+          // should not happen
+          throw new AssertionError();
+        }
+      }
+    }
 
-	/**
-	 * Resumes {@code continuation} in the current thread in the scheduling context
-	 * {@code schedulingContext}, returning the call result once the call completes.
-	 *
-	 * <p>The call result will be passed in a freshly-allocated array, and may therefore
-	 * be manipulated freely by the caller of this method.</p>
-	 *
-	 * <p>This method converts return values to Java values using
-	 * {@link Conversions#toJavaValues(Object[])}. For a greater control over this behaviour,
-	 * use {@link #execute(Continuation, SchedulingContext, boolean)} instead.</p>
-	 *
-	 * @param continuation  the continuation to resume, must not be {@code null}
-	 * @param schedulingContext  the scheduling context, must not be {@code null}
-	 * @return  the call result
-	 *
-	 * @throws CallException  if the call terminated abnormally
-	 * @throws CallPausedException  if the call initiated a pause
-	 * @throws InterruptedException  when the current thread is interrupted while waiting
-	 *                               for an asynchronous operation to be completed
-	 * @throws InvalidContinuationException  when {@code continuation} is invalid
-	 * @throws NullPointerException  if {@code continuation} or {@code schedulingContext}
-	 *                               is {@code null}
-	 */
-	public static Object[] execute(
-			Continuation continuation,
-			SchedulingContext schedulingContext)
-			throws CallException, CallPausedException, InterruptedException {
-
-		return execute(continuation, schedulingContext, true);
-	}
-
-	/**
-	 * Executes {@code continuation} in the current thread in a scheduling context
-	 * that never asks the execution to pause, returning the call result once the call completes.
-	 *
-	 * <p>The call result will be passed in a freshly-allocated array, and may therefore
-	 * be manipulated freely by the caller of this method.</p>
-	 *
-	 * <p>This method converts return values to Java values using
-	 * {@link Conversions#toJavaValues(Object[])}. For a greater control over this behaviour,
-	 * use {@link #execute(Continuation, SchedulingContext, boolean)} instead.</p>
-	 *
-	 * @param continuation  the continuation to resume, must not be {@code null}
-	 * @return  the call result
-	 *
-	 * @throws CallException  if the call terminated abnormally
-	 * @throws CallPausedException  if the call initiated a pause
-	 * @throws InterruptedException  when the current thread is interrupted while waiting
-	 *                               for an asynchronous operation to be completed
-	 * @throws InvalidContinuationException  when {@code continuation} is invalid
-	 * @throws NullPointerException  if {@code continuation} or {@code schedulingContext}
-	 *                               is {@code null}
-	 */
-	public static Object[] execute(Continuation continuation)
-			throws CallException, CallPausedException, InterruptedException {
-		return execute(continuation, SchedulingContexts.neverPause());
-	}
+  }
 
 }

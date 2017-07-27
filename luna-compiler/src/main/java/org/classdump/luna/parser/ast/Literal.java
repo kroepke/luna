@@ -18,6 +18,6 @@ package org.classdump.luna.parser.ast;
 
 public abstract class Literal {
 
-	public abstract Literal accept(Transformer tf);
+  public abstract Literal accept(Transformer tf);
 
 }

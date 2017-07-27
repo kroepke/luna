@@ -30,42 +30,42 @@ import org.classdump.luna.runtime.UnresolvedControlThrowable;
 
 public class SimpleBlockingAsync {
 
-	static class ExampleFunction extends AbstractFunction0 {
+  public static void main(String[] args)
+      throws InterruptedException, CallPausedException, CallException, LoaderException {
 
-		@Override
-		public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
-			System.out.println("invoke");
+    StateContext state = StateContexts.newDefaultInstance();
+    DirectCallExecutor.newExecutor().call(state, new ExampleFunction());
+  }
 
-			try {
-				context.resumeAfter(new AsyncTask() {
-					@Override
-					public void execute(ContinueCallback callback) {
-						System.out.println("in task");
-						callback.finished();
-					}
-				});
-			}
-			catch (UnresolvedControlThrowable ct) {
-				throw ct.resolve(this, null);
-			}
+  static class ExampleFunction extends AbstractFunction0 {
 
-			// control never reaches this point
-			System.out.println("after async -- not!");
-		}
+    @Override
+    public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
+      System.out.println("invoke");
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-			System.out.println("resume");
-			context.getReturnBuffer().setTo();
-		}
+      try {
+        context.resumeAfter(new AsyncTask() {
+          @Override
+          public void execute(ContinueCallback callback) {
+            System.out.println("in task");
+            callback.finished();
+          }
+        });
+      } catch (UnresolvedControlThrowable ct) {
+        throw ct.resolve(this, null);
+      }
 
-	}
+      // control never reaches this point
+      System.out.println("after async -- not!");
+    }
 
-	public static void main(String[] args)
-			throws InterruptedException, CallPausedException, CallException, LoaderException {
+    @Override
+    public void resume(ExecutionContext context, Object suspendedState)
+        throws ResolvedControlThrowable {
+      System.out.println("resume");
+      context.getReturnBuffer().setTo();
+    }
 
-		StateContext state = StateContexts.newDefaultInstance();
-		DirectCallExecutor.newExecutor().call(state, new ExampleFunction());
-	}
+  }
 
 }

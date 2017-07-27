@@ -16,79 +16,84 @@
 
 package org.classdump.luna.compiler.analysis.types;
 
-import org.classdump.luna.compiler.analysis.types.Type;
-import org.classdump.luna.compiler.analysis.types.TypeSeq;
-
 import java.util.Objects;
 
 public abstract class ReturnType {
 
-	private ReturnType() {
-		// not to be extended by the outside world
-	}
+  private ReturnType() {
+    // not to be extended by the outside world
+  }
 
-	public static class ConcreteReturnType extends ReturnType {
+  public static class ConcreteReturnType extends ReturnType {
 
-		public final TypeSeq typeSeq;
+    public final TypeSeq typeSeq;
 
-		public ConcreteReturnType(TypeSeq typeSeq) {
-			this.typeSeq = Objects.requireNonNull(typeSeq);
-		}
+    public ConcreteReturnType(TypeSeq typeSeq) {
+      this.typeSeq = Objects.requireNonNull(typeSeq);
+    }
 
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
 
-			ConcreteReturnType that = (ConcreteReturnType) o;
+      ConcreteReturnType that = (ConcreteReturnType) o;
 
-			return typeSeq.equals(that.typeSeq);
-		}
+      return typeSeq.equals(that.typeSeq);
+    }
 
-		@Override
-		public int hashCode() {
-			return typeSeq.hashCode();
-		}
+    @Override
+    public int hashCode() {
+      return typeSeq.hashCode();
+    }
 
-		@Override
-		public String toString() {
-			return typeSeq.toString();
-		}
+    @Override
+    public String toString() {
+      return typeSeq.toString();
+    }
 
-	}
+  }
 
-	public static class TailCallReturnType extends ReturnType {
+  public static class TailCallReturnType extends ReturnType {
 
-		public final Type target;
-		public final TypeSeq typeSeq;
+    public final Type target;
+    public final TypeSeq typeSeq;
 
-		public TailCallReturnType(Type target, TypeSeq typeSeq) {
-			this.target = Objects.requireNonNull(target);
-			this.typeSeq = Objects.requireNonNull(typeSeq);
-		}
+    public TailCallReturnType(Type target, TypeSeq typeSeq) {
+      this.target = Objects.requireNonNull(target);
+      this.typeSeq = Objects.requireNonNull(typeSeq);
+    }
 
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
 
-			TailCallReturnType that = (TailCallReturnType) o;
+      TailCallReturnType that = (TailCallReturnType) o;
 
-			return target == that.target && typeSeq.equals(that.typeSeq);
-		}
+      return target == that.target && typeSeq.equals(that.typeSeq);
+    }
 
-		@Override
-		public int hashCode() {
-			int result = target.hashCode();
-			result = 31 * result + typeSeq.hashCode();
-			return result;
-		}
+    @Override
+    public int hashCode() {
+      int result = target.hashCode();
+      result = 31 * result + typeSeq.hashCode();
+      return result;
+    }
 
-		@Override
-		public String toString() {
-			return target.toString() + "(" + typeSeq + ")";
-		}
+    @Override
+    public String toString() {
+      return target.toString() + "(" + typeSeq + ")";
+    }
 
-	}
+  }
 
 }

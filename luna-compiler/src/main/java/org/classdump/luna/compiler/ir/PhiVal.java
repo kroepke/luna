@@ -16,19 +16,17 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.AbstractVal;
-
 public class PhiVal extends AbstractVal {
 
-	private final int idx;
+  private final int idx;
 
-	public PhiVal(int idx) {
-		this.idx = idx;
-	}
+  public PhiVal(int idx) {
+    this.idx = idx;
+  }
 
-	@Override
-	public String toString() {
-		return "&" + idx;
-	}
+  @Override
+  public String toString() {
+    return "&" + idx;
+  }
 
 }

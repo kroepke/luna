@@ -18,8 +18,8 @@ package org.classdump.luna.parser.analysis;
 
 public class NameResolutionException extends RuntimeException {
 
-	public NameResolutionException(String message) {
-		super(message);
-	}
+  public NameResolutionException(String message) {
+    super(message);
+  }
 
 }

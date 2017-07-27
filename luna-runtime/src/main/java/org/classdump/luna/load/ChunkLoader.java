@@ -25,48 +25,45 @@ import org.classdump.luna.runtime.LuaFunction;
  */
 public interface ChunkLoader {
 
-	/**
-	 * Loads the text chunk {@code chunk} (a string containing a Lua program) and returns
-	 * it as an instance of {@link LuaFunction}, supplying {@code env} as the chunk's sole
-	 * upvalue.
-	 *
-	 * <p>The argument {@code chunkName}, typically the file name of the file containing
-	 * {@code chunk}, is used to provide debugging information.</p>
-	 *
-	 * <p>If {@code chunk} is not a valid Lua program, a {@link LoaderException} is thrown.</p>
-	 *
-	 * @param env  the variable to be used as the sole upvalue of {@code chunk},
-	 *             must not be {@code null}
-	 * @param chunkName  chunk name, must not be {@code null}
-	 * @param chunk  chunk text, must not be {@code null}
-	 * @return  a function object
-	 *
-	 * @throws LoaderException  if {@code chunk} cannot be converted to a Lua function object
-	 *
-	 * @throws NullPointerException  if {@code env}, {@code chunkName} or {@code chunk}
-	 *                               is {@code null}
-	 */
-	LuaFunction<Variable, ?, ?, ?, ?> loadTextChunk(Variable env, String chunkName, String chunk) throws LoaderException;
+  /**
+   * Loads the text chunk {@code chunk} (a string containing a Lua program) and returns
+   * it as an instance of {@link LuaFunction}, supplying {@code env} as the chunk's sole
+   * upvalue.
+   *
+   * <p>The argument {@code chunkName}, typically the file name of the file containing
+   * {@code chunk}, is used to provide debugging information.</p>
+   *
+   * <p>If {@code chunk} is not a valid Lua program, a {@link LoaderException} is thrown.</p>
+   *
+   * @param env the variable to be used as the sole upvalue of {@code chunk}, must not be {@code
+   * null}
+   * @param chunkName chunk name, must not be {@code null}
+   * @param chunk chunk text, must not be {@code null}
+   * @return a function object
+   * @throws LoaderException if {@code chunk} cannot be converted to a Lua function object
+   * @throws NullPointerException if {@code env}, {@code chunkName} or {@code chunk} is {@code
+   * null}
+   */
+  LuaFunction<Variable, ?, ?, ?, ?> loadTextChunk(Variable env, String chunkName, String chunk)
+      throws LoaderException;
 
-	// TODO: binary chunks
+  // TODO: binary chunks
 //	LuaFunction loadBinaryChunk(Variable env, String chunkName, byte[] chunk, int offset, int len) throws LoaderException;
 
-	/**
-	 * Compiles the text chunk {@code chunk} (a string containing a Lua program) and returns it
-	 * as a {@link ChunkFactory} which can be used to create instances of it.
-	 * <p>The argument {@code chunkName}, typically the file name of the file containing
-	 * {@code chunk}, is used to provide debugging information.</p>
-	 *
-	 * <p>If {@code chunk} is not a valid Lua program, a {@link LoaderException} is thrown.</p>
-	 *
-	 * @param chunkName  chunk name, must not be {@code null}
-	 * @param chunk  chunk text, must not be {@code null}
-	 * @return  the class of the lua function
-	 *
-	 * @throws LoaderException  if {@code chunk} cannot be converted to a Lua function object
-	 *
-	 * @throws NullPointerException  if {@code env}, {@code chunkName} or {@code chunk}
-	 *                               is {@code null}
-	 */
-	ChunkFactory compileTextChunk(String chunkName, String chunk) throws LoaderException;
+  /**
+   * Compiles the text chunk {@code chunk} (a string containing a Lua program) and returns it
+   * as a {@link ChunkFactory} which can be used to create instances of it.
+   * <p>The argument {@code chunkName}, typically the file name of the file containing
+   * {@code chunk}, is used to provide debugging information.</p>
+   *
+   * <p>If {@code chunk} is not a valid Lua program, a {@link LoaderException} is thrown.</p>
+   *
+   * @param chunkName chunk name, must not be {@code null}
+   * @param chunk chunk text, must not be {@code null}
+   * @return the class of the lua function
+   * @throws LoaderException if {@code chunk} cannot be converted to a Lua function object
+   * @throws NullPointerException if {@code env}, {@code chunkName} or {@code chunk} is {@code
+   * null}
+   */
+  ChunkFactory compileTextChunk(String chunkName, String chunk) throws LoaderException;
 }

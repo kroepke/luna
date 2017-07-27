@@ -27,53 +27,51 @@ import java.nio.file.FileSystem;
  */
 public interface RuntimeEnvironment {
 
-	/**
-	 * Returns the standard input stream.
-	 *
-	 * @return  the standard input stream
-	 */
-	InputStream standardInput();
+  /**
+   * Returns the standard input stream.
+   *
+   * @return the standard input stream
+   */
+  InputStream standardInput();
 
-	/**
-	 * Returns the standard output stream.
-	 *
-	 * @return  the standard output stream
-	 */
-	OutputStream standardOutput();
+  /**
+   * Returns the standard output stream.
+   *
+   * @return the standard output stream
+   */
+  OutputStream standardOutput();
 
-	/**
-	 * Returns the standard error stream.
-	 *
-	 * @return  the standard output stream
-	 */
-	OutputStream standardError();
+  /**
+   * Returns the standard error stream.
+   *
+   * @return the standard output stream
+   */
+  OutputStream standardError();
 
-	/**
-	 * Returns the file system.
-	 *
-	 * @return  the file system
-	 */
-	FileSystem fileSystem();
+  /**
+   * Returns the file system.
+   *
+   * @return the file system
+   */
+  FileSystem fileSystem();
 
-	/**
-	 * Returns the value of the environment variable {@code name}, or {@code null} when
-	 * {@code name} is not defined.
-	 *
-	 * @param name  the name of the environment variable, must not be {@code null}
-	 * @return  the value of the environment variable {@code name} (possibly {@code null})
-	 *
-	 * @throws NullPointerException  if {@code name} is {@code null}
-	 */
-	String getEnv(String name);
+  /**
+   * Returns the value of the environment variable {@code name}, or {@code null} when
+   * {@code name} is not defined.
+   *
+   * @param name the name of the environment variable, must not be {@code null}
+   * @return the value of the environment variable {@code name} (possibly {@code null})
+   * @throws NullPointerException if {@code name} is {@code null}
+   */
+  String getEnv(String name);
 
-	/**
-	 * Returns an approximation of the CPU time used by this program in seconds.
-	 *
-	 * @return  an approximation of the CPU time used by this program in seconds
-	 *
-	 * @throws UnsupportedOperationException  if this operation is not supported by the
-	 *                                        runtime environment
-	 */
-	double getCpuTime();
+  /**
+   * Returns an approximation of the CPU time used by this program in seconds.
+   *
+   * @return an approximation of the CPU time used by this program in seconds
+   * @throws UnsupportedOperationException if this operation is not supported by the runtime
+   * environment
+   */
+  double getCpuTime();
 
 }

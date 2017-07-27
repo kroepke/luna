@@ -24,14 +24,14 @@ import org.classdump.luna.LuaRuntimeException;
  */
 public class IllegalCoroutineStateException extends LuaRuntimeException {
 
-	/**
-	 * Constructs a new instance of {@code IllegalCoroutineStateException} with the
-	 * given error message.
-	 *
-	 * @param message  the error message, may be {@code null}
-	 */
-	public IllegalCoroutineStateException(String message) {
-		super(message);
-	}
+  /**
+   * Constructs a new instance of {@code IllegalCoroutineStateException} with the
+   * given error message.
+   *
+   * @param message the error message, may be {@code null}
+   */
+  public IllegalCoroutineStateException(String message) {
+    super(message);
+  }
 
 }

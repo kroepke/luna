@@ -22,204 +22,189 @@ import org.classdump.luna.LuaMathOperators;
 
 class DistanceMappingVisitor implements ParameterMappingVisitor<Integer> {
 
-	static final DistanceMappingVisitor INSTANCE = new DistanceMappingVisitor();
+  static final DistanceMappingVisitor INSTANCE = new DistanceMappingVisitor();
 
-	private static final int INTEGER_TO_LONG   = 0;
-	private static final int INTEGER_TO_INT    = 1;
-	private static final int INTEGER_TO_SHORT  = 2;
-	private static final int INTEGER_TO_BYTE   = 3;
-	private static final int INTEGER_TO_CHAR   = 4;
-	private static final int INTEGER_TO_DOUBLE = 5;
-	private static final int INTEGER_TO_FLOAT  = 6;
+  private static final int INTEGER_TO_LONG = 0;
+  private static final int INTEGER_TO_INT = 1;
+  private static final int INTEGER_TO_SHORT = 2;
+  private static final int INTEGER_TO_BYTE = 3;
+  private static final int INTEGER_TO_CHAR = 4;
+  private static final int INTEGER_TO_DOUBLE = 5;
+  private static final int INTEGER_TO_FLOAT = 6;
 
-	private static final int FLOAT_TO_LONG   = 2;
-	private static final int FLOAT_TO_INT    = 3;
-	private static final int FLOAT_TO_SHORT  = 4;
-	private static final int FLOAT_TO_BYTE   = 5;
-	private static final int FLOAT_TO_CHAR   = 6;
-	private static final int FLOAT_TO_DOUBLE = 0;
-	private static final int FLOAT_TO_FLOAT  = 1;
+  private static final int FLOAT_TO_LONG = 2;
+  private static final int FLOAT_TO_INT = 3;
+  private static final int FLOAT_TO_SHORT = 4;
+  private static final int FLOAT_TO_BYTE = 5;
+  private static final int FLOAT_TO_CHAR = 6;
+  private static final int FLOAT_TO_DOUBLE = 0;
+  private static final int FLOAT_TO_FLOAT = 1;
 
-	private static final int STRING_TO_NUMBER = 7;
+  private static final int STRING_TO_NUMBER = 7;
 
-	private static Integer add(Integer a, Integer b) {
-		if (a != null && b != null) {
-			return a + b;
-		}
-		else {
-			return null;
-		}
-	}
+  private static Integer add(Integer a, Integer b) {
+    if (a != null && b != null) {
+      return a + b;
+    } else {
+      return null;
+    }
+  }
 
-	@Override
-	public Integer visitReferenceParameter(Class<?> clazz, Object arg) {
-		return arg instanceof JavaWrapper
-				? referenceParam(clazz, ((JavaWrapper) arg).get())
-				: referenceParam(clazz, arg);
-	}
+  private static Integer referenceParam(Class<?> clazz, Object arg) {
+    return clazz.isAssignableFrom(arg.getClass()) ? Integer.valueOf(0) : null;
+  }
 
-	private static Integer referenceParam(Class<?> clazz, Object arg) {
-		return clazz.isAssignableFrom(arg.getClass()) ? Integer.valueOf(0) : null;
-	}
+  private static Integer integralParam(Number n, long min, long max, int integerDistance,
+      int floatDistance) {
+    if (n instanceof Long) {
+      long l = (Long) n;
+      return l >= min && l <= max ? integerDistance : null;
+    } else if (n instanceof Double
+        && LuaMathOperators.hasExactIntegerRepresentation(n.doubleValue())) {
+      long l = (long) n.doubleValue();
+      return l >= min && l <= max ? floatDistance : null;
+    } else {
+      return null;
+    }
+  }
 
-	@Override
-	public Integer visitLongParameter(Object arg) {
-		arg = Conversions.canonicalRepresentationOf(arg);
+  private static Integer longParam(Number n) {
+    return integralParam(n, Long.MIN_VALUE, Long.MAX_VALUE, INTEGER_TO_LONG, FLOAT_TO_LONG);
+  }
 
-		if (arg instanceof Number) {
-			return longParam((Number) arg);
-		}
-		else if (arg instanceof ByteString) {
-			Number n = Conversions.numericalValueOf((ByteString) arg);
-			return n != null ? add(STRING_TO_NUMBER, longParam(n)) : null;
-		}
-		else {
-			return null;
-		}
-	}
+  private static Integer intParam(Number n) {
+    return integralParam(n, Integer.MIN_VALUE, Integer.MAX_VALUE, INTEGER_TO_INT, FLOAT_TO_INT);
+  }
 
-	@Override
-	public Integer visitIntParameter(Object arg) {
-		arg = Conversions.canonicalRepresentationOf(arg);
+  private static Integer shortParam(Number n) {
+    return integralParam(n, Short.MIN_VALUE, Short.MAX_VALUE, INTEGER_TO_SHORT, FLOAT_TO_SHORT);
+  }
 
-		if (arg instanceof Number) {
-			return intParam((Number) arg);
-		}
-		else if (arg instanceof ByteString) {
-			Number n = Conversions.numericalValueOf((ByteString) arg);
-			return n != null ? add(STRING_TO_NUMBER, intParam(n)) : null;
-		}
-		else {
-			return null;
-		}
-	}
+  private static Integer byteParam(Number n) {
+    return integralParam(n, Byte.MIN_VALUE, Byte.MAX_VALUE, INTEGER_TO_BYTE, FLOAT_TO_BYTE);
+  }
 
-	@Override
-	public Integer visitShortParameter(Object arg) {
-		arg = Conversions.canonicalRepresentationOf(arg);
+  private static Integer charParam(Number n) {
+    return integralParam(n, Character.MIN_CODE_POINT, Character.MAX_CODE_POINT, INTEGER_TO_CHAR,
+        FLOAT_TO_CHAR);
+  }
 
-		if (arg instanceof Number) {
-			return shortParam(Conversions.toCanonicalNumber((Number) arg));
-		}
-		else if (arg instanceof ByteString) {
-			Number n = Conversions.numericalValueOf((ByteString) arg);
-			return n != null ? add(STRING_TO_NUMBER, shortParam(n)) : null;
-		}
-		else {
-			return null;
-		}
-	}
+  private static Integer doubleParam(Number n) {
+    return n instanceof Long ? INTEGER_TO_DOUBLE : FLOAT_TO_DOUBLE;
+  }
 
-	@Override
-	public Integer visitByteParameter(Object arg) {
-		arg = Conversions.canonicalRepresentationOf(arg);
+  private static Integer floatParam(Number n) {
+    return n instanceof Long ? INTEGER_TO_FLOAT : FLOAT_TO_FLOAT;
+  }
 
-		if (arg instanceof Number) {
-			return byteParam(Conversions.toCanonicalNumber((Number) arg));
-		}
-		else if (arg instanceof ByteString) {
-			Number n = Conversions.numericalValueOf((ByteString) arg);
-			return n != null ? add(STRING_TO_NUMBER, byteParam(n)) : null;
-		}
-		else {
-			return null;
-		}
-	}
+  @Override
+  public Integer visitReferenceParameter(Class<?> clazz, Object arg) {
+    return arg instanceof JavaWrapper
+        ? referenceParam(clazz, ((JavaWrapper) arg).get())
+        : referenceParam(clazz, arg);
+  }
 
-	@Override
-	public Integer visitCharParameter(Object arg) {
-		arg = Conversions.canonicalRepresentationOf(arg);
+  @Override
+  public Integer visitLongParameter(Object arg) {
+    arg = Conversions.canonicalRepresentationOf(arg);
 
-		if (arg instanceof Number) {
-			return charParam(Conversions.toCanonicalNumber((Number) arg));
-		}
-		else if (arg instanceof ByteString) {
-			Number n = Conversions.numericalValueOf((ByteString) arg);
-			return n != null ? add(STRING_TO_NUMBER, charParam(n)) : null;
-		}
-		else {
-			return null;
-		}
-	}
+    if (arg instanceof Number) {
+      return longParam((Number) arg);
+    } else if (arg instanceof ByteString) {
+      Number n = Conversions.numericalValueOf((ByteString) arg);
+      return n != null ? add(STRING_TO_NUMBER, longParam(n)) : null;
+    } else {
+      return null;
+    }
+  }
 
-	@Override
-	public Integer visitDoubleParameter(Object arg) {
-		arg = Conversions.canonicalRepresentationOf(arg);
+  @Override
+  public Integer visitIntParameter(Object arg) {
+    arg = Conversions.canonicalRepresentationOf(arg);
 
-		if (arg instanceof Number) {
-			return doubleParam(Conversions.toCanonicalNumber((Number) arg));
-		}
-		else if (arg instanceof ByteString) {
-			Number n = Conversions.numericalValueOf((ByteString) arg);
-			return n != null ? add(STRING_TO_NUMBER, doubleParam(n)) : null;
-		}
-		else {
-			return null;
-		}
-	}
+    if (arg instanceof Number) {
+      return intParam((Number) arg);
+    } else if (arg instanceof ByteString) {
+      Number n = Conversions.numericalValueOf((ByteString) arg);
+      return n != null ? add(STRING_TO_NUMBER, intParam(n)) : null;
+    } else {
+      return null;
+    }
+  }
 
-	@Override
-	public Integer visitFloatParameter(Object arg) {
-		arg = Conversions.canonicalRepresentationOf(arg);
+  @Override
+  public Integer visitShortParameter(Object arg) {
+    arg = Conversions.canonicalRepresentationOf(arg);
 
-		if (arg instanceof Number) {
-			return floatParam(Conversions.toCanonicalNumber((Number) arg));
-		}
-		else if (arg instanceof ByteString) {
-			Number n = Conversions.numericalValueOf((ByteString) arg);
-			return n != null ? add(STRING_TO_NUMBER, floatParam(n)) : null;
-		}
-		else {
-			return null;
-		}
-	}
+    if (arg instanceof Number) {
+      return shortParam(Conversions.toCanonicalNumber((Number) arg));
+    } else if (arg instanceof ByteString) {
+      Number n = Conversions.numericalValueOf((ByteString) arg);
+      return n != null ? add(STRING_TO_NUMBER, shortParam(n)) : null;
+    } else {
+      return null;
+    }
+  }
 
-	private static Integer integralParam(Number n, long min, long max, int integerDistance, int floatDistance) {
-		if (n instanceof Long) {
-			long l = (Long) n;
-			return l >= min && l <= max ? integerDistance : null;
-		}
-		else if (n instanceof Double
-				&& LuaMathOperators.hasExactIntegerRepresentation(n.doubleValue())) {
-			long l = (long) n.doubleValue();
-			return l >= min && l <= max ? floatDistance : null;
-		}
-		else {
-			return null;
-		}
-	}
+  @Override
+  public Integer visitByteParameter(Object arg) {
+    arg = Conversions.canonicalRepresentationOf(arg);
 
-	private static Integer longParam(Number n) {
-		return integralParam(n, Long.MIN_VALUE, Long.MAX_VALUE, INTEGER_TO_LONG, FLOAT_TO_LONG);
-	}
+    if (arg instanceof Number) {
+      return byteParam(Conversions.toCanonicalNumber((Number) arg));
+    } else if (arg instanceof ByteString) {
+      Number n = Conversions.numericalValueOf((ByteString) arg);
+      return n != null ? add(STRING_TO_NUMBER, byteParam(n)) : null;
+    } else {
+      return null;
+    }
+  }
 
-	private static Integer intParam(Number n) {
-		return integralParam(n, Integer.MIN_VALUE, Integer.MAX_VALUE, INTEGER_TO_INT, FLOAT_TO_INT);
-	}
+  @Override
+  public Integer visitCharParameter(Object arg) {
+    arg = Conversions.canonicalRepresentationOf(arg);
 
-	private static Integer shortParam(Number n) {
-		return integralParam(n, Short.MIN_VALUE, Short.MAX_VALUE, INTEGER_TO_SHORT, FLOAT_TO_SHORT);
-	}
+    if (arg instanceof Number) {
+      return charParam(Conversions.toCanonicalNumber((Number) arg));
+    } else if (arg instanceof ByteString) {
+      Number n = Conversions.numericalValueOf((ByteString) arg);
+      return n != null ? add(STRING_TO_NUMBER, charParam(n)) : null;
+    } else {
+      return null;
+    }
+  }
 
-	private static Integer byteParam(Number n) {
-		return integralParam(n, Byte.MIN_VALUE, Byte.MAX_VALUE, INTEGER_TO_BYTE, FLOAT_TO_BYTE);
-	}
+  @Override
+  public Integer visitDoubleParameter(Object arg) {
+    arg = Conversions.canonicalRepresentationOf(arg);
 
-	private static Integer charParam(Number n) {
-		return integralParam(n, Character.MIN_CODE_POINT, Character.MAX_CODE_POINT, INTEGER_TO_CHAR, FLOAT_TO_CHAR);
-	}
+    if (arg instanceof Number) {
+      return doubleParam(Conversions.toCanonicalNumber((Number) arg));
+    } else if (arg instanceof ByteString) {
+      Number n = Conversions.numericalValueOf((ByteString) arg);
+      return n != null ? add(STRING_TO_NUMBER, doubleParam(n)) : null;
+    } else {
+      return null;
+    }
+  }
 
-	private static Integer doubleParam(Number n) {
-		return n instanceof Long ? INTEGER_TO_DOUBLE : FLOAT_TO_DOUBLE;
-	}
+  @Override
+  public Integer visitFloatParameter(Object arg) {
+    arg = Conversions.canonicalRepresentationOf(arg);
 
-	private static Integer floatParam(Number n) {
-		return n instanceof Long ? INTEGER_TO_FLOAT : FLOAT_TO_FLOAT;
-	}
+    if (arg instanceof Number) {
+      return floatParam(Conversions.toCanonicalNumber((Number) arg));
+    } else if (arg instanceof ByteString) {
+      Number n = Conversions.numericalValueOf((ByteString) arg);
+      return n != null ? add(STRING_TO_NUMBER, floatParam(n)) : null;
+    } else {
+      return null;
+    }
+  }
 
-	@Override
-	public Integer visitBooleanParameter(Object arg) {
-		return arg instanceof Boolean ? Integer.valueOf(0) : null;
-	}
+  @Override
+  public Integer visitBooleanParameter(Object arg) {
+    return arg instanceof Boolean ? Integer.valueOf(0) : null;
+  }
 
 }

@@ -16,55 +16,52 @@
 
 package org.classdump.luna.compiler.analysis;
 
-import org.classdump.luna.compiler.ir.AbstractVal;
-import org.classdump.luna.compiler.ir.Var;
-
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import org.classdump.luna.compiler.ir.AbstractVal;
+import org.classdump.luna.compiler.ir.Var;
 
 public class SlotAllocInfo {
 
-	private final Map<AbstractVal, Integer> valSlots;
-	private final Map<Var, Integer> varSlots;
-	private final int numSlots;
+  private final Map<AbstractVal, Integer> valSlots;
+  private final Map<Var, Integer> varSlots;
+  private final int numSlots;
 
-	public SlotAllocInfo(Map<AbstractVal, Integer> valSlots, Map<Var, Integer> varSlots) {
-		this.valSlots = Objects.requireNonNull(valSlots);
-		this.varSlots = Objects.requireNonNull(varSlots);
+  public SlotAllocInfo(Map<AbstractVal, Integer> valSlots, Map<Var, Integer> varSlots) {
+    this.valSlots = Objects.requireNonNull(valSlots);
+    this.varSlots = Objects.requireNonNull(varSlots);
 
-		int n = 0;
-		for (Integer i : varSlots.values()) {
-			n = Math.max(n, i);
-		}
-		for (Integer i : valSlots.values()) {
-			n = Math.max(n, i);
-		}
-		this.numSlots = n + 1;
-	}
+    int n = 0;
+    for (Integer i : varSlots.values()) {
+      n = Math.max(n, i);
+    }
+    for (Integer i : valSlots.values()) {
+      n = Math.max(n, i);
+    }
+    this.numSlots = n + 1;
+  }
 
-	public int slotOf(AbstractVal v) {
-		Integer idx = valSlots.get(Objects.requireNonNull(v));
-		if (idx != null) {
-			return idx;
-		}
-		else {
-			throw new NoSuchElementException("Undefined slot for value: " + v);
-		}
-	}
+  public int slotOf(AbstractVal v) {
+    Integer idx = valSlots.get(Objects.requireNonNull(v));
+    if (idx != null) {
+      return idx;
+    } else {
+      throw new NoSuchElementException("Undefined slot for value: " + v);
+    }
+  }
 
-	public int slotOf(Var v) {
-		Integer idx = varSlots.get(Objects.requireNonNull(v));
-		if (idx != null) {
-			return idx;
-		}
-		else {
-			throw new NoSuchElementException("Undefined slot for variable: " + v);
-		}
-	}
+  public int slotOf(Var v) {
+    Integer idx = varSlots.get(Objects.requireNonNull(v));
+    if (idx != null) {
+      return idx;
+    } else {
+      throw new NoSuchElementException("Undefined slot for variable: " + v);
+    }
+  }
 
-	public int numSlots() {
-		return numSlots;
-	}
+  public int numSlots() {
+    return numSlots;
+  }
 
 }

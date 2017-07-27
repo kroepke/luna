@@ -30,186 +30,204 @@ import org.classdump.luna.runtime.Dispatch;
 
 public class Typer {
 
-	private static Object literalValue(Type t) {
-		return t instanceof LiteralType ? ((LiteralType<?>) t).value() : null;
-	}
+  private static Object literalValue(Type t) {
+    return t instanceof LiteralType ? ((LiteralType<?>) t).value() : null;
+  }
 
-	private static LiteralType<?> objectToLiteralType(Object o) {
-		if (o instanceof Number) {
-			Number n = (Number) o;
-			if (n instanceof Double || n instanceof Float) {
-				return LuaTypes.NUMBER_FLOAT.newLiteralType(n.doubleValue());
-			}
-			else {
-				return LuaTypes.NUMBER_INTEGER.newLiteralType(n.longValue());
-			}
-		}
-		else if (o instanceof ByteString) {
-			return LuaTypes.STRING.newLiteralType((ByteString) o);
-		}
-		else if (o instanceof Boolean) {
-			return LuaTypes.BOOLEAN.newLiteralType((Boolean) o);
-		}
-		else {
-			return null;
-		}
-	}
+  private static LiteralType<?> objectToLiteralType(Object o) {
+    if (o instanceof Number) {
+      Number n = (Number) o;
+      if (n instanceof Double || n instanceof Float) {
+        return LuaTypes.NUMBER_FLOAT.newLiteralType(n.doubleValue());
+      } else {
+        return LuaTypes.NUMBER_INTEGER.newLiteralType(n.longValue());
+      }
+    } else if (o instanceof ByteString) {
+      return LuaTypes.STRING.newLiteralType((ByteString) o);
+    } else if (o instanceof Boolean) {
+      return LuaTypes.BOOLEAN.newLiteralType((Boolean) o);
+    } else {
+      return null;
+    }
+  }
 
-	private static Object tryEmulateArithmeticOperation(BinOp.Op op, Object l, Object r) {
-		Number nl = Conversions.arithmeticValueOf(l);
-		Number nr = Conversions.arithmeticValueOf(r);
+  private static Object tryEmulateArithmeticOperation(BinOp.Op op, Object l, Object r) {
+    Number nl = Conversions.arithmeticValueOf(l);
+    Number nr = Conversions.arithmeticValueOf(r);
 
-		if (nl == null || nr == null) {
-			return null;
-		}
+    if (nl == null || nr == null) {
+      return null;
+    }
 
-		try {
-			switch (op) {
-				case ADD:  return Dispatch.add(nl, nr);
-				case SUB:  return Dispatch.sub(nl, nr);
-				case MUL:  return Dispatch.mul(nl, nr);
-				case DIV:  return Dispatch.div(nl, nr);
-				case MOD:  return Dispatch.mod(nl, nr);
-				case IDIV: return Dispatch.idiv(nl, nr);
-				case POW:  return Dispatch.pow(nl, nr);
-				default: throw new IllegalArgumentException("Illegal operation: " + op);
-			}
-		}
-		catch (ArithmeticException ex) {
-			return null;
-		}
-	}
+    try {
+      switch (op) {
+        case ADD:
+          return Dispatch.add(nl, nr);
+        case SUB:
+          return Dispatch.sub(nl, nr);
+        case MUL:
+          return Dispatch.mul(nl, nr);
+        case DIV:
+          return Dispatch.div(nl, nr);
+        case MOD:
+          return Dispatch.mod(nl, nr);
+        case IDIV:
+          return Dispatch.idiv(nl, nr);
+        case POW:
+          return Dispatch.pow(nl, nr);
+        default:
+          throw new IllegalArgumentException("Illegal operation: " + op);
+      }
+    } catch (ArithmeticException ex) {
+      return null;
+    }
+  }
 
-	private static Object tryEmulateBitwiseOperation(BinOp.Op op, Object l, Object r) {
-		Long il = Conversions.integerValueOf(l);
-		Long ir = Conversions.integerValueOf(r);
+  private static Object tryEmulateBitwiseOperation(BinOp.Op op, Object l, Object r) {
+    Long il = Conversions.integerValueOf(l);
+    Long ir = Conversions.integerValueOf(r);
 
-		if (il == null || ir == null) {
-			return null;
-		}
+    if (il == null || ir == null) {
+      return null;
+    }
 
-		switch (op) {
-			case BAND: return LuaMathOperators.band(il, ir);
-			case BOR:  return LuaMathOperators.bor(il, ir);
-			case BXOR: return LuaMathOperators.bxor(il, ir);
-			case SHL:  return LuaMathOperators.shl(il, ir);
-			case SHR:  return LuaMathOperators.shr(il, ir);
-			default: throw new IllegalArgumentException("Illegal operation: " + op);
-		}
-	}
+    switch (op) {
+      case BAND:
+        return LuaMathOperators.band(il, ir);
+      case BOR:
+        return LuaMathOperators.bor(il, ir);
+      case BXOR:
+        return LuaMathOperators.bxor(il, ir);
+      case SHL:
+        return LuaMathOperators.shl(il, ir);
+      case SHR:
+        return LuaMathOperators.shr(il, ir);
+      default:
+        throw new IllegalArgumentException("Illegal operation: " + op);
+    }
+  }
 
-	private static ByteString tryEmulateConcatOperation(Object l, Object r) {
-		ByteString sl = Conversions.stringValueOf(l);
-		ByteString sr = Conversions.stringValueOf(r);
+  private static ByteString tryEmulateConcatOperation(Object l, Object r) {
+    ByteString sl = Conversions.stringValueOf(l);
+    ByteString sr = Conversions.stringValueOf(r);
 
-		if (sl == null || sr == null) {
-			return null;
-		}
+    if (sl == null || sr == null) {
+      return null;
+    }
 
-		return sl.concat(sr);
-	}
+    return sl.concat(sr);
+  }
 
-	private static Object tryEmulateComparisonOperation(BinOp.Op op, Object l, Object r) {
-		if (l == null || r == null) {
-			return null;
-		}
+  private static Object tryEmulateComparisonOperation(BinOp.Op op, Object l, Object r) {
+    if (l == null || r == null) {
+      return null;
+    }
 
-		Ordering<Object> c = Ordering.of(l, r);
+    Ordering<Object> c = Ordering.of(l, r);
 
-		if (c == null) {
-			return null;
-		}
+    if (c == null) {
+      return null;
+    }
 
-		switch (op) {
-			case EQ:  return c.eq(l, r);
-			case NEQ: return !c.eq(l, r);
-			case LT:  return c.lt(l, r);
-			case LE:  return c.le(l, r);
-			default: throw new IllegalArgumentException("Illegal operation: " + op);
-		}
-	}
+    switch (op) {
+      case EQ:
+        return c.eq(l, r);
+      case NEQ:
+        return !c.eq(l, r);
+      case LT:
+        return c.lt(l, r);
+      case LE:
+        return c.le(l, r);
+      default:
+        throw new IllegalArgumentException("Illegal operation: " + op);
+    }
+  }
 
-	private static Object tryEmulateOperation(BinOp.Op op, Object l, Object r) {
-		if (l == null || r == null) {
-			return null;
-		}
+  private static Object tryEmulateOperation(BinOp.Op op, Object l, Object r) {
+    if (l == null || r == null) {
+      return null;
+    }
 
-		switch (op) {
+    switch (op) {
 
-			case ADD:
-			case SUB:
-			case MUL:
-			case DIV:
-			case MOD:
-			case IDIV:
-			case POW:
-				return tryEmulateArithmeticOperation(op, l, r);
+      case ADD:
+      case SUB:
+      case MUL:
+      case DIV:
+      case MOD:
+      case IDIV:
+      case POW:
+        return tryEmulateArithmeticOperation(op, l, r);
 
-			case BAND:
-			case BOR:
-			case BXOR:
-			case SHL:
-			case SHR:
-				return tryEmulateBitwiseOperation(op, l, r);
+      case BAND:
+      case BOR:
+      case BXOR:
+      case SHL:
+      case SHR:
+        return tryEmulateBitwiseOperation(op, l, r);
 
-			case CONCAT:
-				return tryEmulateConcatOperation(l, r);
+      case CONCAT:
+        return tryEmulateConcatOperation(l, r);
 
-			case EQ:
-			case NEQ:
-			case LT:
-			case LE:
-				return tryEmulateComparisonOperation(op, l, r);
+      case EQ:
+      case NEQ:
+      case LT:
+      case LE:
+        return tryEmulateComparisonOperation(op, l, r);
 
-			default:
-				throw new IllegalArgumentException("Illegal operation: " + op);
-		}
-	}
+      default:
+        throw new IllegalArgumentException("Illegal operation: " + op);
+    }
+  }
 
-	private static Object tryEmulateOperation(UnOp.Op op, Object arg) {
-		if (arg == null) {
-			return null;
-		}
+  private static Object tryEmulateOperation(UnOp.Op op, Object arg) {
+    if (arg == null) {
+      return null;
+    }
 
-		switch (op) {
-			case UNM: {
-				Number n = Conversions.arithmeticValueOf(arg);
-				return n != null ? Dispatch.unm(n) : null;
-			}
+    switch (op) {
+      case UNM: {
+        Number n = Conversions.arithmeticValueOf(arg);
+        return n != null ? Dispatch.unm(n) : null;
+      }
 
-			case BNOT: {
-				Long l = Conversions.integerValueOf(arg);
-				return l != null ? LuaMathOperators.bnot(l) : null;
-			}
+      case BNOT: {
+        Long l = Conversions.integerValueOf(arg);
+        return l != null ? LuaMathOperators.bnot(l) : null;
+      }
 
-			case NOT:
-				return arg.equals(Boolean.FALSE);
+      case NOT:
+        return arg.equals(Boolean.FALSE);
 
-			case LEN:
-				if (arg instanceof String) return Dispatch.len((String) arg);
-				else if (arg instanceof ByteString) return Long.valueOf(((ByteString) arg).length());
-				else return null;
+      case LEN:
+        if (arg instanceof String) {
+          return Dispatch.len((String) arg);
+        } else if (arg instanceof ByteString) {
+          return Long.valueOf(((ByteString) arg).length());
+        } else {
+          return null;
+        }
 
-			default:
-				throw new IllegalArgumentException("Illegal operation: " + op);
-		}
-	}
+      default:
+        throw new IllegalArgumentException("Illegal operation: " + op);
+    }
+  }
 
-	static LiteralType<?> emulateOp(BinOp.Op op, Type l, Type r) {
-		Object result = tryEmulateOperation(op, literalValue(l), literalValue(r));
-		return result != null ? objectToLiteralType(result) : null;
-	}
+  static LiteralType<?> emulateOp(BinOp.Op op, Type l, Type r) {
+    Object result = tryEmulateOperation(op, literalValue(l), literalValue(r));
+    return result != null ? objectToLiteralType(result) : null;
+  }
 
-	static LiteralType<?> emulateOp(UnOp.Op op, Type t) {
-		Object result = tryEmulateOperation(op, literalValue(t));
-		return result != null ? objectToLiteralType(result) : null;
-	}
+  static LiteralType<?> emulateOp(UnOp.Op op, Type t) {
+    Object result = tryEmulateOperation(op, literalValue(t));
+    return result != null ? objectToLiteralType(result) : null;
+  }
 
 
-	public static TypeInfo analyseTypes(IRFunc fn) {
-		TyperVisitor visitor = new TyperVisitor();
-		visitor.visit(fn);
-		return visitor.valTypes();
-	}
+  public static TypeInfo analyseTypes(IRFunc fn) {
+    TyperVisitor visitor = new TyperVisitor();
+    visitor.visit(fn);
+    return visitor.valTypes();
+  }
 
 }

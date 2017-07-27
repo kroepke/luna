@@ -16,33 +16,30 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.BlockTermNode;
-import org.classdump.luna.compiler.ir.JmpNode;
-
 import java.util.Collections;
 import java.util.Objects;
 
 public class Jmp extends BlockTermNode implements JmpNode {
 
-	private final Label jmpDest;
+  private final Label jmpDest;
 
-	public Jmp(Label jmpDest) {
-		this.jmpDest = Objects.requireNonNull(jmpDest);
-	}
+  public Jmp(Label jmpDest) {
+    this.jmpDest = Objects.requireNonNull(jmpDest);
+  }
 
-	@Override
-	public Label jmpDest() {
-		return jmpDest;
-	}
+  @Override
+  public Label jmpDest() {
+    return jmpDest;
+  }
 
-	@Override
-	public Iterable<Label> nextLabels() {
-		return Collections.singletonList(jmpDest());
-	}
+  @Override
+  public Iterable<Label> nextLabels() {
+    return Collections.singletonList(jmpDest());
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

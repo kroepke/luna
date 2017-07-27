@@ -17,8 +17,6 @@
 package org.classdump.luna.test.fragments
 
 import org.classdump.luna.test.FragmentExecTestSuite
-import org.classdump.luna.test.fragments.UnicodeFragments
-import org.classdump.luna.test.FragmentExecTestSuite
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
@@ -26,7 +24,9 @@ import org.scalatest.junit.JUnitRunner
 class UnicodeFragmentsRunSpec extends FragmentExecTestSuite {
 
   override def bundles = Seq(UnicodeFragments)
+
   override def expectations = Seq(UnicodeFragments)
+
   override def contexts = Seq(Full)
 
   override def steps = Seq(1, Int.MaxValue)

@@ -22,49 +22,48 @@ import java.util.Objects;
 
 public class SeekableInputStream extends InputStream implements SeekableStream {
 
-	private final InputStream in;
-	private long position;
+  private final InputStream in;
+  private long position;
 
-	public SeekableInputStream(InputStream in) {
-		this.in = Objects.requireNonNull(in);
-		this.position = 0L;
-	}
+  public SeekableInputStream(InputStream in) {
+    this.in = Objects.requireNonNull(in);
+    this.position = 0L;
+  }
 
-	@Override
-	public int read() throws IOException {
-		int result = in.read();
-		if (result != -1) {
-			position += 1;
-		}
-		return result;
-	}
+  @Override
+  public int read() throws IOException {
+    int result = in.read();
+    if (result != -1) {
+      position += 1;
+    }
+    return result;
+  }
 
-	// TODO implement more efficient version
-	@Override
-	public int read(byte[] b, int off, int len) throws IOException {
-		return super.read(b, off, len);
-	}
+  // TODO implement more efficient version
+  @Override
+  public int read(byte[] b, int off, int len) throws IOException {
+    return super.read(b, off, len);
+  }
 
-	@Override
-	public long getPosition() {
-		return position;
-	}
+  @Override
+  public long getPosition() {
+    return position;
+  }
 
-	@Override
-	public long setPosition(long newPosition) {
-		position = newPosition;
-		return position;
-	}
+  @Override
+  public long setPosition(long newPosition) {
+    position = newPosition;
+    return position;
+  }
 
-	@Override
-	public long addPosition(long offset) {
-		long newPosition = position + offset;
-		if (position < 0) {
-			throw new IllegalArgumentException("Illegal argument");
-		}
-		else {
-			return setPosition(newPosition);
-		}
-	}
+  @Override
+  public long addPosition(long offset) {
+    long newPosition = position + offset;
+    if (position < 0) {
+      throw new IllegalArgumentException("Illegal argument");
+    } else {
+      return setPosition(newPosition);
+    }
+  }
 
 }

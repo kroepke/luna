@@ -25,34 +25,33 @@ import org.classdump.luna.TableFactory;
  */
 public final class StateContexts {
 
-	private StateContexts() {
-		// not to be instantiated
-	}
+  private StateContexts() {
+    // not to be instantiated
+  }
 
-	/**
-	 * Returns a new state context with the specified table factory {@code tableFactory}
-	 * and the metatable accessor {@code metatableAccessor}.
-	 *
-	 * @param tableFactory  table factory to be used by this state, must not be {@code null}
-	 * @param metatableAccessor  metatable accessor to be used by this state, must not be
-	 *                           {@code null}
-	 * @return  a new default instance with the specified table factory and metatable accessor
-	 *
-	 * @throws NullPointerException  if {@code tableFactory} or {@code metatableAccessor}
-	 *                               is {@code null}
-	 */
-	public static StateContext newInstance(TableFactory tableFactory, MetatableAccessor metatableAccessor) {
-		return new DefaultStateContext(tableFactory, metatableAccessor);
-	}
+  /**
+   * Returns a new state context with the specified table factory {@code tableFactory}
+   * and the metatable accessor {@code metatableAccessor}.
+   *
+   * @param tableFactory table factory to be used by this state, must not be {@code null}
+   * @param metatableAccessor metatable accessor to be used by this state, must not be {@code null}
+   * @return a new default instance with the specified table factory and metatable accessor
+   * @throws NullPointerException if {@code tableFactory} or {@code metatableAccessor} is {@code
+   * null}
+   */
+  public static StateContext newInstance(TableFactory tableFactory,
+      MetatableAccessor metatableAccessor) {
+    return new DefaultStateContext(tableFactory, metatableAccessor);
+  }
 
-	/**
-	 * Returns a new state context with the default table factory and the default (empty)
-	 * metatable accessor.
-	 *
-	 * @return  a new default instance
-	 */
-	public static StateContext newDefaultInstance() {
-		return newInstance(DefaultTable.factory(), new DefaultMetatableAccessor());
-	}
+  /**
+   * Returns a new state context with the default table factory and the default (empty)
+   * metatable accessor.
+   *
+   * @return a new default instance
+   */
+  public static StateContext newDefaultInstance() {
+    return newInstance(DefaultTable.factory(), new DefaultMetatableAccessor());
+  }
 
 }

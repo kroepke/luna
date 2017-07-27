@@ -16,46 +16,48 @@
 
 package org.classdump.luna.parser.ast;
 
-import org.classdump.luna.LuaFormat;
-
 import java.util.Objects;
+import org.classdump.luna.LuaFormat;
 
 public final class Name {
 
-	private final String value;
+  private final String value;
 
-	private Name(String value) {
-		this.value = checkValidName(value);
-	}
+  private Name(String value) {
+    this.value = checkValidName(value);
+  }
 
-	public static Name fromString(String s) {
-		return new Name(s);
-	}
+  public static Name fromString(String s) {
+    return new Name(s);
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		Name name = (Name) o;
-		return Objects.equals(value, name.value);
-	}
+  public static String checkValidName(String s) {
+    if (!LuaFormat.isValidName(s)) {
+      throw new IllegalArgumentException("Not a valid name: " + s);
+    } else {
+      return s;
+    }
+  }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(value);
-	}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Name name = (Name) o;
+    return Objects.equals(value, name.value);
+  }
 
-	public static String checkValidName(String s) {
-		if (!LuaFormat.isValidName(s)) {
-			throw new IllegalArgumentException("Not a valid name: " + s);
-		}
-		else {
-			return s;
-		}
-	}
+  @Override
+  public int hashCode() {
+    return Objects.hash(value);
+  }
 
-	public String value() {
-		return value;
-	}
+  public String value() {
+    return value;
+  }
 
 }

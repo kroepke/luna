@@ -16,67 +16,61 @@
 
 package org.classdump.luna.parser.ast;
 
-import org.classdump.luna.parser.ast.Attributes;
-import org.classdump.luna.parser.ast.Expr;
-import org.classdump.luna.parser.ast.Transformer;
-
 import java.util.List;
 import java.util.Objects;
 
 public class TableConstructorExpr extends Expr {
 
-	private final List<FieldInitialiser> fields;
+  private final List<FieldInitialiser> fields;
 
-	public TableConstructorExpr(Attributes attr, List<FieldInitialiser> fields) {
-		super(attr);
-		this.fields = Objects.requireNonNull(fields);
-	}
+  public TableConstructorExpr(Attributes attr, List<FieldInitialiser> fields) {
+    super(attr);
+    this.fields = Objects.requireNonNull(fields);
+  }
 
-	public static class FieldInitialiser {
+  public List<FieldInitialiser> fields() {
+    return fields;
+  }
 
-		private final Expr keyExpr;  // may be null
-		private final Expr valueExpr;
+  public TableConstructorExpr update(List<FieldInitialiser> fields) {
+    if (this.fields.equals(fields)) {
+      return this;
+    } else {
+      return new TableConstructorExpr(attributes(), fields);
+    }
+  }
 
-		public FieldInitialiser(Expr keyExpr, Expr valueExpr) {
-			this.keyExpr = keyExpr;
-			this.valueExpr = Objects.requireNonNull(valueExpr);
-		}
+  @Override
+  public Expr accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
-		public Expr key() {
-			return keyExpr;
-		}
+  public static class FieldInitialiser {
 
-		public Expr value() {
-			return valueExpr;
-		}
+    private final Expr keyExpr;  // may be null
+    private final Expr valueExpr;
 
-		public FieldInitialiser update(Expr keyExpr, Expr valueExpr) {
-			if (Objects.equals(this.keyExpr, keyExpr) && this.valueExpr.equals(valueExpr)) {
-				return this;
-			}
-			else {
-				return new FieldInitialiser(keyExpr, valueExpr);
-			}
-		}
+    public FieldInitialiser(Expr keyExpr, Expr valueExpr) {
+      this.keyExpr = keyExpr;
+      this.valueExpr = Objects.requireNonNull(valueExpr);
+    }
 
-	}
+    public Expr key() {
+      return keyExpr;
+    }
 
-	public List<FieldInitialiser> fields() {
-		return fields;
-	}
+    public Expr value() {
+      return valueExpr;
+    }
 
-	public TableConstructorExpr update(List<FieldInitialiser> fields) {
-		if (this.fields.equals(fields)) {
-			return this;
-		}
-		else {
-			return new TableConstructorExpr(attributes(), fields);
-		}
-	}
+    public FieldInitialiser update(Expr keyExpr, Expr valueExpr) {
+      if (Objects.equals(this.keyExpr, keyExpr) && this.valueExpr.equals(valueExpr)) {
+        return this;
+      } else {
+        return new FieldInitialiser(keyExpr, valueExpr);
+      }
+    }
 
-	@Override
-	public Expr accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  }
 
 }

@@ -20,23 +20,23 @@ import java.util.Objects;
 
 public abstract class SyntaxElement {
 
-	private final Attributes attr;
+  private final Attributes attr;
 
-	protected SyntaxElement(Attributes attr) {
-		this.attr = Objects.requireNonNull(attr);
-	}
+  protected SyntaxElement(Attributes attr) {
+    this.attr = Objects.requireNonNull(attr);
+  }
 
-	public SourceInfo sourceInfo() {
-		return attr.get(SourceInfo.class);
-	}
+  public SourceInfo sourceInfo() {
+    return attr.get(SourceInfo.class);
+  }
 
-	public int line() {
-		SourceInfo si = sourceInfo();
-		return si != null ? si.line() : 0;
-	}
+  public int line() {
+    SourceInfo si = sourceInfo();
+    return si != null ? si.line() : 0;
+  }
 
-	public Attributes attributes() {
-		return attr;
-	}
+  public Attributes attributes() {
+    return attr;
+  }
 
 }

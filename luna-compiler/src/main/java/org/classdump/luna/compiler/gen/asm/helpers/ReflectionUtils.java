@@ -16,89 +16,90 @@
 
 package org.classdump.luna.compiler.gen.asm.helpers;
 
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.MethodInsnNode;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Objects;
-
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Objects;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.MethodInsnNode;
+
 public class ReflectionUtils {
 
-	public static class Method {
+  private static Method argListMethodFromKind(boolean isStatic, Class<?> owner, String name,
+      Class<?>[] prefix, int kind) {
+    ArrayList<Class<?>> args = new ArrayList<>();
+    if (prefix != null) {
+      Collections.addAll(args, prefix);
+    }
+    if (kind > 0) {
+      for (int i = 0; i < kind - 1; i++) {
+        args.add(Object.class);
+      }
+    } else {
+      args.add(Object[].class);
+    }
 
-		public final Class<?> owner;
-		public final String name;
-		public final boolean isStatic;
-		public final Class<?> returnType;
-		public final Class<?>[] args;
+    return new Method(owner, name, isStatic, Void.TYPE, args.toArray(new Class<?>[0]));
+  }
 
-		public Method(Class<?> owner, String name, boolean isStatic, Class<?> returnType, Class<?>[] args) {
-			this.owner = Objects.requireNonNull(owner);
-			this.name = name;
-			this.isStatic = isStatic;
-			this.returnType = Objects.requireNonNull(returnType);
-			this.args = args != null ? args : new Class[0];
-		}
+  public static Method staticArgListMethodFromKind(Class<?> owner, String name, Class<?>[] prefix,
+      int kind) {
+    return argListMethodFromKind(true, owner, name, prefix, kind);
+  }
 
-		public boolean exists() {
-			try {
-				owner.getMethod(name, args);
-				return true;
-			}
-			catch (NoSuchMethodException ex) {
-				return false;
-			}
-		}
+  public static Method virtualArgListMethodFromKind(Class<?> owner, String name, Class<?>[] prefix,
+      int kind) {
+    return argListMethodFromKind(false, owner, name, prefix, kind);
+  }
 
-		public Type getMethodType() {
-			Type[] ts = new Type[args.length];
-			for (int i = 0; i < args.length; i++) {
-				ts[i] = Type.getType(args[i]);
-			}
-			return Type.getMethodType(
-					Type.getType(returnType),
-					ts);
-		}
+  public static class Method {
 
-		public MethodInsnNode toMethodInsnNode() {
-			return new MethodInsnNode(
-					isStatic ? INVOKESTATIC : (owner.isInterface() ? INVOKEINTERFACE : INVOKEVIRTUAL),
-					Type.getInternalName(owner),
-					name,
-					getMethodType().getDescriptor(),
-					owner.isInterface());
-		}
+    public final Class<?> owner;
+    public final String name;
+    public final boolean isStatic;
+    public final Class<?> returnType;
+    public final Class<?>[] args;
 
-	}
+    public Method(Class<?> owner, String name, boolean isStatic, Class<?> returnType,
+        Class<?>[] args) {
+      this.owner = Objects.requireNonNull(owner);
+      this.name = name;
+      this.isStatic = isStatic;
+      this.returnType = Objects.requireNonNull(returnType);
+      this.args = args != null ? args : new Class[0];
+    }
 
-	private static Method argListMethodFromKind(boolean isStatic, Class<?> owner, String name, Class<?>[] prefix, int kind) {
-		ArrayList<Class<?>> args = new ArrayList<>();
-		if (prefix != null) {
-			Collections.addAll(args, prefix);
-		}
-		if (kind > 0) {
-			for (int i = 0; i < kind - 1; i++) {
-				args.add(Object.class);
-			}
-		}
-		else {
-			args.add(Object[].class);
-		}
+    public boolean exists() {
+      try {
+        owner.getMethod(name, args);
+        return true;
+      } catch (NoSuchMethodException ex) {
+        return false;
+      }
+    }
 
-		return new Method(owner, name, isStatic, Void.TYPE, args.toArray(new Class<?>[0]));
-	}
+    public Type getMethodType() {
+      Type[] ts = new Type[args.length];
+      for (int i = 0; i < args.length; i++) {
+        ts[i] = Type.getType(args[i]);
+      }
+      return Type.getMethodType(
+          Type.getType(returnType),
+          ts);
+    }
 
-	public static Method staticArgListMethodFromKind(Class<?> owner, String name, Class<?>[] prefix, int kind) {
-		return argListMethodFromKind(true, owner, name, prefix, kind);
-	}
+    public MethodInsnNode toMethodInsnNode() {
+      return new MethodInsnNode(
+          isStatic ? INVOKESTATIC : (owner.isInterface() ? INVOKEINTERFACE : INVOKEVIRTUAL),
+          Type.getInternalName(owner),
+          name,
+          getMethodType().getDescriptor(),
+          owner.isInterface());
+    }
 
-	public static Method virtualArgListMethodFromKind(Class<?> owner, String name, Class<?>[] prefix, int kind) {
-		return argListMethodFromKind(false, owner, name, prefix, kind);
-	}
+  }
 
 }

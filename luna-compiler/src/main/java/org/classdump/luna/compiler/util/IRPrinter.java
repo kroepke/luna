@@ -16,21 +16,20 @@
 
 package org.classdump.luna.compiler.util;
 
-import org.classdump.luna.compiler.IRFunc;
-
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import org.classdump.luna.compiler.IRFunc;
 
 public class IRPrinter {
 
-	public static void printFunc(IRFunc fn, PrintWriter writer) {
-		IRPrinterVisitor visitor = new IRPrinterVisitor(writer);
-		visitor.visit(fn);
-		writer.flush();
-	}
+  public static void printFunc(IRFunc fn, PrintWriter writer) {
+    IRPrinterVisitor visitor = new IRPrinterVisitor(writer);
+    visitor.visit(fn);
+    writer.flush();
+  }
 
-	public static void printFunc(IRFunc fn, PrintStream out) {
-		printFunc(fn, new PrintWriter(out));
-	}
+  public static void printFunc(IRFunc fn, PrintStream out) {
+    printFunc(fn, new PrintWriter(out));
+  }
 
 }

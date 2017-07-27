@@ -20,67 +20,67 @@ import org.classdump.luna.Conversions;
 
 class ApplyMappingVisitor implements ParameterMappingVisitor<Object> {
 
-	static final ApplyMappingVisitor INSTANCE = new ApplyMappingVisitor();
+  static final ApplyMappingVisitor INSTANCE = new ApplyMappingVisitor();
 
-	public static Object[] applyAll(ParameterMapping[] params, Object[] args) {
-		Object[] result = new Object[args.length];
-		for (int i = 0; i < args.length; i++) {
-			result[i] = params[i].accept(INSTANCE, args[i]);
-		}
-		return result;
-	}
+  public static Object[] applyAll(ParameterMapping[] params, Object[] args) {
+    Object[] result = new Object[args.length];
+    for (int i = 0; i < args.length; i++) {
+      result[i] = params[i].accept(INSTANCE, args[i]);
+    }
+    return result;
+  }
 
-	@Override
-	public Object visitReferenceParameter(Class<?> clazz, Object arg) {
-		return arg instanceof JavaWrapper
-				? ((JavaWrapper<?>) arg).get()
-				: arg;
-	}
+  @Override
+  public Object visitReferenceParameter(Class<?> clazz, Object arg) {
+    return arg instanceof JavaWrapper
+        ? ((JavaWrapper<?>) arg).get()
+        : arg;
+  }
 
-	@Override
-	public Object visitLongParameter(Object arg) {
-		return Conversions.integerValueOf(arg);
-	}
+  @Override
+  public Object visitLongParameter(Object arg) {
+    return Conversions.integerValueOf(arg);
+  }
 
-	@Override
-	public Object visitIntParameter(Object arg) {
-		Long l = Conversions.integerValueOf(arg);
-		return l != null ? Integer.valueOf(l.intValue()) : null;
-	}
+  @Override
+  public Object visitIntParameter(Object arg) {
+    Long l = Conversions.integerValueOf(arg);
+    return l != null ? Integer.valueOf(l.intValue()) : null;
+  }
 
-	@Override
-	public Object visitShortParameter(Object arg) {
-		Long l = Conversions.integerValueOf(arg);
-		return l != null ? Short.valueOf(l.shortValue()) : null;
-	}
+  @Override
+  public Object visitShortParameter(Object arg) {
+    Long l = Conversions.integerValueOf(arg);
+    return l != null ? Short.valueOf(l.shortValue()) : null;
+  }
 
-	@Override
-	public Object visitByteParameter(Object arg) {
-		Long l = Conversions.integerValueOf(arg);
-		return l != null ? Byte.valueOf(l.byteValue()) : null;
-	}
+  @Override
+  public Object visitByteParameter(Object arg) {
+    Long l = Conversions.integerValueOf(arg);
+    return l != null ? Byte.valueOf(l.byteValue()) : null;
+  }
 
-	@Override
-	public Object visitCharParameter(Object arg) {
-		Long l = Conversions.integerValueOf(arg);
-		return l != null ? Character.valueOf((char) l.intValue()) : null;
-	}
+  @Override
+  public Object visitCharParameter(Object arg) {
+    Long l = Conversions.integerValueOf(arg);
+    return l != null ? Character.valueOf((char) l.intValue()) : null;
+  }
 
-	@Override
-	public Object visitDoubleParameter(Object arg) {
-		Number n = Conversions.numericalValueOf(arg);
-		return n != null ? Conversions.floatValueOf(n) : null;
-	}
+  @Override
+  public Object visitDoubleParameter(Object arg) {
+    Number n = Conversions.numericalValueOf(arg);
+    return n != null ? Conversions.floatValueOf(n) : null;
+  }
 
-	@Override
-	public Object visitFloatParameter(Object arg) {
-		Number n = Conversions.numericalValueOf(arg);
-		return n != null ? Float.valueOf(n.floatValue()) : null;
-	}
+  @Override
+  public Object visitFloatParameter(Object arg) {
+    Number n = Conversions.numericalValueOf(arg);
+    return n != null ? Float.valueOf(n.floatValue()) : null;
+  }
 
-	@Override
-	public Object visitBooleanParameter(Object arg) {
-		return Conversions.booleanValueOf(arg);
-	}
+  @Override
+  public Object visitBooleanParameter(Object arg) {
+    return Conversions.booleanValueOf(arg);
+  }
 
 }

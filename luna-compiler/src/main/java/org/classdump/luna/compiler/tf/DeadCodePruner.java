@@ -22,10 +22,10 @@ import org.classdump.luna.compiler.analysis.TypeInfo;
 
 public class DeadCodePruner {
 
-	public static IRFunc pruneDeadCode(IRFunc fn, TypeInfo types, LivenessInfo liveness) {
-		DeadCodePrunerVisitor visitor = new DeadCodePrunerVisitor(types, liveness);
-		visitor.visit(fn);
-		return fn.update(visitor.result());
-	}
+  public static IRFunc pruneDeadCode(IRFunc fn, TypeInfo types, LivenessInfo liveness) {
+    DeadCodePrunerVisitor visitor = new DeadCodePrunerVisitor(types, liveness);
+    visitor.visit(fn);
+    return fn.update(visitor.result());
+  }
 
 }

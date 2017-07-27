@@ -16,41 +16,38 @@
 
 package org.classdump.luna.parser.ast;
 
-import org.classdump.luna.parser.ast.LValueExpr;
-
 import java.util.Objects;
 
 public class IndexExpr extends LValueExpr {
 
-	private final Expr object;
-	private final Expr key;
+  private final Expr object;
+  private final Expr key;
 
-	public IndexExpr(Attributes attr, Expr object, Expr key) {
-		super(attr);
-		this.object = Objects.requireNonNull(object);
-		this.key = Objects.requireNonNull(key);
-	}
+  public IndexExpr(Attributes attr, Expr object, Expr key) {
+    super(attr);
+    this.object = Objects.requireNonNull(object);
+    this.key = Objects.requireNonNull(key);
+  }
 
-	public Expr object() {
-		return object;
-	}
+  public Expr object() {
+    return object;
+  }
 
-	public Expr key() {
-		return key;
-	}
+  public Expr key() {
+    return key;
+  }
 
-	public IndexExpr update(Expr object, Expr key) {
-		if (this.object.equals(object) && this.key.equals(key)) {
-			return this;
-		}
-		else {
-			return new IndexExpr(attributes(), object, key);
-		}
-	}
+  public IndexExpr update(Expr object, Expr key) {
+    if (this.object.equals(object) && this.key.equals(key)) {
+      return this;
+    } else {
+      return new IndexExpr(attributes(), object, key);
+    }
+  }
 
-	@Override
-	public LValueExpr accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public LValueExpr accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

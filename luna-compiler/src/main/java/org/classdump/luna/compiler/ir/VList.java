@@ -21,24 +21,24 @@ import java.util.Objects;
 
 public class VList {
 
-	private final List<Val> addrs;
-	private final MultiVal suffix;  // may be null
+  private final List<Val> addrs;
+  private final MultiVal suffix;  // may be null
 
-	public VList(List<Val> addrs, MultiVal suffix) {
-		this.addrs = Objects.requireNonNull(addrs);
-		this.suffix = suffix;
-	}
+  public VList(List<Val> addrs, MultiVal suffix) {
+    this.addrs = Objects.requireNonNull(addrs);
+    this.suffix = suffix;
+  }
 
-	public List<Val> addrs() {
-		return addrs;
-	}
+  public List<Val> addrs() {
+    return addrs;
+  }
 
-	public boolean isMulti() {
-		return suffix != null;
-	}
+  public boolean isMulti() {
+    return suffix != null;
+  }
 
-	public MultiVal suffix() {
-		return suffix;
-	}
+  public MultiVal suffix() {
+    return suffix;
+  }
 
 }

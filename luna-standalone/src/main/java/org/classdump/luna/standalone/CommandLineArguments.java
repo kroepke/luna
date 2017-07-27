@@ -16,261 +16,166 @@
 
 package org.classdump.luna.standalone;
 
-import org.classdump.luna.Table;
-import org.classdump.luna.TableFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.classdump.luna.Table;
+import org.classdump.luna.TableFactory;
 
 class CommandLineArguments {
 
-	private final String[] args;
-	private final int scriptIndex;
+  private final String[] args;
+  private final int scriptIndex;
 
-	private final boolean interactive;
-	private final boolean ignoreEnvVars;
+  private final boolean interactive;
+  private final boolean ignoreEnvVars;
 
-	private final Iterable<Step> steps;
+  private final Iterable<Step> steps;
 
-	public CommandLineArguments(
-			String[] args,
-			int scriptIndex,
-			boolean interactive,
-			boolean ignoreEnvVars,
-			Iterable<Step> steps) {
+  public CommandLineArguments(
+      String[] args,
+      int scriptIndex,
+      boolean interactive,
+      boolean ignoreEnvVars,
+      Iterable<Step> steps) {
 
-		this.args = Objects.requireNonNull(args);
-		this.scriptIndex = scriptIndex;
+    this.args = Objects.requireNonNull(args);
+    this.scriptIndex = scriptIndex;
 
-		this.interactive = interactive;
-		this.ignoreEnvVars = ignoreEnvVars;
+    this.interactive = interactive;
+    this.ignoreEnvVars = ignoreEnvVars;
 
-		this.steps = Objects.requireNonNull(steps);
-	}
+    this.steps = Objects.requireNonNull(steps);
+  }
 
-	static class Step {
+  public static CommandLineArguments parseArguments(String[] args, boolean inTty) {
+    Objects.requireNonNull(args);
 
-		enum What {
-			PRINT_VERSION,
-			EXECUTE_STRING,
-			EXECUTE_FILE,
-			EXECUTE_STDIN,
-			REQUIRE_MODULE
-		}
+    boolean explicitPrintVersion = false;
+    boolean interactive = false;
+    boolean explicitIgnoreEnvVars = false;
 
-		private final What what;
-		private final String arg0;
-		private final String arg1;
-		private final String[] argArray;
+    boolean stdin = false;
 
-		private Step(What what, String arg0, String arg1, String[] argArray) {
-			this.what = Objects.requireNonNull(what);
-			this.arg0 = arg0;  // may be null
-			this.arg1 = arg1;  // may be null
-			this.argArray = argArray;  // may be null
-		}
+    List<Step> steps = new ArrayList<>();
 
-		public What what() {
-			return what;
-		}
+    int i = 0;
 
-		public String arg0() {
-			return arg0;
-		}
+    // handle options
 
-		public String arg1() {
-			return arg1;
-		}
+    for (; i < args.length; i++) {
+      String arg = Objects.requireNonNull(args[i]);
 
-		public String[] argArray() {
-			return argArray;
-		}
+      // -v       show version information
+      if (arg.equals("-v")) {
+        explicitPrintVersion = true;
+        continue;
+      }
 
-		public static Step printVersion() {
-			return new Step(What.PRINT_VERSION, null, null, null);
-		}
+      // -i       enter interactive mode after executing 'script'
+      else if (arg.equals("-i")) {
+        interactive = true;
+        continue;
+      }
 
-		public static Step executeString(String program, String origin) {
-			return new Step(What.EXECUTE_STRING, Objects.requireNonNull(program), origin, null);
-		}
+      // -e stat  execute string 'stat'
+      else if (arg.startsWith("-e")) {
+        String suffix = arg.substring(2);
+        final Step step;
 
-		public static Step executeFile(String fileName, String[] arguments) {
-			return new Step(What.EXECUTE_FILE, Objects.requireNonNull(fileName), null, Objects.requireNonNull(arguments));
-		}
+        if (suffix.isEmpty()) {
+          // statement is in the next argument
+          if (i + 1 < args.length) {
+            step = Step.executeString(args[++i], Constants.SOURCE_COMMAND_LINE);
+          } else {
+            throw new IllegalArgumentException("'-e' needs argument");
+          }
+        } else {
+          // suffix is the statement
+          step = Step.executeString(suffix, Constants.SOURCE_COMMAND_LINE);
+        }
 
-		public static Step executeStdin(String[] arguments) {
-			return new Step(What.EXECUTE_STDIN, null, null, Objects.requireNonNull(arguments));
-		}
+        steps.add(step);
+        continue;
+      }
 
-		public static Step require(String moduleName) {
-			return new Step(What.REQUIRE_MODULE, Objects.requireNonNull(moduleName), null, null);
-		}
+      // -l name  require library 'name'
+      else if (arg.startsWith("-l")) {
+        String suffix = arg.substring(2);
+        final Step step;
 
-	}
+        if (suffix.isEmpty()) {
+          // module name is in the next argument
+          if (i + 1 < args.length) {
+            step = Step.require(args[++i]);
+          } else {
+            throw new IllegalArgumentException("'-l' needs argument");
+          }
+        } else {
+          // suffix is the module name
+          step = Step.require(suffix);
+        }
 
-	public boolean interactive() {
-		return interactive;
-	}
+        steps.add(step);
+        continue;
+      }
 
-	public boolean ignoreEnvVars() {
-		return ignoreEnvVars;
-	}
+      // -E       ignore environment variables
+      else if (arg.equals("-E")) {
+        explicitIgnoreEnvVars = true;
+        continue;
+      }
 
-	public Iterable<Step> steps() {
-		return steps;
-	}
+      // --       stop handling options
+      else if (arg.equals("--")) {
+        i += 1;
+        break;
+      }
 
-	public Table toArgTable(TableFactory tableFactory) {
-		Table t = tableFactory.newTable();
+      // -        stop handling options and execute stdin
+      else if (arg.equals("-")) {
+        stdin = true;
+        i += 1;
+        break;
+      } else if (arg.startsWith("-")) {
+        throw new IllegalArgumentException("unrecognized option '" + arg + "'");
+      } else {
+        // this not an option
+        break;
+      }
+    }
 
-		// Caveat: does not insert the interpreter name
-		// scriptIndex == -1 when no script was specified
+    // handle script and its arguments
+    int scriptIndex = -1;
+    {
+      String script = null;
 
-		for (int i = 0; i < args.length; i++) {
-			t.rawset(i - scriptIndex, args[i]);
-		}
+      if (!stdin) {
+        if (i < args.length) {
+          scriptIndex = i++;
+          script = args[scriptIndex];
+        }
+      }
 
-		return t;
-	}
+      // script arguments
+      final String[] scriptArgs;
+      {
+        List<String> tmp = new ArrayList<>();
+        while (i < args.length) {
+          tmp.add(args[i++]);
+        }
+        scriptArgs = tmp.toArray(new String[tmp.size()]);
+      }
 
-	public static CommandLineArguments parseArguments(String[] args, boolean inTty) {
-		Objects.requireNonNull(args);
-
-		boolean explicitPrintVersion = false;
-		boolean interactive = false;
-		boolean explicitIgnoreEnvVars = false;
-
-		boolean stdin = false;
-
-		List<Step> steps = new ArrayList<>();
-
-		int i = 0;
-
-		// handle options
-
-		for ( ; i < args.length; i++) {
-			String arg = Objects.requireNonNull(args[i]);
-
-			// -v       show version information
-			if (arg.equals("-v")) {
-				explicitPrintVersion = true;
-				continue;
-			}
-
-			// -i       enter interactive mode after executing 'script'
-			else if (arg.equals("-i")) {
-				interactive = true;
-				continue;
-			}
-
-			// -e stat  execute string 'stat'
-			else if (arg.startsWith("-e")) {
-				String suffix = arg.substring(2);
-				final Step step;
-
-				if (suffix.isEmpty()) {
-					// statement is in the next argument
-					if (i + 1 < args.length) {
-						step = Step.executeString(args[++i], Constants.SOURCE_COMMAND_LINE);
-					}
-					else {
-						throw new IllegalArgumentException("'-e' needs argument");
-					}
-				}
-				else {
-					// suffix is the statement
-					step = Step.executeString(suffix, Constants.SOURCE_COMMAND_LINE);
-				}
-
-				steps.add(step);
-				continue;
-			}
-
-			// -l name  require library 'name'
-			else if (arg.startsWith("-l")) {
-				String suffix = arg.substring(2);
-				final Step step;
-
-				if (suffix.isEmpty()) {
-					// module name is in the next argument
-					if (i + 1 < args.length) {
-						step = Step.require(args[++i]);
-					}
-					else {
-						throw new IllegalArgumentException("'-l' needs argument");
-					}
-				}
-				else {
-					// suffix is the module name
-					step = Step.require(suffix);
-				}
-
-				steps.add(step);
-				continue;
-			}
-
-			// -E       ignore environment variables
-			else if (arg.equals("-E")) {
-				explicitIgnoreEnvVars = true;
-				continue;
-			}
-
-			// --       stop handling options
-			else if (arg.equals("--")) {
-				i += 1;
-				break;
-			}
-
-			// -        stop handling options and execute stdin
-			else if (arg.equals("-")) {
-				stdin = true;
-				i += 1;
-				break;
-			}
-
-			else if (arg.startsWith("-")) {
-				throw new IllegalArgumentException("unrecognized option '" + arg + "'");
-			}
-
-			else {
-				// this not an option
-				break;
-			}
-		}
-
-		// handle script and its arguments
-		int scriptIndex = -1;
-		{
-			String script = null;
-
-			if (!stdin) {
-				if (i < args.length) {
-					scriptIndex = i++;
-					script = args[scriptIndex];
-				}
-			}
-
-			// script arguments
-			final String[] scriptArgs;
-			{
-				List<String> tmp = new ArrayList<>();
-				while (i < args.length) {
-					tmp.add(args[i++]);
-				}
-				scriptArgs = tmp.toArray(new String[tmp.size()]);
-			}
-
-			if (stdin) {
-				steps.add(Step.executeStdin(scriptArgs));
-			}
-			else if (script != null) {
-				steps.add(Step.executeFile(script, scriptArgs));
-			}
-		}
+      if (stdin) {
+        steps.add(Step.executeStdin(scriptArgs));
+      } else if (script != null) {
+        steps.add(Step.executeFile(script, scriptArgs));
+      }
+    }
 
 		/*
-		 * Note down whether we've already inserted a step for printing the version string.
+     * Note down whether we've already inserted a step for printing the version string.
 		 * This is not very nice, but it allows us to mimic the following behaviour
 		 * of PUC-Lua 5.3.3:
 		 *
@@ -289,58 +194,142 @@ class CommandLineArguments {
 		 * > (interactive mode)
 		 */
 
-		boolean versionPrinted = false;
+    boolean versionPrinted = false;
 
-		// fall back to defaults when no arguments are specified
-		if (args.length == 0) {
-			// no arguments
-			if (inTty) {
-				// force -i -v
-				// if LUA_INIT_x is used, this will be executed *before* the version is printed
-				steps.add(Step.printVersion());
-				versionPrinted = true;
-				interactive = true;
-			}
-			else {
-				// force -
-				steps.add(Step.executeStdin(new String[0]));
-			}
-		}
+    // fall back to defaults when no arguments are specified
+    if (args.length == 0) {
+      // no arguments
+      if (inTty) {
+        // force -i -v
+        // if LUA_INIT_x is used, this will be executed *before* the version is printed
+        steps.add(Step.printVersion());
+        versionPrinted = true;
+        interactive = true;
+      } else {
+        // force -
+        steps.add(Step.executeStdin(new String[0]));
+      }
+    }
 
-		// check LUA_INIT_5_3 or LUA_INIT
-		String[] initEnvVars = explicitIgnoreEnvVars
-				? new String[0]
-				: new String[] { Constants.ENV_INIT_FIRST, Constants.ENV_INIT_SECOND };
+    // check LUA_INIT_5_3 or LUA_INIT
+    String[] initEnvVars = explicitIgnoreEnvVars
+        ? new String[0]
+        : new String[]{Constants.ENV_INIT_FIRST, Constants.ENV_INIT_SECOND};
 
-		{
-			String origin = null;
-			String init = null;
+    {
+      String origin = null;
+      String init = null;
 
-			for (String envVar : initEnvVars) {
-				origin = envVar;
-				init = System.getenv(origin);
-			}
+      for (String envVar : initEnvVars) {
+        origin = envVar;
+        init = System.getenv(origin);
+      }
 
-			if (init != null) {
-				Step step = init.startsWith("@")
-						? Step.executeFile(init.substring(1), new String[0])
-						: Step.executeString(init, origin);
+      if (init != null) {
+        Step step = init.startsWith("@")
+            ? Step.executeFile(init.substring(1), new String[0])
+            : Step.executeString(init, origin);
 
-				steps.add(0, step);
-			}
-		}
+        steps.add(0, step);
+      }
+    }
 
-		// were we explicitly asked to print the version string?
-		if (!versionPrinted && (explicitPrintVersion || interactive)) {
-			steps.add(0, Step.printVersion());
-		}
+    // were we explicitly asked to print the version string?
+    if (!versionPrinted && (explicitPrintVersion || interactive)) {
+      steps.add(0, Step.printVersion());
+    }
 
-		return new CommandLineArguments(
-				args,
-				scriptIndex,
-				interactive,
-				explicitIgnoreEnvVars,
-				steps);
-	}
+    return new CommandLineArguments(
+        args,
+        scriptIndex,
+        interactive,
+        explicitIgnoreEnvVars,
+        steps);
+  }
+
+  public boolean interactive() {
+    return interactive;
+  }
+
+  public boolean ignoreEnvVars() {
+    return ignoreEnvVars;
+  }
+
+  public Iterable<Step> steps() {
+    return steps;
+  }
+
+  public Table toArgTable(TableFactory tableFactory) {
+    Table t = tableFactory.newTable();
+
+    // Caveat: does not insert the interpreter name
+    // scriptIndex == -1 when no script was specified
+
+    for (int i = 0; i < args.length; i++) {
+      t.rawset(i - scriptIndex, args[i]);
+    }
+
+    return t;
+  }
+
+  static class Step {
+
+    private final What what;
+    private final String arg0;
+    private final String arg1;
+    private final String[] argArray;
+    private Step(What what, String arg0, String arg1, String[] argArray) {
+      this.what = Objects.requireNonNull(what);
+      this.arg0 = arg0;  // may be null
+      this.arg1 = arg1;  // may be null
+      this.argArray = argArray;  // may be null
+    }
+
+    public static Step printVersion() {
+      return new Step(What.PRINT_VERSION, null, null, null);
+    }
+
+    public static Step executeString(String program, String origin) {
+      return new Step(What.EXECUTE_STRING, Objects.requireNonNull(program), origin, null);
+    }
+
+    public static Step executeFile(String fileName, String[] arguments) {
+      return new Step(What.EXECUTE_FILE, Objects.requireNonNull(fileName), null,
+          Objects.requireNonNull(arguments));
+    }
+
+    public static Step executeStdin(String[] arguments) {
+      return new Step(What.EXECUTE_STDIN, null, null, Objects.requireNonNull(arguments));
+    }
+
+    public static Step require(String moduleName) {
+      return new Step(What.REQUIRE_MODULE, Objects.requireNonNull(moduleName), null, null);
+    }
+
+    public What what() {
+      return what;
+    }
+
+    public String arg0() {
+      return arg0;
+    }
+
+    public String arg1() {
+      return arg1;
+    }
+
+    public String[] argArray() {
+      return argArray;
+    }
+
+    enum What {
+      PRINT_VERSION,
+      EXECUTE_STRING,
+      EXECUTE_FILE,
+      EXECUTE_STDIN,
+      REQUIRE_MODULE
+    }
+
+  }
 
 }

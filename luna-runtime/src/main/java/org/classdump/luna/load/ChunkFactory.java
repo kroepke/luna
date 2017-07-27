@@ -10,26 +10,26 @@ import org.classdump.luna.runtime.LuaFunction;
  */
 public class ChunkFactory {
 
-    private final Class<? extends LuaFunction<Variable, ?, ?, ?, ?>> chunk;
-    private final String chunkName;
+  private final Class<? extends LuaFunction<Variable, ?, ?, ?, ?>> chunk;
+  private final String chunkName;
 
-    public ChunkFactory(Class<? extends LuaFunction<Variable, ?, ?, ?, ?>> chunk, String chunkName) {
-        this.chunk = chunk;
-        this.chunkName = chunkName;
-    }
+  public ChunkFactory(Class<? extends LuaFunction<Variable, ?, ?, ?, ?>> chunk, String chunkName) {
+    this.chunk = chunk;
+    this.chunkName = chunkName;
+  }
 
-    /**
-     * Creates a new instance of the compiled chunk with the given "_ENV" upvalue.
-     *
-     * @param env the _ENV upvalue for this instance, should not be shared between scripts.
-     * @return a new script instance
-     * @throws LoaderException when the script could not be instantiated.
-     */
-    public LuaFunction<Variable, ?, ?, ?, ?> newInstance(Variable env) throws LoaderException {
-        try {
-            return chunk.getConstructor(Variable.class).newInstance(env);
-        } catch (RuntimeException | LinkageError | ReflectiveOperationException e) {
-            throw new LoaderException(e, chunkName, 0, false);
-        }
+  /**
+   * Creates a new instance of the compiled chunk with the given "_ENV" upvalue.
+   *
+   * @param env the _ENV upvalue for this instance, should not be shared between scripts.
+   * @return a new script instance
+   * @throws LoaderException when the script could not be instantiated.
+   */
+  public LuaFunction<Variable, ?, ?, ?, ?> newInstance(Variable env) throws LoaderException {
+    try {
+      return chunk.getConstructor(Variable.class).newInstance(env);
+    } catch (RuntimeException | LinkageError | ReflectiveOperationException e) {
+      throw new LoaderException(e, chunkName, 0, false);
     }
+  }
 }

@@ -16,36 +16,32 @@
 
 package org.classdump.luna.parser.ast;
 
-import org.classdump.luna.parser.ast.Block;
-import org.classdump.luna.parser.ast.Expr;
-
 import java.util.Objects;
 
 public class ConditionalBlock {
 
-	private final Expr condition;
-	private final Block block;
+  private final Expr condition;
+  private final Block block;
 
-	public ConditionalBlock(Expr condition, Block block) {
-		this.condition = Objects.requireNonNull(condition);
-		this.block = Objects.requireNonNull(block);
-	}
+  public ConditionalBlock(Expr condition, Block block) {
+    this.condition = Objects.requireNonNull(condition);
+    this.block = Objects.requireNonNull(block);
+  }
 
-	public Expr condition() {
-		return condition;
-	}
+  public Expr condition() {
+    return condition;
+  }
 
-	public Block block() {
-		return block;
-	}
+  public Block block() {
+    return block;
+  }
 
-	public ConditionalBlock update(Expr condition, Block block) {
-		if (this.condition.equals(condition) && this.block.equals(block)) {
-			return this;
-		}
-		else {
-			return new ConditionalBlock(condition, block);
-		}
-	}
+  public ConditionalBlock update(Expr condition, Block block) {
+    if (this.condition.equals(condition) && this.block.equals(block)) {
+      return this;
+    } else {
+      return new ConditionalBlock(condition, block);
+    }
+  }
 
 }

@@ -16,32 +16,29 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.IRVisitor;
-import org.classdump.luna.compiler.ir.Label;
-
 import java.util.Collections;
 import java.util.Objects;
 
 public class ToNext extends BlockTermNode {
 
-	private final Label label;
+  private final Label label;
 
-	public ToNext(Label label) {
-		this.label = Objects.requireNonNull(label);
-	}
+  public ToNext(Label label) {
+    this.label = Objects.requireNonNull(label);
+  }
 
-	public Label label() {
-		return label;
-	}
+  public Label label() {
+    return label;
+  }
 
-	@Override
-	public Iterable<Label> nextLabels() {
-		return Collections.singletonList(label());
-	}
+  @Override
+  public Iterable<Label> nextLabels() {
+    return Collections.singletonList(label());
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

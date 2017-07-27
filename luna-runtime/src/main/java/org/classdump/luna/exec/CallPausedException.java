@@ -16,8 +16,6 @@
 
 package org.classdump.luna.exec;
 
-import org.classdump.luna.exec.Continuation;
-
 import java.util.Objects;
 
 /**
@@ -28,30 +26,29 @@ import java.util.Objects;
  */
 public class CallPausedException extends Exception {
 
-	private final Continuation continuation;
+  private final Continuation continuation;
 
-	/**
-	 * Constructs a new instance of {@code CallPausedException} with the specified
-	 * continuation.
-	 *
-	 * <p>For performance reasons, the exception does not have a writable stack trace.</p>
-	 *
-	 * @param continuation  the continuation of the paused call, must not be {@code null}
-	 *
-	 * @throws NullPointerException  if {@code continuation} is {@code null}
-	 */
-	public CallPausedException(Continuation continuation) {
-		super("Call paused", null, true, false);
-		this.continuation = Objects.requireNonNull(continuation);
-	}
+  /**
+   * Constructs a new instance of {@code CallPausedException} with the specified
+   * continuation.
+   *
+   * <p>For performance reasons, the exception does not have a writable stack trace.</p>
+   *
+   * @param continuation the continuation of the paused call, must not be {@code null}
+   * @throws NullPointerException if {@code continuation} is {@code null}
+   */
+  public CallPausedException(Continuation continuation) {
+    super("Call paused", null, true, false);
+    this.continuation = Objects.requireNonNull(continuation);
+  }
 
-	/**
-	 * Get the continuation of the paused call.
-	 *
-	 * @return  the call continuation
-	 */
-	public Continuation getContinuation() {
-		return continuation;
-	}
+  /**
+   * Get the continuation of the paused call.
+   *
+   * @return the call continuation
+   */
+  public Continuation getContinuation() {
+    return continuation;
+  }
 
 }

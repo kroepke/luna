@@ -12,10 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */package org.classdump.luna.test.fragments
+ */
+package org.classdump.luna.test.fragments
 
 import org.classdump.luna.test.FragmentExecTestSuite
-import org.classdump.luna.test.fragments.OsLibFragments
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 

@@ -21,14 +21,11 @@ import java.io.{ByteArrayInputStream, PrintWriter}
 import org.classdump.luna.compiler.analysis._
 import org.classdump.luna.compiler.ir.Code
 import org.classdump.luna.compiler.util.IRPrinterVisitor
+import org.classdump.luna.parser.{Expressions, Parser}
 import org.classdump.luna.parser.analysis.NameResolver
 import org.classdump.luna.parser.ast.{Chunk, Expr}
-import org.classdump.luna.parser.{Expressions, Parser}
-import org.classdump.luna.test.fragments._
-import org.classdump.luna.compiler.{LuaCompiler, ModuleBuilder}
-import org.classdump.luna.parser.Expressions
 import org.classdump.luna.test.Util
-import org.classdump.luna.test.fragments.BasicFragments
+import org.classdump.luna.test.fragments.{BasicFragments, _}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
@@ -65,8 +62,6 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     parser.Chunk()
   }
 
-  def resolveNames(c: Chunk): Chunk = NameResolver.resolveNames(c)
-
   def typeInfo(fn: IRFunc): TypeInfo = Typer.analyseTypes(fn)
 
   def dependencyInfo(fn: IRFunc): DependencyInfo = DependencyAnalyser.analyse(fn)
@@ -101,7 +96,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     }
     else {
       val ids = depInfo.nestedRefs().asScala
-      println("\t" + (ids map { id => "[" + id + "]"}).mkString(", "))
+      println("\t" + (ids map { id => "[" + id + "]" }).mkString(", "))
     }
   }
 
@@ -126,15 +121,21 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     println()
   }
 
-  describe ("expression") {
-    describe ("can be translated to IR:") {
+  def translate(chunk: Chunk): Module = {
+    val resolved = resolveNames(chunk)
+    val modBuilder = new ModuleBuilder()
+    IRTranslator.translate(resolved)
+  }
+
+  describe("expression") {
+    describe("can be translated to IR:") {
       Util.silenced {
 
         for ((s, o) <- Expressions.get if o) {
 
           val ss = "return " + s
 
-          it (ss) {
+          it(ss) {
             val ck = resolveNames(parseChunk(ss))
 
             val mod = IRTranslator.translate(ck)
@@ -150,13 +151,10 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     }
   }
 
-  case class CompiledFn(fn: IRFunc, types: TypeInfo)
-  case class CompiledModule(fns: Seq[CompiledFn])
+  def resolveNames(c: Chunk): Chunk = NameResolver.resolveNames(c)
 
-  def translate(chunk: Chunk): Module = {
-    val resolved = resolveNames(chunk)
-    val modBuilder = new ModuleBuilder()
-    IRTranslator.translate(resolved)
+  def compile(mod: Module): CompiledModule = {
+    CompiledModule(for (fn <- mod.fns().asScala) yield compile(fn))
   }
 
   def compile(fn: IRFunc): CompiledFn = {
@@ -165,15 +163,15 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     CompiledFn(pfn.fn, pfn.types)
   }
 
-  def compile(mod: Module): CompiledModule = {
-    CompiledModule(for (fn <- mod.fns().asScala) yield compile(fn))
-  }
+  case class CompiledFn(fn: IRFunc, types: TypeInfo)
+
+  case class CompiledModule(fns: Seq[CompiledFn])
 
   for (b <- bundles) {
-    describe ("from " + b.name + " :") {
+    describe("from " + b.name + " :") {
       for (f <- b.all) {
-        describe (f.description) {
-          it ("can be translated to IR (translation only)") {
+        describe(f.description) {
+          it("can be translated to IR (translation only)") {
             Util.silenced {
               val code = f.code
 
@@ -194,7 +192,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
           }
 
-          it ("can be translated to IR and optimised") {
+          it("can be translated to IR and optimised") {
             Util.silenced {
               val code = f.code
 

@@ -16,8 +16,6 @@
 
 package org.classdump.luna;
 
-import org.classdump.luna.LuaType;
-
 import static org.classdump.luna.LuaFormat.TYPENAME_BOOLEAN;
 import static org.classdump.luna.LuaFormat.TYPENAME_FUNCTION;
 import static org.classdump.luna.LuaFormat.TYPENAME_NIL;
@@ -34,40 +32,48 @@ import static org.classdump.luna.LuaFormat.TYPENAME_USERDATA;
  */
 public class PlainValueTypeNamer implements ValueTypeNamer {
 
-	/**
-	 * A static instance of this value type namer.
-	 */
-	public static final PlainValueTypeNamer INSTANCE = new PlainValueTypeNamer();
+  /**
+   * A static instance of this value type namer.
+   */
+  public static final PlainValueTypeNamer INSTANCE = new PlainValueTypeNamer();
 
-	/**
-	 * Returns the name (a string) of a given Lua type.
-	 *
-	 * <p>The result of this method is one of {@code "nil"}, {@code "boolean"}, {@code "number"},
-	 * {@code "string"}, {@code "table"}, {@code "function"}, {@code "userdata"}
-	 * and {@code "thread"}.</p>
-	 *
-	 * @param type  the type, must not be {@code null}
-	 * @return  the name of {@code type}
-	 *
-	 * @throws NullPointerException  if {@code type} is {@code null}
-	 */
-	public static ByteString luaTypeToName(LuaType type) {
-		switch (type) {
-			case NIL: return TYPENAME_NIL;
-			case BOOLEAN: return TYPENAME_BOOLEAN;
-			case NUMBER: return TYPENAME_NUMBER;
-			case STRING: return TYPENAME_STRING;
-			case TABLE: return TYPENAME_TABLE;
-			case FUNCTION: return TYPENAME_FUNCTION;
-			case USERDATA: return TYPENAME_USERDATA;
-			case THREAD: return TYPENAME_THREAD;
-			default: throw new NullPointerException("Illegal type: " + type);
-		}
-	}
+  /**
+   * Returns the name (a string) of a given Lua type.
+   *
+   * <p>The result of this method is one of {@code "nil"}, {@code "boolean"}, {@code "number"},
+   * {@code "string"}, {@code "table"}, {@code "function"}, {@code "userdata"}
+   * and {@code "thread"}.</p>
+   *
+   * @param type the type, must not be {@code null}
+   * @return the name of {@code type}
+   * @throws NullPointerException if {@code type} is {@code null}
+   */
+  public static ByteString luaTypeToName(LuaType type) {
+    switch (type) {
+      case NIL:
+        return TYPENAME_NIL;
+      case BOOLEAN:
+        return TYPENAME_BOOLEAN;
+      case NUMBER:
+        return TYPENAME_NUMBER;
+      case STRING:
+        return TYPENAME_STRING;
+      case TABLE:
+        return TYPENAME_TABLE;
+      case FUNCTION:
+        return TYPENAME_FUNCTION;
+      case USERDATA:
+        return TYPENAME_USERDATA;
+      case THREAD:
+        return TYPENAME_THREAD;
+      default:
+        throw new NullPointerException("Illegal type: " + type);
+    }
+  }
 
-	@Override
-	public ByteString typeNameOf(Object instance) {
-		return luaTypeToName(LuaType.typeOf(instance));
-	}
+  @Override
+  public ByteString typeNameOf(Object instance) {
+    return luaTypeToName(LuaType.typeOf(instance));
+  }
 
 }

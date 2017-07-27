@@ -22,5 +22,7 @@ package org.classdump.luna.runtime;
  * If the argument types are known beforehand, consider using {@link AbstractFunction4}.
  */
 @SuppressWarnings("unused")
-public abstract class AbstractUntypedFunction4 extends AbstractFunction4<Object, Object, Object, Object> {
+public abstract class AbstractUntypedFunction4 extends
+    AbstractFunction4<Object, Object, Object, Object> {
+
 }

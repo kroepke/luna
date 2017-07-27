@@ -21,29 +21,28 @@ import java.util.Objects;
 
 public class Block {
 
-	private final List<BodyStatement> statements;
-	private final ReturnStatement ret;  // may be null
+  private final List<BodyStatement> statements;
+  private final ReturnStatement ret;  // may be null
 
-	public Block(List<BodyStatement> statements, ReturnStatement ret) {
-		this.statements = Objects.requireNonNull(statements);
-		this.ret = ret;
-	}
+  public Block(List<BodyStatement> statements, ReturnStatement ret) {
+    this.statements = Objects.requireNonNull(statements);
+    this.ret = ret;
+  }
 
-	public List<BodyStatement> statements() {
-		return statements;
-	}
+  public List<BodyStatement> statements() {
+    return statements;
+  }
 
-	public ReturnStatement returnStatement() {
-		return ret;
-	}
+  public ReturnStatement returnStatement() {
+    return ret;
+  }
 
-	public Block update(List<BodyStatement> statements, ReturnStatement ret) {
-		if (this.statements.equals(statements) && Objects.equals(this.ret, ret)) {
-			return this;
-		}
-		else {
-			return new Block(statements, ret);
-		}
-	}
+  public Block update(List<BodyStatement> statements, ReturnStatement ret) {
+    if (this.statements.equals(statements) && Objects.equals(this.ret, ret)) {
+      return this;
+    } else {
+      return new Block(statements, ret);
+    }
+  }
 
 }

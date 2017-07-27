@@ -16,20 +16,15 @@
 
 package org.classdump.luna.parser.ast;
 
-import org.classdump.luna.parser.ast.Attributes;
-import org.classdump.luna.parser.ast.Expr;
-import org.classdump.luna.parser.ast.MultiExpr;
-import org.classdump.luna.parser.ast.Transformer;
-
 public class VarargsExpr extends MultiExpr {
 
-	public VarargsExpr(Attributes attr) {
-		super(attr);
-	}
+  public VarargsExpr(Attributes attr) {
+    super(attr);
+  }
 
-	@Override
-	public Expr accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public Expr accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

@@ -16,25 +16,23 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.IRVisitor;
-
 import java.util.Objects;
 
 public class Vararg extends BodyNode {
 
-	private final MultiVal dest;
+  private final MultiVal dest;
 
-	public Vararg(MultiVal dest) {
-		this.dest = Objects.requireNonNull(dest);
-	}
+  public Vararg(MultiVal dest) {
+    this.dest = Objects.requireNonNull(dest);
+  }
 
-	public MultiVal dest() {
-		return dest;
-	}
+  public MultiVal dest() {
+    return dest;
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

@@ -16,26 +16,24 @@
 
 package org.classdump.luna.compiler.gen;
 
-import org.classdump.luna.compiler.gen.ClassNameTranslator;
-
 import java.util.Objects;
 
 public class SuffixingClassNameTranslator implements ClassNameTranslator {
 
-	private final String base;
+  private final String base;
 
-	public SuffixingClassNameTranslator(String base) {
-		this.base = Objects.requireNonNull(base);
-	}
+  public SuffixingClassNameTranslator(String base) {
+    this.base = Objects.requireNonNull(base);
+  }
 
-	@Override
-	public String className() {
-		return "luna_dynamic." + base;
-	}
+  @Override
+  public String className() {
+    return "luna_dynamic." + base;
+  }
 
-	@Override
-	public ClassNameTranslator child(int idx) {
-		return new SuffixingClassNameTranslator(base + "$" + idx);
-	}
+  @Override
+  public ClassNameTranslator child(int idx) {
+    return new SuffixingClassNameTranslator(base + "$" + idx);
+  }
 
 }

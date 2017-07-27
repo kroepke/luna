@@ -18,8 +18,8 @@ package org.classdump.luna.parser.ast;
 
 public abstract class MultiExpr extends Expr {
 
-	protected MultiExpr(Attributes attr) {
-		super(attr);
-	}
+  protected MultiExpr(Attributes attr) {
+    super(attr);
+  }
 
 }

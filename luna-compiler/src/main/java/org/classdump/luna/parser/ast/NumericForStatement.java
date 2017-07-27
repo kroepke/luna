@@ -20,63 +20,66 @@ import java.util.Objects;
 
 public class NumericForStatement extends BodyStatement {
 
-	private final Name name;
-	private final Expr init;
-	private final Expr limit;
-	private final Expr step;  // may be null
-	private final Block block;
+  private final Name name;
+  private final Expr init;
+  private final Expr limit;
+  private final Expr step;  // may be null
+  private final Block block;
 
-	public NumericForStatement(Attributes attr, Name name, Expr init, Expr limit, Expr step, Block block) {
-		super(attr);
-		this.name = Objects.requireNonNull(name);
-		this.init = Objects.requireNonNull(init);
-		this.limit = Objects.requireNonNull(limit);
-		this.step = step;
-		this.block = Objects.requireNonNull(block);
-	}
+  public NumericForStatement(Attributes attr, Name name, Expr init, Expr limit, Expr step,
+      Block block) {
+    super(attr);
+    this.name = Objects.requireNonNull(name);
+    this.init = Objects.requireNonNull(init);
+    this.limit = Objects.requireNonNull(limit);
+    this.step = step;
+    this.block = Objects.requireNonNull(block);
+  }
 
-	public Name name() {
-		return name;
-	}
+  public Name name() {
+    return name;
+  }
 
-	public Expr init() {
-		return init;
-	}
+  public Expr init() {
+    return init;
+  }
 
-	public Expr limit() {
-		return limit;
-	}
+  public Expr limit() {
+    return limit;
+  }
 
-	public Expr step() {
-		return step;
-	}
+  public Expr step() {
+    return step;
+  }
 
-	public Block block() {
-		return block;
-	}
+  public Block block() {
+    return block;
+  }
 
-	public NumericForStatement update(Name name, Expr init, Expr limit, Expr step, Block block) {
-		if (this.name.equals(name) && this.init.equals(init) && this.limit.equals(limit)
-				&& Objects.equals(this.step, step) && this.block.equals(block)) {
-			return this;
-		}
-		else {
-			return new NumericForStatement(attributes(), name, init, limit, step, block);
-		}
-	}
+  public NumericForStatement update(Name name, Expr init, Expr limit, Expr step, Block block) {
+    if (this.name.equals(name) && this.init.equals(init) && this.limit.equals(limit)
+        && Objects.equals(this.step, step) && this.block.equals(block)) {
+      return this;
+    } else {
+      return new NumericForStatement(attributes(), name, init, limit, step, block);
+    }
+  }
 
-	public NumericForStatement withAttributes(Attributes attr) {
-		if (attributes().equals(attr)) return this;
-		else return new NumericForStatement(attr, name, init, limit, step, block);
-	}
+  public NumericForStatement withAttributes(Attributes attr) {
+    if (attributes().equals(attr)) {
+      return this;
+    } else {
+      return new NumericForStatement(attr, name, init, limit, step, block);
+    }
+  }
 
-	public NumericForStatement with(Object o) {
-		return this.withAttributes(attributes().with(o));
-	}
+  public NumericForStatement with(Object o) {
+    return this.withAttributes(attributes().with(o));
+  }
 
-	@Override
-	public BodyStatement accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public BodyStatement accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

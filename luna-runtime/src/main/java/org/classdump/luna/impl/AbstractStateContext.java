@@ -16,12 +16,11 @@
 
 package org.classdump.luna.impl;
 
+import java.util.Objects;
 import org.classdump.luna.MetatableAccessor;
 import org.classdump.luna.StateContext;
 import org.classdump.luna.Table;
 import org.classdump.luna.TableFactory;
-
-import java.util.Objects;
 
 /**
  * An abstract implementation of a state context that delegates state context methods
@@ -29,125 +28,123 @@ import java.util.Objects;
  */
 public abstract class AbstractStateContext implements StateContext {
 
-	private final TableFactory tableFactory;
-	private final MetatableAccessor metatableAccessor;
+  private final TableFactory tableFactory;
+  private final MetatableAccessor metatableAccessor;
 
-	/**
-	 * Constructs a new {@code AbstractStateContext} with the specified table factory
-	 * and metatable accessor.
-	 *
-	 * @param tableFactory  the table factory, must not be {@code null}
-	 * @param metatableAccessor  the metatable accessor, must not be {@code null}
-	 *
-	 * @throws NullPointerException  if {@code tableFactory} or {@code metatableAccessor}
-	 *                               is {@code null}
-	 */
-	protected AbstractStateContext(TableFactory tableFactory, MetatableAccessor metatableAccessor) {
-		this.tableFactory = Objects.requireNonNull(tableFactory);
-		this.metatableAccessor = Objects.requireNonNull(metatableAccessor);
-	}
+  /**
+   * Constructs a new {@code AbstractStateContext} with the specified table factory
+   * and metatable accessor.
+   *
+   * @param tableFactory the table factory, must not be {@code null}
+   * @param metatableAccessor the metatable accessor, must not be {@code null}
+   * @throws NullPointerException if {@code tableFactory} or {@code metatableAccessor} is {@code
+   * null}
+   */
+  protected AbstractStateContext(TableFactory tableFactory, MetatableAccessor metatableAccessor) {
+    this.tableFactory = Objects.requireNonNull(tableFactory);
+    this.metatableAccessor = Objects.requireNonNull(metatableAccessor);
+  }
 
-	/**
-	 * Constructs a new {@code AbstractStateContext} that delegates to the specified
-	 * state context {@code stateContext}.
-	 *
-	 * @param stateContext  the state context, must not be {@code null}
-	 *
-	 * @throws NullPointerException  if {@code stateContext} is {@code null}
-	 */
-	protected AbstractStateContext(StateContext stateContext) {
-		this(stateContext, stateContext);
-	}
+  /**
+   * Constructs a new {@code AbstractStateContext} that delegates to the specified
+   * state context {@code stateContext}.
+   *
+   * @param stateContext the state context, must not be {@code null}
+   * @throws NullPointerException if {@code stateContext} is {@code null}
+   */
+  protected AbstractStateContext(StateContext stateContext) {
+    this(stateContext, stateContext);
+  }
 
-	@Override
-	public Table getMetatable(Object instance) {
-		return metatableAccessor.getMetatable(instance);
-	}
+  @Override
+  public Table getMetatable(Object instance) {
+    return metatableAccessor.getMetatable(instance);
+  }
 
-	@Override
-	public Table getNilMetatable() {
-		return metatableAccessor.getNilMetatable();
-	}
+  @Override
+  public Table getNilMetatable() {
+    return metatableAccessor.getNilMetatable();
+  }
 
-	@Override
-	public Table getBooleanMetatable() {
-		return metatableAccessor.getBooleanMetatable();
-	}
+  @Override
+  public Table getBooleanMetatable() {
+    return metatableAccessor.getBooleanMetatable();
+  }
 
-	@Override
-	public Table getNumberMetatable() {
-		return metatableAccessor.getNumberMetatable();
-	}
+  @Override
+  public Table getNumberMetatable() {
+    return metatableAccessor.getNumberMetatable();
+  }
 
-	@Override
-	public Table getStringMetatable() {
-		return metatableAccessor.getStringMetatable();
-	}
+  @Override
+  public Table getStringMetatable() {
+    return metatableAccessor.getStringMetatable();
+  }
 
-	@Override
-	public Table getFunctionMetatable() {
-		return metatableAccessor.getFunctionMetatable();
-	}
+  @Override
+  public Table getFunctionMetatable() {
+    return metatableAccessor.getFunctionMetatable();
+  }
 
-	@Override
-	public Table getThreadMetatable() {
-		return metatableAccessor.getThreadMetatable();
-	}
+  @Override
+  public Table getThreadMetatable() {
+    return metatableAccessor.getThreadMetatable();
+  }
 
-	@Override
-	public Table getLightUserdataMetatable() {
-		return metatableAccessor.getLightUserdataMetatable();
-	}
+  @Override
+  public Table getLightUserdataMetatable() {
+    return metatableAccessor.getLightUserdataMetatable();
+  }
 
-	@Override
-	public Table setMetatable(Object instance, Table table) {
-		return metatableAccessor.setMetatable(instance, table);
-	}
+  @Override
+  public Table setMetatable(Object instance, Table table) {
+    return metatableAccessor.setMetatable(instance, table);
+  }
 
-	@Override
-	public Table setNilMetatable(Table table) {
-		return metatableAccessor.setNilMetatable(table);
-	}
+  @Override
+  public Table setNilMetatable(Table table) {
+    return metatableAccessor.setNilMetatable(table);
+  }
 
-	@Override
-	public Table setBooleanMetatable(Table table) {
-		return metatableAccessor.setBooleanMetatable(table);
-	}
+  @Override
+  public Table setBooleanMetatable(Table table) {
+    return metatableAccessor.setBooleanMetatable(table);
+  }
 
-	@Override
-	public Table setNumberMetatable(Table table) {
-		return metatableAccessor.setNumberMetatable(table);
-	}
+  @Override
+  public Table setNumberMetatable(Table table) {
+    return metatableAccessor.setNumberMetatable(table);
+  }
 
-	@Override
-	public Table setStringMetatable(Table table) {
-		return metatableAccessor.setStringMetatable(table);
-	}
+  @Override
+  public Table setStringMetatable(Table table) {
+    return metatableAccessor.setStringMetatable(table);
+  }
 
-	@Override
-	public Table setFunctionMetatable(Table table) {
-		return metatableAccessor.setFunctionMetatable(table);
-	}
+  @Override
+  public Table setFunctionMetatable(Table table) {
+    return metatableAccessor.setFunctionMetatable(table);
+  }
 
-	@Override
-	public Table setThreadMetatable(Table table) {
-		return metatableAccessor.setThreadMetatable(table);
-	}
+  @Override
+  public Table setThreadMetatable(Table table) {
+    return metatableAccessor.setThreadMetatable(table);
+  }
 
-	@Override
-	public Table setLightUserdataMetatable(Table table) {
-		return metatableAccessor.setLightUserdataMetatable(table);
-	}
+  @Override
+  public Table setLightUserdataMetatable(Table table) {
+    return metatableAccessor.setLightUserdataMetatable(table);
+  }
 
-	@Override
-	public Table newTable() {
-		return tableFactory.newTable();
-	}
+  @Override
+  public Table newTable() {
+    return tableFactory.newTable();
+  }
 
-	@Override
-	public Table newTable(int array, int hash) {
-		return tableFactory.newTable(array, hash);
-	}
+  @Override
+  public Table newTable(int array, int hash) {
+    return tableFactory.newTable(array, hash);
+  }
 
 
 }

@@ -16,39 +16,38 @@
 
 package org.classdump.luna.parser.analysis;
 
-import org.classdump.luna.parser.analysis.Variable;
-
 import java.util.List;
 import java.util.Objects;
 
 public class FunctionVarInfo {
 
-	private final List<Variable> params;
-	private final List<Variable> locals;
-	private final List<Variable.Ref> upvalues;
-	private final boolean vararg;
+  private final List<Variable> params;
+  private final List<Variable> locals;
+  private final List<Variable.Ref> upvalues;
+  private final boolean vararg;
 
-	public FunctionVarInfo(List<Variable> params, List<Variable> locals, List<Variable.Ref> upvalues, boolean vararg) {
-		this.params = Objects.requireNonNull(params);
-		this.locals = Objects.requireNonNull(locals);
-		this.upvalues = Objects.requireNonNull(upvalues);
-		this.vararg = vararg;
-	}
+  public FunctionVarInfo(List<Variable> params, List<Variable> locals, List<Variable.Ref> upvalues,
+      boolean vararg) {
+    this.params = Objects.requireNonNull(params);
+    this.locals = Objects.requireNonNull(locals);
+    this.upvalues = Objects.requireNonNull(upvalues);
+    this.vararg = vararg;
+  }
 
-	public List<Variable> params() {
-		return params;
-	}
+  public List<Variable> params() {
+    return params;
+  }
 
-	public List<Variable> locals() {
-		return locals;
-	}
+  public List<Variable> locals() {
+    return locals;
+  }
 
-	public List<Variable.Ref> upvalues() {
-		return upvalues;
-	}
+  public List<Variable.Ref> upvalues() {
+    return upvalues;
+  }
 
-	public boolean isVararg() {
-		return vararg;
-	}
+  public boolean isVararg() {
+    return vararg;
+  }
 
 }

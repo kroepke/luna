@@ -24,7 +24,9 @@ import org.scalatest.junit.JUnitRunner
 class DebugLibFragmentsRunSpec extends FragmentExecTestSuite {
 
   override def bundles = Seq(DebugLibFragments)
+
   override def expectations = Seq(DebugLibFragments)
+
   override def contexts = Seq(Debug, Full)
 
   override def steps = Seq(1, Int.MaxValue)

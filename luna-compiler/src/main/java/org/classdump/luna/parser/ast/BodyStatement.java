@@ -18,10 +18,10 @@ package org.classdump.luna.parser.ast;
 
 public abstract class BodyStatement extends Statement {
 
-	protected BodyStatement(Attributes attr) {
-		super(attr);
-	}
+  protected BodyStatement(Attributes attr) {
+    super(attr);
+  }
 
-	public abstract BodyStatement accept(Transformer tf);
+  public abstract BodyStatement accept(Transformer tf);
 
 }

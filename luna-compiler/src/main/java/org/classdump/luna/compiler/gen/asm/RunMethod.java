@@ -16,11 +16,42 @@
 
 package org.classdump.luna.compiler.gen.asm;
 
+import static org.objectweb.asm.Opcodes.AALOAD;
+import static org.objectweb.asm.Opcodes.AASTORE;
+import static org.objectweb.asm.Opcodes.ACC_FINAL;
+import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
+import static org.objectweb.asm.Opcodes.ACONST_NULL;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ANEWARRAY;
+import static org.objectweb.asm.Opcodes.ARETURN;
+import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.ATHROW;
+import static org.objectweb.asm.Opcodes.CHECKCAST;
+import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.F_APPEND;
+import static org.objectweb.asm.Opcodes.F_SAME;
+import static org.objectweb.asm.Opcodes.GETSTATIC;
+import static org.objectweb.asm.Opcodes.GOTO;
+import static org.objectweb.asm.Opcodes.IAND;
+import static org.objectweb.asm.Opcodes.IFNULL;
+import static org.objectweb.asm.Opcodes.ILOAD;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.ISTORE;
+import static org.objectweb.asm.Opcodes.ISUB;
+import static org.objectweb.asm.Opcodes.IUSHR;
+import static org.objectweb.asm.Opcodes.NEW;
+import static org.objectweb.asm.Opcodes.PUTSTATIC;
+import static org.objectweb.asm.Opcodes.RETURN;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import org.classdump.luna.compiler.gen.CodeSegmenter;
 import org.classdump.luna.compiler.gen.SegmentedCode;
 import org.classdump.luna.compiler.gen.asm.helpers.ASMUtils;
 import org.classdump.luna.compiler.ir.BasicBlock;
-import org.classdump.luna.compiler.gen.asm.ASMBytecodeEmitter;
 import org.classdump.luna.compiler.ir.Label;
 import org.classdump.luna.impl.DefaultSavedState;
 import org.classdump.luna.runtime.ExecutionContext;
@@ -29,694 +60,730 @@ import org.classdump.luna.runtime.Resumable;
 import org.classdump.luna.runtime.UnresolvedControlThrowable;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import static org.objectweb.asm.Opcodes.*;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.FrameNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LocalVariableNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TableSwitchInsnNode;
+import org.objectweb.asm.tree.TryCatchBlockNode;
+import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 class RunMethod {
 
-	public final int LV_CONTEXT = 1;
-	public final int LV_RESUME = 2;
-	public final int LV_VARARGS = 3;  // index of the varargs argument, if present
+  public static final int ST_SHIFT_SEGMENT = 24;
+  public static final int ST_SHIFT_LABELIDX = 16;
+  public final int LV_CONTEXT = 1;
+  public final int LV_RESUME = 2;
+  public final int LV_VARARGS = 3;  // index of the varargs argument, if present
+  private final ASMBytecodeEmitter context;
+  private final List<MethodNode> methodNodes;
+  private final boolean resumable;
 
-	public static final int ST_SHIFT_SEGMENT  = 24;
-	public static final int ST_SHIFT_LABELIDX = 16;
+  private final List<ClosureFieldInstance> closureFields;
+  private final List<ConstFieldInstance> constFields;
 
-	private final ASMBytecodeEmitter context;
-	private final List<MethodNode> methodNodes;
-	private final boolean resumable;
+  public RunMethod(ASMBytecodeEmitter context) {
+    this.context = Objects.requireNonNull(context);
 
-	private final List<ClosureFieldInstance> closureFields;
-	private final List<ConstFieldInstance> constFields;
+    final SegmentedCode segmentedCode = CodeSegmenter.segment(
+        context.fn.code(),
+        context.compilerSettings.nodeSizeLimit());
 
-	interface LabelResolver {
-		boolean isLocalLabel(Label l);
-		int labelStateIndex(Label l);
-	}
+    this.methodNodes = new ArrayList<>();
 
-	static int labelStateIdx(SegmentedCode.LabelEntry le) {
-		return (le.segmentIdx << ST_SHIFT_SEGMENT) | (le.idx << ST_SHIFT_LABELIDX);
-	}
+    this.closureFields = new ArrayList<>();
+    this.constFields = new ArrayList<>();
 
-	public RunMethod(ASMBytecodeEmitter context) {
-		this.context = Objects.requireNonNull(context);
+    if (segmentedCode.isSingleton()) {
+      // as before
+      BytecodeEmitVisitor visitor = new BytecodeEmitVisitor(
+          context, this, context.slots, context.types, closureFields, constFields, -1,
+          new LabelResolver() {
+            @Override
+            public boolean isLocalLabel(Label l) {
+              return true;
+            }
 
-		final SegmentedCode segmentedCode = CodeSegmenter.segment(
-				context.fn.code(),
-				context.compilerSettings.nodeSizeLimit());
+            @Override
+            public int labelStateIndex(Label l) {
+              throw new IllegalStateException();
+            }
+          });
 
-		this.methodNodes = new ArrayList<>();
+      this.methodNodes.add(emitSingletonRunMethod(visitor, segmentedCode.segments().get(0)));
+      this.resumable = visitor.isResumable();
+    } else {
+      // split up into multiple segments
 
-		this.closureFields = new ArrayList<>();
-		this.constFields = new ArrayList<>();
+      boolean resumable = false;
+      for (int i = 0; i < segmentedCode.segments().size(); i++) {
 
-		if (segmentedCode.isSingleton()) {
-			// as before
-			BytecodeEmitVisitor visitor = new BytecodeEmitVisitor(
-					context, this, context.slots, context.types, closureFields, constFields, -1,
-					new LabelResolver() {
-						@Override
-						public boolean isLocalLabel(Label l) {
-							return true;
-						}
+        final int thisSegmentIdx = i;
 
-						@Override
-						public int labelStateIndex(Label l) {
-							throw new IllegalStateException();
-						}
-					});
+        BytecodeEmitVisitor visitor = new BytecodeEmitVisitor(
+            context, this, context.slots, context.types, closureFields, constFields, i,
+            new LabelResolver() {
+              @Override
+              public boolean isLocalLabel(Label l) {
+                return segmentedCode.labelEntry(l).segmentIdx == thisSegmentIdx;
+              }
 
-			this.methodNodes.add(emitSingletonRunMethod(visitor, segmentedCode.segments().get(0)));
-			this.resumable = visitor.isResumable();
-		}
-		else {
-			// split up into multiple segments
+              @Override
+              public int labelStateIndex(Label l) {
+                return labelStateIdx(segmentedCode.labelEntry(l));
+              }
+            });
 
-			boolean resumable = false;
-			for (int i = 0; i < segmentedCode.segments().size(); i++) {
+        this.methodNodes
+            .add(emitSegmentedSubRunMethod(i, visitor, segmentedCode.segments().get(i)));
+        resumable |= visitor.isResumable();
+      }
 
-				final int thisSegmentIdx = i;
+      this.resumable = resumable;
 
-				BytecodeEmitVisitor visitor = new BytecodeEmitVisitor(
-						context, this, context.slots, context.types, closureFields, constFields, i,
-						new LabelResolver() {
-							@Override
-							public boolean isLocalLabel(Label l) {
-								return segmentedCode.labelEntry(l).segmentIdx == thisSegmentIdx;
-							}
-
-							@Override
-							public int labelStateIndex(Label l) {
-								return labelStateIdx(segmentedCode.labelEntry(l));
-							}
-						});
-
-				this.methodNodes.add(emitSegmentedSubRunMethod(i, visitor, segmentedCode.segments().get(i)));
-				resumable |= visitor.isResumable();
-			}
-
-			this.resumable = resumable;
-
-			this.methodNodes.add(emitSegmentedRunMethod(segmentedCode.segments().size()));
+      this.methodNodes.add(emitSegmentedRunMethod(segmentedCode.segments().size()));
 
 //			throw new UnsupportedOperationException();  // TODO
-		}
-	}
-
-	public int numOfRegisters() {
-		return context.slots.numSlots();
-	}
-
-	public int slotOffset() {
-		return context.isVararg() ? LV_VARARGS + 1 : LV_VARARGS;
-	}
-
-	public boolean isResumable() {
-		return resumable;
-	}
-
-	public String[] throwsExceptions() {
-		return new String[] { Type.getInternalName(ResolvedControlThrowable.class) };
-	}
-
-	public boolean usesSnapshotMethod() {
-		return isResumable();
-	}
-
-	private String snapshotMethodName() {
-		return "snapshot";
-	}
-
-	private Type snapshotMethodType() {
-		ArrayList<Type> args = new ArrayList<>();
-
-		args.add(Type.INT_TYPE);
-		if (context.isVararg()) {
-			args.add(ASMUtils.arrayTypeFor(Object.class));
-		}
-		for (int i = 0; i < numOfRegisters(); i++) {
-			args.add(Type.getType(Object.class));
-		}
-		return Type.getMethodType(context.savedStateClassType(), args.toArray(new Type[0]));
-	}
-
-	public MethodInsnNode snapshotMethodInvokeInsn() {
-		return new MethodInsnNode(
-				INVOKESPECIAL,
-				context.thisClassType().getInternalName(),
-				snapshotMethodName(),
-				snapshotMethodType().getDescriptor(),
-				false);
-	}
-
-	public MethodNode snapshotMethodNode() {
-		MethodNode node = new MethodNode(
-				ACC_PRIVATE,
-				snapshotMethodName(),
-				snapshotMethodType().getDescriptor(),
-				null,
-				null);
-
-		InsnList il = node.instructions;
-		LabelNode begin = new LabelNode();
-		LabelNode end = new LabelNode();
-
-		il.add(begin);
-
-		il.add(new TypeInsnNode(NEW, Type.getInternalName(DefaultSavedState.class)));
-		il.add(new InsnNode(DUP));
-
-		// resumption point
-		il.add(new VarInsnNode(ILOAD, 1));
-
-		// registers
-		int numRegs = numOfRegisters() + (context.isVararg() ? 1 : 0);
-		int regOffset = context.isVararg() ? 3 : 2;
-
-		il.add(ASMUtils.loadInt(numRegs));
-		il.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
-		{
-			for (int i = 0; i < numRegs; i++) {
-				il.add(new InsnNode(DUP));
-				il.add(ASMUtils.loadInt(i));
-				il.add(new VarInsnNode(ALOAD, 2 + i));
-				il.add(new InsnNode(AASTORE));
-			}
-		}
-
-		il.add(ASMUtils.ctor(
-				Type.getType(DefaultSavedState.class),
-				Type.INT_TYPE,
-				ASMUtils.arrayTypeFor(Object.class)));
-
-		il.add(new InsnNode(ARETURN));
-
-		il.add(end);
-
-		List<LocalVariableNode> locals = node.localVariables;
-
-		locals.add(new LocalVariableNode("this", context.thisClassType().getDescriptor(), null, begin, end, 0));
-		locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, begin, end, 1));
-		if (context.isVararg()) {
-			locals.add(new LocalVariableNode("varargs", ASMUtils.arrayTypeFor(Object.class).getDescriptor(), null, begin, end, 2));
-		}
-		for (int i = 0; i < numOfRegisters(); i++) {
-			locals.add(new LocalVariableNode("r_" + i, Type.getDescriptor(Object.class), null, begin, end, regOffset + i));
-		}
-
-		node.maxLocals = 2 + numOfRegisters();
-		node.maxStack = 4 + 3;  // 4 to get register array at top, +3 to add element to it
-
-		return node;
-	}
-
-	public String methodName() {
-		return "run";
-	}
-
-	private Type methodType(Type returnType) {
-		ArrayList<Type> args = new ArrayList<>();
-
-		args.add(Type.getType(ExecutionContext.class));
-		args.add(Type.INT_TYPE);
-		if (context.isVararg()) {
-			args.add(ASMUtils.arrayTypeFor(Object.class));
-		}
-		for (int i = 0; i < numOfRegisters(); i++) {
-			args.add(Type.getType(Object.class));
-		}
-		return Type.getMethodType(returnType, args.toArray(new Type[0]));
-	}
-
-	public Type methodType() {
-		return methodType(Type.VOID_TYPE);
-	}
-
-	private Type subMethodType() {
-		return methodType(context.savedStateClassType());
-	}
-
-	public AbstractInsnNode methodInvokeInsn() {
-		return new MethodInsnNode(
-				INVOKESPECIAL,
-				context.thisClassType().getInternalName(),
-				methodName(),
-				methodType().getDescriptor(),
-				false);
-	}
-
-	private InsnList errorState(LabelNode label) {
-		InsnList il = new InsnList();
-		il.add(label);
-		il.add(ASMUtils.frameSame());
-		il.add(new TypeInsnNode(NEW, Type.getInternalName(IllegalStateException.class)));
-		il.add(new InsnNode(DUP));
-		il.add(ASMUtils.ctor(IllegalStateException.class));
-		il.add(new InsnNode(ATHROW));
-		return il;
-	}
-
-	private InsnList dispatchTable(List<LabelNode> extLabels, List<LabelNode> resumptionLabels, LabelNode errorStateLabel) {
-		InsnList il = new InsnList();
-
-		assert (!extLabels.isEmpty());
-
-		ArrayList<LabelNode> labels = new ArrayList<>();
-		labels.addAll(extLabels);
-		labels.addAll(resumptionLabels);
-		LabelNode[] labelArray = labels.toArray(new LabelNode[labels.size()]);
-
-		int min = 1 - extLabels.size();
-		int max = resumptionLabels.size();
-
-		il.add(new VarInsnNode(ILOAD, LV_RESUME));
-		il.add(new TableSwitchInsnNode(min, max, errorStateLabel, labelArray));
-		return il;
-	}
-
-	InsnList createSnapshot() {
-		InsnList il = new InsnList();
-
-		il.add(new VarInsnNode(ALOAD, 0));  // this
-		il.add(new VarInsnNode(ALOAD, 0));
-		il.add(new VarInsnNode(ILOAD, LV_RESUME));
-		if (context.isVararg()) {
-			il.add(new VarInsnNode(ALOAD, LV_VARARGS));
-		}
-		for (int i = 0; i < numOfRegisters(); i++) {
-			il.add(new VarInsnNode(ALOAD, slotOffset() + i));
-		}
-		il.add(snapshotMethodInvokeInsn());
-
-		return il;
-	}
-
-	protected InsnList resumptionHandler(LabelNode label) {
-		InsnList il = new InsnList();
-
-		il.add(label);
-		il.add(ASMUtils.frameSame1(UnresolvedControlThrowable.class));
-
-		il.add(createSnapshot());
-
-		// register snapshot with the control exception
-		il.add(new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(UnresolvedControlThrowable.class),
-				"resolve",
-				Type.getMethodType(
-						Type.getType(ResolvedControlThrowable.class),
-						Type.getType(Resumable.class),
-						Type.getType(Object.class)).getDescriptor(),
-				false));
-
-		// rethrow
-		il.add(new InsnNode(ATHROW));
-
-		return il;
-	}
-
-	static class ClosureFieldInstance {
-
-		private final FieldNode fieldNode;
-		private final InsnList instantiateInsns;
-
-		public ClosureFieldInstance(FieldNode fieldNode, InsnList instantiateInsns) {
-			this.fieldNode = Objects.requireNonNull(fieldNode);
-			this.instantiateInsns = Objects.requireNonNull(instantiateInsns);
-		}
-
-		public FieldNode fieldNode() {
-			return fieldNode;
-		}
-
-		public InsnList instantiateInsns() {
-			return instantiateInsns;
-		}
-
-	}
-
-	public List<ClosureFieldInstance> closureFields() {
-		return closureFields;
-	}
-
-	abstract static class ConstFieldInstance {
-
-		private final Object value;
-		private final String fieldName;
-		private final Type ownerClassType;
-		private final Type fieldType;
-
-		public ConstFieldInstance(Object value, String fieldName, Type ownerClassType, Type fieldType) {
-			this.value = Objects.requireNonNull(value);
-			this.fieldName = Objects.requireNonNull(fieldName);
-			this.ownerClassType = Objects.requireNonNull(ownerClassType);
-			this.fieldType = Objects.requireNonNull(fieldType);
-		}
-
-		public Object value() {
-			return value;
-		}
-
-		public FieldNode fieldNode() {
-			return new FieldNode(
-					ACC_PRIVATE + ACC_STATIC + ACC_FINAL,
-					fieldName,
-					fieldType.getDescriptor(),
-					null,
-					null);
-		}
-
-		public abstract void doInstantiate(InsnList il);
-
-		public InsnList instantiateInsns() {
-			InsnList il = new InsnList();
-			doInstantiate(il);
-			il.add(new FieldInsnNode(
-					PUTSTATIC,
-					ownerClassType.getInternalName(),
-					fieldName,
-					fieldType.getDescriptor()));
-	        return il;
-		}
-
-		public InsnList accessInsns() {
-			InsnList il = new InsnList();
-			il.add(new FieldInsnNode(
-					GETSTATIC,
-					ownerClassType.getInternalName(),
-					fieldName,
-					fieldType.getDescriptor()));
-			return il;
-		}
-
-	}
-
-	public List<ConstFieldInstance> constFields() {
-		return constFields;
-	}
-
-	private List<LocalVariableNode> baseLocals(LabelNode l_begin, LabelNode l_end) {
-		List<LocalVariableNode> locals = new ArrayList<>();
-
-		locals.add(new LocalVariableNode("this", context.thisClassType().getDescriptor(), null, l_begin, l_end, 0));
-		locals.add(new LocalVariableNode("context", Type.getDescriptor(ExecutionContext.class), null, l_begin, l_end, LV_CONTEXT));
-		locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, l_begin, l_end, LV_RESUME));
-
-		if (context.isVararg()) {
-			locals.add(new LocalVariableNode(
-					"varargs",
-					ASMUtils.arrayTypeFor(Object.class).getDescriptor(),
-					null,
-					l_begin,
-					l_end,
-					LV_VARARGS
-					));
-		}
-
-		for (int i = 0; i < numOfRegisters(); i++) {
-			locals.add(new LocalVariableNode("s_" + i, Type.getDescriptor(Object.class), null, l_begin, l_end, slotOffset() + i));
-		}
-
-		return locals;
-	}
-
-	private void addLocals(MethodNode node, LabelNode l_begin, LabelNode l_end, BytecodeEmitVisitor visitor) {
-		List<LocalVariableNode> locals = node.localVariables;
-		locals.addAll(baseLocals(l_begin, l_end));
-		locals.addAll(visitor.locals());
-	}
-
-	private MethodNode emitRunMethod(String methodName, Type returnType, BytecodeEmitVisitor visitor, List<BasicBlock> blocks, boolean sub) {
-		MethodNode node = new MethodNode(
-				ACC_PRIVATE,
-				methodName,
-				methodType(returnType).getDescriptor(),
-				null,
-				throwsExceptions());
-
-		InsnList insns = node.instructions;
-
-		LabelNode l_begin = new LabelNode();
-		LabelNode l_end = new LabelNode();
-
-		visitor.visitBlocks(blocks);
-
-		InsnList prefix = new InsnList();
-		InsnList suffix = new InsnList();
-
-		final LabelNode l_head;
-		final List<LabelNode> els = new ArrayList<>();
-		if (sub) {
-			assert (!blocks.isEmpty());
-			for (int i = blocks.size() - 1; i >= 0; i--) {
-				BasicBlock blk = blocks.get(i);
-				LabelNode l = visitor.labels.get(blk.label());
-				assert (l != null);
-				els.add(l);
-			}
-			l_head = visitor.labels.get(blocks.get(0).label());
-		}
-		else {
-			l_head = new LabelNode();
-			els.add(l_head);
-		}
-
-		assert (l_head != null);
-
-		if (visitor.isResumable()) {
-			LabelNode l_error_state = new LabelNode();
-			LabelNode l_handler_begin = new LabelNode();
-
-			List<LabelNode> rls = visitor.resumptionLabels();
-
-			assert (!rls.isEmpty() || !els.isEmpty());
-
-			prefix.add(dispatchTable(els, rls, l_error_state));
-
-			final LabelNode l_entry = l_head;
-
-			if (!sub) {
-				prefix.add(l_entry);
-				prefix.add(ASMUtils.frameSame());
-			}
-
-			suffix.add(errorState(l_error_state));
-			suffix.add(resumptionHandler(l_handler_begin));
-
-			node.tryCatchBlocks.add(new TryCatchBlockNode(l_entry, l_error_state, l_handler_begin, Type.getInternalName(UnresolvedControlThrowable.class)));
-		}
-
-		insns.add(l_begin);
-		insns.add(prefix);
-		insns.add(visitor.instructions());
-		insns.add(suffix);
-		insns.add(l_end);
-
-		addLocals(node, l_begin, l_end, visitor);
-
-		return node;
-	}
-
-	private MethodNode emitSingletonRunMethod(BytecodeEmitVisitor visitor, List<BasicBlock> blocks) {
-		return emitRunMethod(methodName(), Type.VOID_TYPE, visitor, blocks, false);
-	}
-
-	private String subRunMethodName(int segmentIdx) {
-		return "run_" + segmentIdx;
-	}
-
-	private MethodNode emitSegmentedSubRunMethod(int segmentIdx, BytecodeEmitVisitor visitor, List<BasicBlock> blocks) {
-		return emitRunMethod(subRunMethodName(segmentIdx), context.savedStateClassType(), visitor, blocks, true);
-	}
-
-	private MethodNode emitSegmentedRunMethod(int numOfSegments) {
-		MethodNode node = new MethodNode(
-				ACC_PRIVATE,
-				methodName(),
-				methodType().getDescriptor(),
-				null,
-				throwsExceptions());
-
-		InsnList il = node.instructions;
-
-		int lvOffset = slotOffset() + numOfRegisters();
-
-		int lv_rpp        = lvOffset + 0;
-		int lv_methodIdx  = lvOffset + 1;
-		int lv_jmpIdx     = lvOffset + 2;
-		int lv_stateIdx   = lvOffset + 3;
-		int lv_savedState = lvOffset + 4;
-
-		LabelNode l_top = new LabelNode();
-		LabelNode l_ret = new LabelNode();
-		LabelNode l_end = new LabelNode();
-
-		LabelNode l_rpp = new LabelNode();
-		LabelNode l_methodIdx = new LabelNode();
-		LabelNode l_jmpIdx = new LabelNode();
-		LabelNode l_stateIdx = new LabelNode();
-		LabelNode l_savedState = new LabelNode();
-
-		il.add(l_top);
-		il.add(new FrameNode(F_SAME, 0, null, 0, null));
-
-		// rpp = rp & ((1 << ST_SHIFT_SEGMENT) - 1)
-		il.add(new VarInsnNode(ILOAD, LV_RESUME));
-		il.add(ASMUtils.loadInt((1 << ST_SHIFT_SEGMENT) - 1));
-		il.add(new InsnNode(IAND));
-		il.add(new VarInsnNode(ISTORE, lv_rpp));
-		il.add(l_rpp);
-		il.add(new FrameNode(F_APPEND, 1, new Object[] { Opcodes.INTEGER }, 0, null));
-
-		// methodIdx = rp >>> ST_SHIFT_SEGMENT
-		il.add(new VarInsnNode(ILOAD, LV_RESUME));
-		il.add(ASMUtils.loadInt(ST_SHIFT_SEGMENT));
-		il.add(new InsnNode(IUSHR));
-		il.add(new VarInsnNode(ISTORE, lv_methodIdx));
-		il.add(l_methodIdx);
-		il.add(new FrameNode(F_APPEND, 1, new Object[] { Opcodes.INTEGER }, 0, null));
-
-		// jmpIdx = rpp >>> ST_SHIFT_LABELIDX
-		il.add(new VarInsnNode(ILOAD, lv_rpp));
-		il.add(ASMUtils.loadInt(ST_SHIFT_LABELIDX));
-		il.add(new InsnNode(IUSHR));
-		il.add(new VarInsnNode(ISTORE, lv_jmpIdx));
-		il.add(l_jmpIdx);
-		il.add(new FrameNode(F_APPEND, 1, new Object[] { Opcodes.INTEGER }, 0, null));
-
-		// stateIdx = (rp & ((1 << ST_SHIFT_LABELIDX) - 1)) - jmpIdx
-		il.add(new VarInsnNode(ILOAD, LV_RESUME));
-		il.add(ASMUtils.loadInt((1 << ST_SHIFT_LABELIDX) - 1));
-		il.add(new InsnNode(IAND));
-		il.add(new VarInsnNode(ILOAD, lv_jmpIdx));
-		il.add(new InsnNode(ISUB));
-		il.add(new VarInsnNode(ISTORE, lv_stateIdx));
-		il.add(l_stateIdx);
-		il.add(new FrameNode(F_APPEND, 1, new Object[] { Opcodes.INTEGER }, 0, null));
-
-		// savedState = null
-		il.add(new InsnNode(ACONST_NULL));
-		il.add(new VarInsnNode(ASTORE, lv_savedState));
-		il.add(l_savedState);
-		il.add(new FrameNode(F_APPEND, 1, new Object[] { context.savedStateClassType().getInternalName() }, 0, null));
-
-		// switch on methodIdx
-
-		LabelNode l_after = new LabelNode();
-
-		LabelNode l_error = new LabelNode();
-		LabelNode[] l_invokes = new LabelNode[numOfSegments];
-		for (int i = 0; i < numOfSegments; i++) {
-			l_invokes[i] = new LabelNode();
-		}
-
-		il.add(new VarInsnNode(ILOAD, lv_methodIdx));
-		il.add(new TableSwitchInsnNode(0, numOfSegments - 1, l_error, l_invokes));
-
-		for (int i = 0; i < numOfSegments; i++) {
-			il.add(l_invokes[i]);
-			il.add(new FrameNode(F_SAME, 0, null, 0, null));
-			// push arguments to stack
-			il.add(new VarInsnNode(ALOAD, 0));
-			il.add(new VarInsnNode(ALOAD, LV_CONTEXT));
-			il.add(new VarInsnNode(ILOAD, lv_stateIdx));  // pass stateIdx to the sub-method
-			if (context.isVararg()) {
-				il.add(new VarInsnNode(ALOAD, LV_VARARGS));
-			}
-			for (int j = 0; j < numOfRegisters(); j++) {
-				il.add(new VarInsnNode(ALOAD, slotOffset() + j));
-			}
-
-			il.add(new MethodInsnNode(INVOKESPECIAL,
-					context.thisClassType().getInternalName(),
-					subRunMethodName(i),
-					subMethodType().getDescriptor(),
-					false));
-
-			il.add(new VarInsnNode(ASTORE, lv_savedState));
-			il.add(new JumpInsnNode(GOTO, l_after));
-		}
-
-		// error state
-		il.add(errorState(l_error));
-
-		il.add(l_after);
-		il.add(new FrameNode(F_SAME, 0, null, 0, null));
-
-		il.add(new VarInsnNode(ALOAD, lv_savedState));
-		il.add(new JumpInsnNode(IFNULL, l_ret));  // savedState == null ?
-
-		// continuing: savedState != null
-
-		// FIXME: taken from ResumeMethod -- beware of code duplication!
-
-		il.add(new VarInsnNode(ALOAD, lv_savedState));  // saved state
-		il.add(new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(DefaultSavedState.class),
-				"resumptionPoint",
-				Type.getMethodDescriptor(
-						Type.INT_TYPE),
-				false
-		));  // resumption point
-		il.add(new VarInsnNode(ISTORE, LV_RESUME));
-
-		// registers
-		if (context.isVararg() || numOfRegisters() > 0) {
-			il.add(new VarInsnNode(ALOAD, lv_savedState));
-			il.add(new MethodInsnNode(
-					INVOKEVIRTUAL,
-					Type.getInternalName(DefaultSavedState.class),
-					"registers",
-					Type.getMethodDescriptor(
-							ASMUtils.arrayTypeFor(Object.class)),
-					false
-			));
-
-			int numRegs = numOfRegisters() + (context.isVararg() ? 1 : 0);
-
-			for (int i = 0; i < numRegs; i++) {
-				if (i + 1 < numRegs) {
-					il.add(new InsnNode(DUP));
-				}
-				il.add(ASMUtils.loadInt(i));
-				il.add(new InsnNode(AALOAD));
-				if (i == 0 && context.isVararg()) {
-					il.add(new TypeInsnNode(CHECKCAST, ASMUtils.arrayTypeFor(Object.class).getInternalName()));
-				}
-				il.add(new VarInsnNode(ASTORE, LV_VARARGS + i));
-			}
-		}
-
-		// loop back to the beginning
-		il.add(new JumpInsnNode(GOTO, l_top));
-
-		// got a null, that's the end
-		il.add(l_ret);
-		il.add(new FrameNode(F_SAME, 0, null, 0, null));
-		il.add(new InsnNode(RETURN));
-
-		il.add(l_end);
-
-		// add local variables
-		node.localVariables.addAll(baseLocals(l_top, l_end));
-		node.localVariables.add(new LocalVariableNode("rpp", Type.INT_TYPE.getDescriptor(), null, l_rpp, l_ret, lv_rpp));
-		node.localVariables.add(new LocalVariableNode("methodIdx", Type.INT_TYPE.getDescriptor(), null, l_methodIdx, l_ret, lv_methodIdx));
-		node.localVariables.add(new LocalVariableNode("jmpIdx", Type.INT_TYPE.getDescriptor(), null, l_jmpIdx, l_ret, lv_jmpIdx));
-		node.localVariables.add(new LocalVariableNode("stateIdx", Type.INT_TYPE.getDescriptor(), null, l_stateIdx, l_ret, lv_stateIdx));
-		node.localVariables.add(new LocalVariableNode("savedState", context.savedStateClassType().getDescriptor(), null, l_savedState, l_ret, lv_savedState));
-
-
-		return node;
-	}
-
-	public List<MethodNode> methodNodes() {
-		return methodNodes;
-	}
+    }
+  }
+
+  static int labelStateIdx(SegmentedCode.LabelEntry le) {
+    return (le.segmentIdx << ST_SHIFT_SEGMENT) | (le.idx << ST_SHIFT_LABELIDX);
+  }
+
+  public int numOfRegisters() {
+    return context.slots.numSlots();
+  }
+
+  public int slotOffset() {
+    return context.isVararg() ? LV_VARARGS + 1 : LV_VARARGS;
+  }
+
+  public boolean isResumable() {
+    return resumable;
+  }
+
+  public String[] throwsExceptions() {
+    return new String[]{Type.getInternalName(ResolvedControlThrowable.class)};
+  }
+
+  public boolean usesSnapshotMethod() {
+    return isResumable();
+  }
+
+  private String snapshotMethodName() {
+    return "snapshot";
+  }
+
+  private Type snapshotMethodType() {
+    ArrayList<Type> args = new ArrayList<>();
+
+    args.add(Type.INT_TYPE);
+    if (context.isVararg()) {
+      args.add(ASMUtils.arrayTypeFor(Object.class));
+    }
+    for (int i = 0; i < numOfRegisters(); i++) {
+      args.add(Type.getType(Object.class));
+    }
+    return Type.getMethodType(context.savedStateClassType(), args.toArray(new Type[0]));
+  }
+
+  public MethodInsnNode snapshotMethodInvokeInsn() {
+    return new MethodInsnNode(
+        INVOKESPECIAL,
+        context.thisClassType().getInternalName(),
+        snapshotMethodName(),
+        snapshotMethodType().getDescriptor(),
+        false);
+  }
+
+  public MethodNode snapshotMethodNode() {
+    MethodNode node = new MethodNode(
+        ACC_PRIVATE,
+        snapshotMethodName(),
+        snapshotMethodType().getDescriptor(),
+        null,
+        null);
+
+    InsnList il = node.instructions;
+    LabelNode begin = new LabelNode();
+    LabelNode end = new LabelNode();
+
+    il.add(begin);
+
+    il.add(new TypeInsnNode(NEW, Type.getInternalName(DefaultSavedState.class)));
+    il.add(new InsnNode(DUP));
+
+    // resumption point
+    il.add(new VarInsnNode(ILOAD, 1));
+
+    // registers
+    int numRegs = numOfRegisters() + (context.isVararg() ? 1 : 0);
+    int regOffset = context.isVararg() ? 3 : 2;
+
+    il.add(ASMUtils.loadInt(numRegs));
+    il.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
+    {
+      for (int i = 0; i < numRegs; i++) {
+        il.add(new InsnNode(DUP));
+        il.add(ASMUtils.loadInt(i));
+        il.add(new VarInsnNode(ALOAD, 2 + i));
+        il.add(new InsnNode(AASTORE));
+      }
+    }
+
+    il.add(ASMUtils.ctor(
+        Type.getType(DefaultSavedState.class),
+        Type.INT_TYPE,
+        ASMUtils.arrayTypeFor(Object.class)));
+
+    il.add(new InsnNode(ARETURN));
+
+    il.add(end);
+
+    List<LocalVariableNode> locals = node.localVariables;
+
+    locals.add(
+        new LocalVariableNode("this", context.thisClassType().getDescriptor(), null, begin, end,
+            0));
+    locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, begin, end, 1));
+    if (context.isVararg()) {
+      locals.add(
+          new LocalVariableNode("varargs", ASMUtils.arrayTypeFor(Object.class).getDescriptor(),
+              null, begin, end, 2));
+    }
+    for (int i = 0; i < numOfRegisters(); i++) {
+      locals.add(new LocalVariableNode("r_" + i, Type.getDescriptor(Object.class), null, begin, end,
+          regOffset + i));
+    }
+
+    node.maxLocals = 2 + numOfRegisters();
+    node.maxStack = 4 + 3;  // 4 to get register array at top, +3 to add element to it
+
+    return node;
+  }
+
+  public String methodName() {
+    return "run";
+  }
+
+  private Type methodType(Type returnType) {
+    ArrayList<Type> args = new ArrayList<>();
+
+    args.add(Type.getType(ExecutionContext.class));
+    args.add(Type.INT_TYPE);
+    if (context.isVararg()) {
+      args.add(ASMUtils.arrayTypeFor(Object.class));
+    }
+    for (int i = 0; i < numOfRegisters(); i++) {
+      args.add(Type.getType(Object.class));
+    }
+    return Type.getMethodType(returnType, args.toArray(new Type[0]));
+  }
+
+  public Type methodType() {
+    return methodType(Type.VOID_TYPE);
+  }
+
+  private Type subMethodType() {
+    return methodType(context.savedStateClassType());
+  }
+
+  public AbstractInsnNode methodInvokeInsn() {
+    return new MethodInsnNode(
+        INVOKESPECIAL,
+        context.thisClassType().getInternalName(),
+        methodName(),
+        methodType().getDescriptor(),
+        false);
+  }
+
+  private InsnList errorState(LabelNode label) {
+    InsnList il = new InsnList();
+    il.add(label);
+    il.add(ASMUtils.frameSame());
+    il.add(new TypeInsnNode(NEW, Type.getInternalName(IllegalStateException.class)));
+    il.add(new InsnNode(DUP));
+    il.add(ASMUtils.ctor(IllegalStateException.class));
+    il.add(new InsnNode(ATHROW));
+    return il;
+  }
+
+  private InsnList dispatchTable(List<LabelNode> extLabels, List<LabelNode> resumptionLabels,
+      LabelNode errorStateLabel) {
+    InsnList il = new InsnList();
+
+    assert (!extLabels.isEmpty());
+
+    ArrayList<LabelNode> labels = new ArrayList<>();
+    labels.addAll(extLabels);
+    labels.addAll(resumptionLabels);
+    LabelNode[] labelArray = labels.toArray(new LabelNode[labels.size()]);
+
+    int min = 1 - extLabels.size();
+    int max = resumptionLabels.size();
+
+    il.add(new VarInsnNode(ILOAD, LV_RESUME));
+    il.add(new TableSwitchInsnNode(min, max, errorStateLabel, labelArray));
+    return il;
+  }
+
+  InsnList createSnapshot() {
+    InsnList il = new InsnList();
+
+    il.add(new VarInsnNode(ALOAD, 0));  // this
+    il.add(new VarInsnNode(ALOAD, 0));
+    il.add(new VarInsnNode(ILOAD, LV_RESUME));
+    if (context.isVararg()) {
+      il.add(new VarInsnNode(ALOAD, LV_VARARGS));
+    }
+    for (int i = 0; i < numOfRegisters(); i++) {
+      il.add(new VarInsnNode(ALOAD, slotOffset() + i));
+    }
+    il.add(snapshotMethodInvokeInsn());
+
+    return il;
+  }
+
+  protected InsnList resumptionHandler(LabelNode label) {
+    InsnList il = new InsnList();
+
+    il.add(label);
+    il.add(ASMUtils.frameSame1(UnresolvedControlThrowable.class));
+
+    il.add(createSnapshot());
+
+    // register snapshot with the control exception
+    il.add(new MethodInsnNode(
+        INVOKEVIRTUAL,
+        Type.getInternalName(UnresolvedControlThrowable.class),
+        "resolve",
+        Type.getMethodType(
+            Type.getType(ResolvedControlThrowable.class),
+            Type.getType(Resumable.class),
+            Type.getType(Object.class)).getDescriptor(),
+        false));
+
+    // rethrow
+    il.add(new InsnNode(ATHROW));
+
+    return il;
+  }
+
+  public List<ClosureFieldInstance> closureFields() {
+    return closureFields;
+  }
+
+  public List<ConstFieldInstance> constFields() {
+    return constFields;
+  }
+
+  private List<LocalVariableNode> baseLocals(LabelNode l_begin, LabelNode l_end) {
+    List<LocalVariableNode> locals = new ArrayList<>();
+
+    locals.add(
+        new LocalVariableNode("this", context.thisClassType().getDescriptor(), null, l_begin, l_end,
+            0));
+    locals.add(
+        new LocalVariableNode("context", Type.getDescriptor(ExecutionContext.class), null, l_begin,
+            l_end, LV_CONTEXT));
+    locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, l_begin, l_end,
+        LV_RESUME));
+
+    if (context.isVararg()) {
+      locals.add(new LocalVariableNode(
+          "varargs",
+          ASMUtils.arrayTypeFor(Object.class).getDescriptor(),
+          null,
+          l_begin,
+          l_end,
+          LV_VARARGS
+      ));
+    }
+
+    for (int i = 0; i < numOfRegisters(); i++) {
+      locals.add(
+          new LocalVariableNode("s_" + i, Type.getDescriptor(Object.class), null, l_begin, l_end,
+              slotOffset() + i));
+    }
+
+    return locals;
+  }
+
+  private void addLocals(MethodNode node, LabelNode l_begin, LabelNode l_end,
+      BytecodeEmitVisitor visitor) {
+    List<LocalVariableNode> locals = node.localVariables;
+    locals.addAll(baseLocals(l_begin, l_end));
+    locals.addAll(visitor.locals());
+  }
+
+  private MethodNode emitRunMethod(String methodName, Type returnType, BytecodeEmitVisitor visitor,
+      List<BasicBlock> blocks, boolean sub) {
+    MethodNode node = new MethodNode(
+        ACC_PRIVATE,
+        methodName,
+        methodType(returnType).getDescriptor(),
+        null,
+        throwsExceptions());
+
+    InsnList insns = node.instructions;
+
+    LabelNode l_begin = new LabelNode();
+    LabelNode l_end = new LabelNode();
+
+    visitor.visitBlocks(blocks);
+
+    InsnList prefix = new InsnList();
+    InsnList suffix = new InsnList();
+
+    final LabelNode l_head;
+    final List<LabelNode> els = new ArrayList<>();
+    if (sub) {
+      assert (!blocks.isEmpty());
+      for (int i = blocks.size() - 1; i >= 0; i--) {
+        BasicBlock blk = blocks.get(i);
+        LabelNode l = visitor.labels.get(blk.label());
+        assert (l != null);
+        els.add(l);
+      }
+      l_head = visitor.labels.get(blocks.get(0).label());
+    } else {
+      l_head = new LabelNode();
+      els.add(l_head);
+    }
+
+    assert (l_head != null);
+
+    if (visitor.isResumable()) {
+      LabelNode l_error_state = new LabelNode();
+      LabelNode l_handler_begin = new LabelNode();
+
+      List<LabelNode> rls = visitor.resumptionLabels();
+
+      assert (!rls.isEmpty() || !els.isEmpty());
+
+      prefix.add(dispatchTable(els, rls, l_error_state));
+
+      final LabelNode l_entry = l_head;
+
+      if (!sub) {
+        prefix.add(l_entry);
+        prefix.add(ASMUtils.frameSame());
+      }
+
+      suffix.add(errorState(l_error_state));
+      suffix.add(resumptionHandler(l_handler_begin));
+
+      node.tryCatchBlocks.add(new TryCatchBlockNode(l_entry, l_error_state, l_handler_begin,
+          Type.getInternalName(UnresolvedControlThrowable.class)));
+    }
+
+    insns.add(l_begin);
+    insns.add(prefix);
+    insns.add(visitor.instructions());
+    insns.add(suffix);
+    insns.add(l_end);
+
+    addLocals(node, l_begin, l_end, visitor);
+
+    return node;
+  }
+
+  private MethodNode emitSingletonRunMethod(BytecodeEmitVisitor visitor, List<BasicBlock> blocks) {
+    return emitRunMethod(methodName(), Type.VOID_TYPE, visitor, blocks, false);
+  }
+
+  private String subRunMethodName(int segmentIdx) {
+    return "run_" + segmentIdx;
+  }
+
+  private MethodNode emitSegmentedSubRunMethod(int segmentIdx, BytecodeEmitVisitor visitor,
+      List<BasicBlock> blocks) {
+    return emitRunMethod(subRunMethodName(segmentIdx), context.savedStateClassType(), visitor,
+        blocks, true);
+  }
+
+  private MethodNode emitSegmentedRunMethod(int numOfSegments) {
+    MethodNode node = new MethodNode(
+        ACC_PRIVATE,
+        methodName(),
+        methodType().getDescriptor(),
+        null,
+        throwsExceptions());
+
+    InsnList il = node.instructions;
+
+    int lvOffset = slotOffset() + numOfRegisters();
+
+    int lv_rpp = lvOffset + 0;
+    int lv_methodIdx = lvOffset + 1;
+    int lv_jmpIdx = lvOffset + 2;
+    int lv_stateIdx = lvOffset + 3;
+    int lv_savedState = lvOffset + 4;
+
+    LabelNode l_top = new LabelNode();
+    LabelNode l_ret = new LabelNode();
+    LabelNode l_end = new LabelNode();
+
+    LabelNode l_rpp = new LabelNode();
+    LabelNode l_methodIdx = new LabelNode();
+    LabelNode l_jmpIdx = new LabelNode();
+    LabelNode l_stateIdx = new LabelNode();
+    LabelNode l_savedState = new LabelNode();
+
+    il.add(l_top);
+    il.add(new FrameNode(F_SAME, 0, null, 0, null));
+
+    // rpp = rp & ((1 << ST_SHIFT_SEGMENT) - 1)
+    il.add(new VarInsnNode(ILOAD, LV_RESUME));
+    il.add(ASMUtils.loadInt((1 << ST_SHIFT_SEGMENT) - 1));
+    il.add(new InsnNode(IAND));
+    il.add(new VarInsnNode(ISTORE, lv_rpp));
+    il.add(l_rpp);
+    il.add(new FrameNode(F_APPEND, 1, new Object[]{Opcodes.INTEGER}, 0, null));
+
+    // methodIdx = rp >>> ST_SHIFT_SEGMENT
+    il.add(new VarInsnNode(ILOAD, LV_RESUME));
+    il.add(ASMUtils.loadInt(ST_SHIFT_SEGMENT));
+    il.add(new InsnNode(IUSHR));
+    il.add(new VarInsnNode(ISTORE, lv_methodIdx));
+    il.add(l_methodIdx);
+    il.add(new FrameNode(F_APPEND, 1, new Object[]{Opcodes.INTEGER}, 0, null));
+
+    // jmpIdx = rpp >>> ST_SHIFT_LABELIDX
+    il.add(new VarInsnNode(ILOAD, lv_rpp));
+    il.add(ASMUtils.loadInt(ST_SHIFT_LABELIDX));
+    il.add(new InsnNode(IUSHR));
+    il.add(new VarInsnNode(ISTORE, lv_jmpIdx));
+    il.add(l_jmpIdx);
+    il.add(new FrameNode(F_APPEND, 1, new Object[]{Opcodes.INTEGER}, 0, null));
+
+    // stateIdx = (rp & ((1 << ST_SHIFT_LABELIDX) - 1)) - jmpIdx
+    il.add(new VarInsnNode(ILOAD, LV_RESUME));
+    il.add(ASMUtils.loadInt((1 << ST_SHIFT_LABELIDX) - 1));
+    il.add(new InsnNode(IAND));
+    il.add(new VarInsnNode(ILOAD, lv_jmpIdx));
+    il.add(new InsnNode(ISUB));
+    il.add(new VarInsnNode(ISTORE, lv_stateIdx));
+    il.add(l_stateIdx);
+    il.add(new FrameNode(F_APPEND, 1, new Object[]{Opcodes.INTEGER}, 0, null));
+
+    // savedState = null
+    il.add(new InsnNode(ACONST_NULL));
+    il.add(new VarInsnNode(ASTORE, lv_savedState));
+    il.add(l_savedState);
+    il.add(
+        new FrameNode(F_APPEND, 1, new Object[]{context.savedStateClassType().getInternalName()}, 0,
+            null));
+
+    // switch on methodIdx
+
+    LabelNode l_after = new LabelNode();
+
+    LabelNode l_error = new LabelNode();
+    LabelNode[] l_invokes = new LabelNode[numOfSegments];
+    for (int i = 0; i < numOfSegments; i++) {
+      l_invokes[i] = new LabelNode();
+    }
+
+    il.add(new VarInsnNode(ILOAD, lv_methodIdx));
+    il.add(new TableSwitchInsnNode(0, numOfSegments - 1, l_error, l_invokes));
+
+    for (int i = 0; i < numOfSegments; i++) {
+      il.add(l_invokes[i]);
+      il.add(new FrameNode(F_SAME, 0, null, 0, null));
+      // push arguments to stack
+      il.add(new VarInsnNode(ALOAD, 0));
+      il.add(new VarInsnNode(ALOAD, LV_CONTEXT));
+      il.add(new VarInsnNode(ILOAD, lv_stateIdx));  // pass stateIdx to the sub-method
+      if (context.isVararg()) {
+        il.add(new VarInsnNode(ALOAD, LV_VARARGS));
+      }
+      for (int j = 0; j < numOfRegisters(); j++) {
+        il.add(new VarInsnNode(ALOAD, slotOffset() + j));
+      }
+
+      il.add(new MethodInsnNode(INVOKESPECIAL,
+          context.thisClassType().getInternalName(),
+          subRunMethodName(i),
+          subMethodType().getDescriptor(),
+          false));
+
+      il.add(new VarInsnNode(ASTORE, lv_savedState));
+      il.add(new JumpInsnNode(GOTO, l_after));
+    }
+
+    // error state
+    il.add(errorState(l_error));
+
+    il.add(l_after);
+    il.add(new FrameNode(F_SAME, 0, null, 0, null));
+
+    il.add(new VarInsnNode(ALOAD, lv_savedState));
+    il.add(new JumpInsnNode(IFNULL, l_ret));  // savedState == null ?
+
+    // continuing: savedState != null
+
+    // FIXME: taken from ResumeMethod -- beware of code duplication!
+
+    il.add(new VarInsnNode(ALOAD, lv_savedState));  // saved state
+    il.add(new MethodInsnNode(
+        INVOKEVIRTUAL,
+        Type.getInternalName(DefaultSavedState.class),
+        "resumptionPoint",
+        Type.getMethodDescriptor(
+            Type.INT_TYPE),
+        false
+    ));  // resumption point
+    il.add(new VarInsnNode(ISTORE, LV_RESUME));
+
+    // registers
+    if (context.isVararg() || numOfRegisters() > 0) {
+      il.add(new VarInsnNode(ALOAD, lv_savedState));
+      il.add(new MethodInsnNode(
+          INVOKEVIRTUAL,
+          Type.getInternalName(DefaultSavedState.class),
+          "registers",
+          Type.getMethodDescriptor(
+              ASMUtils.arrayTypeFor(Object.class)),
+          false
+      ));
+
+      int numRegs = numOfRegisters() + (context.isVararg() ? 1 : 0);
+
+      for (int i = 0; i < numRegs; i++) {
+        if (i + 1 < numRegs) {
+          il.add(new InsnNode(DUP));
+        }
+        il.add(ASMUtils.loadInt(i));
+        il.add(new InsnNode(AALOAD));
+        if (i == 0 && context.isVararg()) {
+          il.add(
+              new TypeInsnNode(CHECKCAST, ASMUtils.arrayTypeFor(Object.class).getInternalName()));
+        }
+        il.add(new VarInsnNode(ASTORE, LV_VARARGS + i));
+      }
+    }
+
+    // loop back to the beginning
+    il.add(new JumpInsnNode(GOTO, l_top));
+
+    // got a null, that's the end
+    il.add(l_ret);
+    il.add(new FrameNode(F_SAME, 0, null, 0, null));
+    il.add(new InsnNode(RETURN));
+
+    il.add(l_end);
+
+    // add local variables
+    node.localVariables.addAll(baseLocals(l_top, l_end));
+    node.localVariables.add(
+        new LocalVariableNode("rpp", Type.INT_TYPE.getDescriptor(), null, l_rpp, l_ret, lv_rpp));
+    node.localVariables.add(
+        new LocalVariableNode("methodIdx", Type.INT_TYPE.getDescriptor(), null, l_methodIdx, l_ret,
+            lv_methodIdx));
+    node.localVariables.add(
+        new LocalVariableNode("jmpIdx", Type.INT_TYPE.getDescriptor(), null, l_jmpIdx, l_ret,
+            lv_jmpIdx));
+    node.localVariables.add(
+        new LocalVariableNode("stateIdx", Type.INT_TYPE.getDescriptor(), null, l_stateIdx, l_ret,
+            lv_stateIdx));
+    node.localVariables.add(
+        new LocalVariableNode("savedState", context.savedStateClassType().getDescriptor(), null,
+            l_savedState, l_ret, lv_savedState));
+
+    return node;
+  }
+
+  public List<MethodNode> methodNodes() {
+    return methodNodes;
+  }
+
+  interface LabelResolver {
+
+    boolean isLocalLabel(Label l);
+
+    int labelStateIndex(Label l);
+  }
+
+  static class ClosureFieldInstance {
+
+    private final FieldNode fieldNode;
+    private final InsnList instantiateInsns;
+
+    public ClosureFieldInstance(FieldNode fieldNode, InsnList instantiateInsns) {
+      this.fieldNode = Objects.requireNonNull(fieldNode);
+      this.instantiateInsns = Objects.requireNonNull(instantiateInsns);
+    }
+
+    public FieldNode fieldNode() {
+      return fieldNode;
+    }
+
+    public InsnList instantiateInsns() {
+      return instantiateInsns;
+    }
+
+  }
+
+  abstract static class ConstFieldInstance {
+
+    private final Object value;
+    private final String fieldName;
+    private final Type ownerClassType;
+    private final Type fieldType;
+
+    public ConstFieldInstance(Object value, String fieldName, Type ownerClassType, Type fieldType) {
+      this.value = Objects.requireNonNull(value);
+      this.fieldName = Objects.requireNonNull(fieldName);
+      this.ownerClassType = Objects.requireNonNull(ownerClassType);
+      this.fieldType = Objects.requireNonNull(fieldType);
+    }
+
+    public Object value() {
+      return value;
+    }
+
+    public FieldNode fieldNode() {
+      return new FieldNode(
+          ACC_PRIVATE + ACC_STATIC + ACC_FINAL,
+          fieldName,
+          fieldType.getDescriptor(),
+          null,
+          null);
+    }
+
+    public abstract void doInstantiate(InsnList il);
+
+    public InsnList instantiateInsns() {
+      InsnList il = new InsnList();
+      doInstantiate(il);
+      il.add(new FieldInsnNode(
+          PUTSTATIC,
+          ownerClassType.getInternalName(),
+          fieldName,
+          fieldType.getDescriptor()));
+      return il;
+    }
+
+    public InsnList accessInsns() {
+      InsnList il = new InsnList();
+      il.add(new FieldInsnNode(
+          GETSTATIC,
+          ownerClassType.getInternalName(),
+          fieldName,
+          fieldType.getDescriptor()));
+      return il;
+    }
+
+  }
 
 }

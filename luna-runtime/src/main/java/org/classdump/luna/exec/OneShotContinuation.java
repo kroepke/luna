@@ -16,21 +16,19 @@
 
 package org.classdump.luna.exec;
 
-import org.classdump.luna.exec.Continuation;
-
 /**
  * A one-shot continuation, i.e., a continuation that may be resumed at most once.
  */
 public interface OneShotContinuation extends Continuation {
 
-	/**
-	 * Returns {@code true} if this continuation is current, i.e., can be resumed.
-	 *
-	 * <p>In other words, returns {@code false} if an attempt to resume the continuation
-	 * would throw a {@link InvalidContinuationException}.</p>
-	 *
-	 * @return  {@code true} if this continuation is valid, {@code false} otherwise
-	 */
-	boolean isCurrent();
+  /**
+   * Returns {@code true} if this continuation is current, i.e., can be resumed.
+   *
+   * <p>In other words, returns {@code false} if an attempt to resume the continuation
+   * would throw a {@link InvalidContinuationException}.</p>
+   *
+   * @return {@code true} if this continuation is valid, {@code false} otherwise
+   */
+  boolean isCurrent();
 
 }

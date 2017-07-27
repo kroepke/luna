@@ -25,21 +25,20 @@ import org.classdump.luna.runtime.LuaFunction;
  */
 public interface LoaderProvider {
 
-	/**
-	 * Returns the name of the library provided by this provider.
-	 *
-	 * @return  the name of the library
-	 */
-	String name();
+  /**
+   * Returns the name of the library provided by this provider.
+   *
+   * @return the name of the library
+   */
+  String name();
 
-	/**
-	 * Returns a new instance of the loader function for this library.
-	 *
-	 * @param runtimeEnvironment  the runtime environment to be used by the provider
-	 * @param env  the global {@code _ENV} table used to load the library
-	 *
-	 * @return  a new instance of the library loader
-	 */
-	LuaFunction newLoader(RuntimeEnvironment runtimeEnvironment, Table env);
+  /**
+   * Returns a new instance of the loader function for this library.
+   *
+   * @param runtimeEnvironment the runtime environment to be used by the provider
+   * @param env the global {@code _ENV} table used to load the library
+   * @return a new instance of the library loader
+   */
+  LuaFunction newLoader(RuntimeEnvironment runtimeEnvironment, Table env);
 
 }

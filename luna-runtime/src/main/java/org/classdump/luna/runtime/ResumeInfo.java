@@ -16,42 +16,38 @@
 
 package org.classdump.luna.runtime;
 
-import org.classdump.luna.Conversions;
-import org.classdump.luna.runtime.ResolvedControlThrowable;
-
 import java.util.Objects;
+import org.classdump.luna.Conversions;
 
 class ResumeInfo {
 
-	public final Resumable resumable;
-	public final Object savedState;
+  public final Resumable resumable;
+  public final Object savedState;
 
-	public ResumeInfo(Resumable resumable, Object savedState) {
-		this.resumable = Objects.requireNonNull(resumable);
-		this.savedState = savedState;
-	}
+  public ResumeInfo(Resumable resumable, Object savedState) {
+    this.resumable = Objects.requireNonNull(resumable);
+    this.savedState = savedState;
+  }
 
-	public boolean resume(ExecutionContext context, Throwable error) throws ResolvedControlThrowable {
-		if (error == null) {
-			// no errors
-			resumable.resume(context, savedState);
-			Dispatch.evaluateTailCalls(context);
-			return true;
-		}
-		else {
-			// there is an error to be handled
-			if (resumable instanceof ProtectedResumable) {
-				// top is protected, can handle the error
-				ProtectedResumable pr = (ProtectedResumable) resumable;
-				pr.resumeError(context, savedState, Conversions.toErrorObject(error));
-				Dispatch.evaluateTailCalls(context);
-				return true;
-			}
-			else {
-				// top is not protected, continue unwinding the stack
-				return false;
-			}
-		}
-	}
+  public boolean resume(ExecutionContext context, Throwable error) throws ResolvedControlThrowable {
+    if (error == null) {
+      // no errors
+      resumable.resume(context, savedState);
+      Dispatch.evaluateTailCalls(context);
+      return true;
+    } else {
+      // there is an error to be handled
+      if (resumable instanceof ProtectedResumable) {
+        // top is protected, can handle the error
+        ProtectedResumable pr = (ProtectedResumable) resumable;
+        pr.resumeError(context, savedState, Conversions.toErrorObject(error));
+        Dispatch.evaluateTailCalls(context);
+        return true;
+      } else {
+        // top is not protected, continue unwinding the stack
+        return false;
+      }
+    }
+  }
 
 }

@@ -26,35 +26,37 @@ import org.classdump.luna.runtime.ResolvedControlThrowable;
  */
 public class UnimplementedFunction extends AbstractFunction0 {
 
-	private final String name;
+  private final String name;
 
-	/**
-	 * Constructs a new instance of {@code UnimplementedFunction} with the given name
-	 * for error reporting. {@code name} may be {@code null}, in which case no name will
-	 * be included in error messages.
-	 *
-	 * @param name  function name for error reporting, may be {@code null}
-	 */
-	public UnimplementedFunction(String name) {
-		this.name = name;
-	}
+  /**
+   * Constructs a new instance of {@code UnimplementedFunction} with the given name
+   * for error reporting. {@code name} may be {@code null}, in which case no name will
+   * be included in error messages.
+   *
+   * @param name function name for error reporting, may be {@code null}
+   */
+  public UnimplementedFunction(String name) {
+    this.name = name;
+  }
 
-	/**
-	 * Constructs a new instance of {@code UnimplementedFunction} without a name for error
-	 * reporting. Equivalent to {@link #UnimplementedFunction(String) UnimplementedFunction(null)}.
-	 */
-	public UnimplementedFunction() {
-		this(null);
-	}
+  /**
+   * Constructs a new instance of {@code UnimplementedFunction} without a name for error
+   * reporting. Equivalent to {@link #UnimplementedFunction(String) UnimplementedFunction(null)}.
+   */
+  public UnimplementedFunction() {
+    this(null);
+  }
 
-	@Override
-	public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
-		throw new UnsupportedOperationException("function not implemented" + (name != null ? ": " + name : ""));
-	}
+  @Override
+  public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
+    throw new UnsupportedOperationException(
+        "function not implemented" + (name != null ? ": " + name : ""));
+  }
 
-	@Override
-	public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-		throw new NonsuspendableFunctionException(this.getClass());
-	}
+  @Override
+  public void resume(ExecutionContext context, Object suspendedState)
+      throws ResolvedControlThrowable {
+    throw new NonsuspendableFunctionException(this.getClass());
+  }
 
 }

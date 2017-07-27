@@ -18,6 +18,6 @@ package org.classdump.luna.compiler.gen;
 
 public abstract class BytecodeEmitter {
 
-	public abstract CompiledClass emit();
+  public abstract CompiledClass emit();
 
 }

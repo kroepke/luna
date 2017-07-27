@@ -16,38 +16,36 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.IRVisitor;
-
 import java.util.Objects;
 
 public class TabNew extends BodyNode {
 
-	private final Val dest;
-	private final int array;
-	private final int hash;
-	// TODO: dynamic size of array part when multi-vals are used
+  private final Val dest;
+  private final int array;
+  private final int hash;
+  // TODO: dynamic size of array part when multi-vals are used
 
-	public TabNew(Val dest, int array, int hash) {
-		this.dest = Objects.requireNonNull(dest);
-		this.array = array;
-		this.hash = hash;
-	}
+  public TabNew(Val dest, int array, int hash) {
+    this.dest = Objects.requireNonNull(dest);
+    this.array = array;
+    this.hash = hash;
+  }
 
-	public Val dest() {
-		return dest;
-	}
+  public Val dest() {
+    return dest;
+  }
 
-	public int array() {
-		return array;
-	}
+  public int array() {
+    return array;
+  }
 
-	public int hash() {
-		return hash;
-	}
+  public int hash() {
+    return hash;
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

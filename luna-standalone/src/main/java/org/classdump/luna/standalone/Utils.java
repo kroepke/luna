@@ -16,8 +16,6 @@
 
 package org.classdump.luna.standalone;
 
-import org.classdump.luna.standalone.Constants;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,67 +28,64 @@ import java.util.Objects;
 
 final class Utils {
 
-	private Utils() {
-		// not to be instantiated or extended
-	}
+  private Utils() {
+    // not to be instantiated or extended
+  }
 
-	public static String bytesToString(byte[] bytes) {
-		// Lua likes clean 8-bit input; FIXME: is ISO-8859-1 okay?
-		Charset charset = Charset.forName("ISO-8859-1");
-		return new String(bytes, charset);
-	}
+  public static String bytesToString(byte[] bytes) {
+    // Lua likes clean 8-bit input; FIXME: is ISO-8859-1 okay?
+    Charset charset = Charset.forName("ISO-8859-1");
+    return new String(bytes, charset);
+  }
 
-	public static String readFile(String fileName) throws IOException {
-		Objects.requireNonNull(fileName);
-		return bytesToString(Files.readAllBytes(Paths.get(fileName)));
-	}
+  public static String readFile(String fileName) throws IOException {
+    Objects.requireNonNull(fileName);
+    return bytesToString(Files.readAllBytes(Paths.get(fileName)));
+  }
 
-	public static String readInputStream(InputStream stream) throws IOException {
-		// FIXME: this ia a quick-and-dirty hack
+  public static String readInputStream(InputStream stream) throws IOException {
+    // FIXME: this ia a quick-and-dirty hack
 
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-		int b;
-		do {
-			b = stream.read();
-			if (b != -1) {
-				baos.write(b);
-			}
-		} while (b != -1);
+    int b;
+    do {
+      b = stream.read();
+      if (b != -1) {
+        baos.write(b);
+      }
+    } while (b != -1);
 
-		return bytesToString(baos.toByteArray());
-	}
+    return bytesToString(baos.toByteArray());
+  }
 
-	public static String skipLeadingShebang(String s) {
-		if (s.startsWith("#")) {
-			int endOfFirstLine = s.indexOf('\n');
-			// don't skip the newline at the end of the shebang
-			return endOfFirstLine >= 0 ? s.substring(endOfFirstLine) : "";
-		}
-		else {
-			return s;
-		}
-	}
+  public static String skipLeadingShebang(String s) {
+    if (s.startsWith("#")) {
+      int endOfFirstLine = s.indexOf('\n');
+      // don't skip the newline at the end of the shebang
+      return endOfFirstLine >= 0 ? s.substring(endOfFirstLine) : "";
+    } else {
+      return s;
+    }
+  }
 
-	public static boolean isVerbose() {
-		return System.getenv(Constants.ENV_VERBOSE) != null;
-	}
+  public static boolean isVerbose() {
+    return System.getenv(Constants.ENV_VERBOSE) != null;
+  }
 
-	public static void logClassPath(ClassLoader cl, String name) {
-		if (isVerbose()) {
-			System.err.println(name + ":");
-			if (cl instanceof URLClassLoader) {
-				for (URL url : ((URLClassLoader) cl).getURLs()) {
-					System.err.println("\t" + url);
-				}
-			}
-			else if (cl == null) {
-				System.err.println("\t(none)");
-			}
-			else {
-				System.err.println("\t(unknown)");
-			}
-		}
-	}
+  public static void logClassPath(ClassLoader cl, String name) {
+    if (isVerbose()) {
+      System.err.println(name + ":");
+      if (cl instanceof URLClassLoader) {
+        for (URL url : ((URLClassLoader) cl).getURLs()) {
+          System.err.println("\t" + url);
+        }
+      } else if (cl == null) {
+        System.err.println("\t(none)");
+      } else {
+        System.err.println("\t(unknown)");
+      }
+    }
+  }
 
 }

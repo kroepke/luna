@@ -16,10 +16,8 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.Label;
-
 public abstract class BlockTermNode extends IRNode {
 
-	public abstract Iterable<Label> nextLabels();
+  public abstract Iterable<Label> nextLabels();
 
 }

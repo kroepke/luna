@@ -18,25 +18,25 @@ package org.classdump.luna.compiler.ir;
 
 public class Label {
 
-	// TODO: get rid of the index
+  // TODO: get rid of the index
 
-	private final int idx;
+  private final int idx;
 
-	public Label(int idx) {
-		this.idx = idx;
-	}
+  public Label(int idx) {
+    this.idx = idx;
+  }
 
-	@Override
-	public String toString() {
-		return "L" + idx;
-	}
+  @Override
+  public String toString() {
+    return "L" + idx;
+  }
 
-	public int idx() {
-		return idx;
-	}
+  public int idx() {
+    return idx;
+  }
 
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

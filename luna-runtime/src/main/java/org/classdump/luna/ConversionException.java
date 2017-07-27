@@ -21,13 +21,13 @@ package org.classdump.luna;
  */
 public class ConversionException extends LuaRuntimeException {
 
-	/**
-	 * Constructs a new instance with the given error message.
-	 *
-	 * @param message  error message
-	 */
-	public ConversionException(String message) {
-		super(message);
-	}
+  /**
+   * Constructs a new instance with the given error message.
+   *
+   * @param message error message
+   */
+  public ConversionException(String message) {
+    super(message);
+  }
 
 }

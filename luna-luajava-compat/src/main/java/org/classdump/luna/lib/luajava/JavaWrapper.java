@@ -30,82 +30,84 @@ import org.classdump.luna.runtime.ResolvedControlThrowable;
 
 abstract class JavaWrapper<T> extends Userdata<Object> {
 
-	abstract String typeName();
+  abstract String typeName();
 
-	/**
-	 * Returns the wrapped object.
-	 *
-	 * @return  the wrapped object
-	 */
-	public abstract T get();
+  /**
+   * Returns the wrapped object.
+   *
+   * @return the wrapped object
+   */
+  public abstract T get();
 
-	@Override
-	public Object getUserValue() {
-		return null;
-	}
+  @Override
+  public Object getUserValue() {
+    return null;
+  }
 
-	@Override
-	public Object setUserValue(Object value) {
-		throw new UnsupportedOperationException("user value not supported");
-	}
+  @Override
+  public Object setUserValue(Object value) {
+    throw new UnsupportedOperationException("user value not supported");
+  }
 
-	@Override
-	public Table setMetatable(Table mt) {
-		throw new UnsupportedOperationException("cannot wrapper metatable");
-	}
+  @Override
+  public Table setMetatable(Table mt) {
+    throw new UnsupportedOperationException("cannot wrapper metatable");
+  }
 
-	static class ToString extends AbstractFunction1<JavaWrapper> {
+  static class ToString extends AbstractFunction1<JavaWrapper> {
 
-		public static final ToString INSTANCE = new ToString();
+    public static final ToString INSTANCE = new ToString();
 
-		@Override
-		public void invoke(ExecutionContext context, JavaWrapper wrapper) throws ResolvedControlThrowable {
-			if (wrapper != null) {
-				context.getReturnBuffer().setTo(wrapper.typeName() + " (" + wrapper.get().toString() + ")");
-			}
-			else {
-				throw new IllegalArgumentException("invalid argument to toString: expecting Java wrapper, got "
-						+ NameMetamethodValueTypeNamer.typeNameOf(wrapper, context));
-			}
-		}
+    @Override
+    public void invoke(ExecutionContext context, JavaWrapper wrapper)
+        throws ResolvedControlThrowable {
+      if (wrapper != null) {
+        context.getReturnBuffer().setTo(wrapper.typeName() + " (" + wrapper.get().toString() + ")");
+      } else {
+        throw new IllegalArgumentException(
+            "invalid argument to toString: expecting Java wrapper, got "
+                + NameMetamethodValueTypeNamer.typeNameOf(wrapper, context));
+      }
+    }
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
+    @Override
+    public void resume(ExecutionContext context, Object suspendedState)
+        throws ResolvedControlThrowable {
+      throw new NonsuspendableFunctionException(this.getClass());
+    }
 
-	}
+  }
 
-	static abstract class AbstractGetMemberAccessor extends AbstractUntypedFunction2 {
+  static abstract class AbstractGetMemberAccessor extends AbstractUntypedFunction2 {
 
-		protected abstract LuaFunction methodAccessorForName(String methodName);
+    protected abstract LuaFunction methodAccessorForName(String methodName);
 
-		@Override
-		public void invoke(ExecutionContext context, Object arg1, Object arg2)
-				throws ResolvedControlThrowable {
+    @Override
+    public void invoke(ExecutionContext context, Object arg1, Object arg2)
+        throws ResolvedControlThrowable {
 
-			// arg1 is ignored
+      // arg1 is ignored
 
-			final String methodName;
-			{
-				ByteString s = Conversions.stringValueOf(arg2);
-				if (s != null) {
-					methodName = s.toString();
-				}
-				else {
-					throw new IllegalArgumentException("invalid member name: expecting string, got "
-							+ NameMetamethodValueTypeNamer.typeNameOf(arg2, context));
-				}
-			}
+      final String methodName;
+      {
+        ByteString s = Conversions.stringValueOf(arg2);
+        if (s != null) {
+          methodName = s.toString();
+        } else {
+          throw new IllegalArgumentException("invalid member name: expecting string, got "
+              + NameMetamethodValueTypeNamer.typeNameOf(arg2, context));
+        }
+      }
 
-			context.getReturnBuffer().setTo(methodAccessorForName(methodName));
-		}
+      context.getReturnBuffer().setTo(methodAccessorForName(methodName));
+    }
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
+    @Override
+    public void resume(ExecutionContext context, Object suspendedState)
+        throws ResolvedControlThrowable {
+      throw new NonsuspendableFunctionException(this.getClass());
+    }
 
-	}
+  }
 
 }

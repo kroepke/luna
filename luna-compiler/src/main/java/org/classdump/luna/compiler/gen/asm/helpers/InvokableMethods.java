@@ -16,24 +16,23 @@
 
 package org.classdump.luna.compiler.gen.asm.helpers;
 
-import org.classdump.luna.compiler.gen.asm.helpers.ReflectionUtils;
 import org.classdump.luna.runtime.ExecutionContext;
 import org.classdump.luna.runtime.LuaFunction;
 import org.objectweb.asm.tree.AbstractInsnNode;
 
 public class InvokableMethods {
 
-	public static int adjustKind_invoke(int kind) {
-		return kind > 0 ? (invoke_method(kind).exists() ? kind : 0) : 0;
-	}
+  public static int adjustKind_invoke(int kind) {
+    return kind > 0 ? (invoke_method(kind).exists() ? kind : 0) : 0;
+  }
 
-	public static ReflectionUtils.Method invoke_method(int kind) {
-		return ReflectionUtils.virtualArgListMethodFromKind(
-				LuaFunction.class, "invoke", new Class[] { ExecutionContext.class }, kind);
-	}
+  public static ReflectionUtils.Method invoke_method(int kind) {
+    return ReflectionUtils.virtualArgListMethodFromKind(
+        LuaFunction.class, "invoke", new Class[]{ExecutionContext.class}, kind);
+  }
 
-	public static AbstractInsnNode invoke(int kind) {
-		return invoke_method(kind).toMethodInsnNode();
-	}
+  public static AbstractInsnNode invoke(int kind) {
+    return invoke_method(kind).toMethodInsnNode();
+  }
 
 }

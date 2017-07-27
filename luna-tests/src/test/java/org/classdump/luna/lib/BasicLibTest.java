@@ -16,6 +16,11 @@
 
 package org.classdump.luna.lib;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
 import org.classdump.luna.Metatables;
 import org.classdump.luna.StateContext;
 import org.classdump.luna.Table;
@@ -32,125 +37,126 @@ import org.classdump.luna.runtime.LuaFunction;
 import org.classdump.luna.runtime.ResolvedControlThrowable;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class BasicLibTest {
 
-    private static class PairsList extends DefaultUserdata<List<String>> {
-        private static final ImmutableTable META_TABLE = new ImmutableTable.Builder()
-                .add(BasicLib.MT_PAIRS, new Pairs())
-                .add(Metatables.MT_INDEX, new Index())
-                .build();
+  @Test
+  public void ipairsWithUserdata() throws Exception {
+    String program = "local a = {}\n" +
+        "for i, elem in ipairs(list) do a[elem] = i end\n" +
+        "return a";
 
-        public PairsList() {
-            super(META_TABLE, new ArrayList<String>() {{
-                this.add("a");
-                this.add("b");
-                this.add("c");
-                this.add("d");
-            }});
-        }
+    StateContext state = StateContexts.newDefaultInstance();
+    Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
+    env.rawset("list", new PairsList());
 
-        private static class Pairs extends AbstractLibFunction {
-            @Override
-            protected String name() {
-                return "list_pairs";
-            }
+    ChunkLoader loader = CompilerChunkLoader.of("call_from_lua");
+    LuaFunction main = loader.loadTextChunk(new Variable(env), "", program);
 
-            @Override
-            protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-                final List<String> list = args.nextOfClass(PairsList.class).getUserValue();
-                context.getReturnBuffer().setTo(new Next(), list.listIterator(), null);
-            }
-        }
+    Object[] result = DirectCallExecutor.newExecutor().call(state, main);
 
-        private static class Index extends AbstractLibFunction {
-            @Override
-            protected String name() {
-                return "list_index";
-            }
+    Table table = (Table) result[0];
 
-            @Override
-            protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-                final List<String> list = args.nextOfClass(PairsList.class).getUserValue();
-                final int index = args.nextInt() - 1;
-                if (index == list.size()) {
-                    context.getReturnBuffer().setTo(null);
-                    return;
-                }
-                context.getReturnBuffer().setTo(list.get(index));
-            }
-        }
+    assertThat(table.rawget("a")).isEqualTo(1L);
+    assertThat(table.rawget("b")).isEqualTo(2L);
+    assertThat(table.rawget("c")).isEqualTo(3L);
+    assertThat(table.rawget("d")).isEqualTo(4L);
+  }
 
-        private static class Next extends AbstractLibFunction {
-            @Override
-            protected String name() {
-                return "list_next";
-            }
+  @Test
+  public void pairsWithUserdata() throws Exception {
+    String program = "local a = {}\n" +
+        "for elem in pairs(list) do print(elem); a[elem] = elem end\n" +
+        "return a";
 
-            @Override
-            protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-                final ListIterator iterator = args.nextOfClass(ListIterator.class);
-                if (!iterator.hasNext()) {
-                    context.getReturnBuffer().setTo(null);
-                    return;
-                }
-                final Object next = iterator.next();
+    StateContext state = StateContexts.newDefaultInstance();
+    Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
+    env.rawset("list", new PairsList());
 
-                context.getReturnBuffer().setTo(next);
-            }
-        }
+    ChunkLoader loader = CompilerChunkLoader.of("call_from_lua");
+    LuaFunction main = loader.loadTextChunk(new Variable(env), "", program);
+
+    Object[] result = DirectCallExecutor.newExecutor().call(state, main);
+
+    Table table = (Table) result[0];
+
+    // this .toString() is a bit annoying but strings from Lua are ByteStrings..
+    assertThat(table.rawget("a").toString()).isEqualTo("a");
+    assertThat(table.rawget("b").toString()).isEqualTo("b");
+    assertThat(table.rawget("c").toString()).isEqualTo("c");
+    assertThat(table.rawget("d").toString()).isEqualTo("d");
+  }
+
+  private static class PairsList extends DefaultUserdata<List<String>> {
+
+    private static final ImmutableTable META_TABLE = new ImmutableTable.Builder()
+        .add(BasicLib.MT_PAIRS, new Pairs())
+        .add(Metatables.MT_INDEX, new Index())
+        .build();
+
+    public PairsList() {
+      super(META_TABLE, new ArrayList<String>() {{
+        this.add("a");
+        this.add("b");
+        this.add("c");
+        this.add("d");
+      }});
     }
 
-    @Test
-    public void ipairsWithUserdata() throws Exception {
-        String program = "local a = {}\n" +
-                "for i, elem in ipairs(list) do a[elem] = i end\n" +
-                "return a";
+    private static class Pairs extends AbstractLibFunction {
 
-        StateContext state = StateContexts.newDefaultInstance();
-        Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
-        env.rawset("list", new PairsList());
+      @Override
+      protected String name() {
+        return "list_pairs";
+      }
 
-        ChunkLoader loader = CompilerChunkLoader.of("call_from_lua");
-        LuaFunction main = loader.loadTextChunk(new Variable(env), "", program);
-
-        Object[] result = DirectCallExecutor.newExecutor().call(state, main);
-
-        Table table = (Table) result[0];
-
-        assertThat(table.rawget("a")).isEqualTo(1L);
-        assertThat(table.rawget("b")).isEqualTo(2L);
-        assertThat(table.rawget("c")).isEqualTo(3L);
-        assertThat(table.rawget("d")).isEqualTo(4L);
+      @Override
+      protected void invoke(ExecutionContext context, ArgumentIterator args)
+          throws ResolvedControlThrowable {
+        final List<String> list = args.nextOfClass(PairsList.class).getUserValue();
+        context.getReturnBuffer().setTo(new Next(), list.listIterator(), null);
+      }
     }
 
-    @Test
-    public void pairsWithUserdata() throws Exception {
-        String program = "local a = {}\n" +
-                "for elem in pairs(list) do print(elem); a[elem] = elem end\n" +
-                "return a";
+    private static class Index extends AbstractLibFunction {
 
-        StateContext state = StateContexts.newDefaultInstance();
-        Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
-        env.rawset("list", new PairsList());
+      @Override
+      protected String name() {
+        return "list_index";
+      }
 
-        ChunkLoader loader = CompilerChunkLoader.of("call_from_lua");
-        LuaFunction main = loader.loadTextChunk(new Variable(env), "", program);
-
-        Object[] result = DirectCallExecutor.newExecutor().call(state, main);
-
-        Table table = (Table) result[0];
-
-        // this .toString() is a bit annoying but strings from Lua are ByteStrings..
-        assertThat(table.rawget("a").toString()).isEqualTo("a");
-        assertThat(table.rawget("b").toString()).isEqualTo("b");
-        assertThat(table.rawget("c").toString()).isEqualTo("c");
-        assertThat(table.rawget("d").toString()).isEqualTo("d");
+      @Override
+      protected void invoke(ExecutionContext context, ArgumentIterator args)
+          throws ResolvedControlThrowable {
+        final List<String> list = args.nextOfClass(PairsList.class).getUserValue();
+        final int index = args.nextInt() - 1;
+        if (index == list.size()) {
+          context.getReturnBuffer().setTo(null);
+          return;
+        }
+        context.getReturnBuffer().setTo(list.get(index));
+      }
     }
+
+    private static class Next extends AbstractLibFunction {
+
+      @Override
+      protected String name() {
+        return "list_next";
+      }
+
+      @Override
+      protected void invoke(ExecutionContext context, ArgumentIterator args)
+          throws ResolvedControlThrowable {
+        final ListIterator iterator = args.nextOfClass(ListIterator.class);
+        if (!iterator.hasNext()) {
+          context.getReturnBuffer().setTo(null);
+          return;
+        }
+        final Object next = iterator.next();
+
+        context.getReturnBuffer().setTo(next);
+      }
+    }
+  }
 
 }

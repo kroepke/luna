@@ -16,16 +16,14 @@
 
 package org.classdump.luna.compiler.analysis.types;
 
-import org.classdump.luna.compiler.analysis.types.ConcreteType;
-
 public class ConcreteLitType<T> extends ConcreteType {
 
-	protected ConcreteLitType(AbstractType supertype, String name) {
-		super(supertype, name);
-	}
+  protected ConcreteLitType(AbstractType supertype, String name) {
+    super(supertype, name);
+  }
 
-	public LiteralType<T> newLiteralType(T value) {
-		return new LiteralType<>(this, value);
-	}
+  public LiteralType<T> newLiteralType(T value) {
+    return new LiteralType<>(this, value);
+  }
 
 }

@@ -22,53 +22,53 @@ import org.classdump.luna.Table;
 
 final class TableUtil {
 
-	private TableUtil() {
-		// not to be instantiated
-	}
+  private TableUtil() {
+    // not to be instantiated
+  }
 
-	public static boolean hasLenMetamethod(Table t) {
-		return Metatables.getMetamethod(Metatables.MT_LEN, t) != null;
-	}
+  public static boolean hasLenMetamethod(Table t) {
+    return Metatables.getMetamethod(Metatables.MT_LEN, t) != null;
+  }
 
-	public static boolean hasIndexMetamethod(Table t) {
-		return Metatables.getMetamethod(Metatables.MT_INDEX, t) != null;
-	}
+  public static boolean hasIndexMetamethod(Table t) {
+    return Metatables.getMetamethod(Metatables.MT_INDEX, t) != null;
+  }
 
-	public static boolean hasNewIndexMetamethod(Table t) {
-		return Metatables.getMetamethod(Metatables.MT_NEWINDEX, t) != null;
-	}
+  public static boolean hasNewIndexMetamethod(Table t) {
+    return Metatables.getMetamethod(Metatables.MT_NEWINDEX, t) != null;
+  }
 
-	public static Ordering<Object> rawSequenceOrderingOf(Table t, long firstIdx, long lastIdx) {
-		long count = lastIdx - firstIdx + 1;
+  public static Ordering<Object> rawSequenceOrderingOf(Table t, long firstIdx, long lastIdx) {
+    long count = lastIdx - firstIdx + 1;
 
-		if (count < 2) {
-			throw new IllegalArgumentException("Interval is empty: [" + firstIdx + ", " + lastIdx + "]");
-		}
+    if (count < 2) {
+      throw new IllegalArgumentException("Interval is empty: [" + firstIdx + ", " + lastIdx + "]");
+    }
 
-		// every value between [firstIdx..lastIdx] is retrieved at most once
+    // every value between [firstIdx..lastIdx] is retrieved at most once
 
-		final Ordering<Object> result;
-		{
-			// the first pair determines the ordering
-			Object first = t.rawget(firstIdx);
-			result = Ordering.of(first, t.rawget(firstIdx + 1));
+    final Ordering<Object> result;
+    {
+      // the first pair determines the ordering
+      Object first = t.rawget(firstIdx);
+      result = Ordering.of(first, t.rawget(firstIdx + 1));
 
-			if (count % 2 == 1) {
-				// odd number of values: compare first with last
-				if (result != Ordering.of(first, t.rawget(lastIdx))) {
-					return null;
-				}
-			}
-		}
+      if (count % 2 == 1) {
+        // odd number of values: compare first with last
+        if (result != Ordering.of(first, t.rawget(lastIdx))) {
+          return null;
+        }
+      }
+    }
 
-		// check the remaining value pairs
-		for (long idx = firstIdx + 2; idx + 1 <= lastIdx; idx += 2) {
-			if (result != Ordering.of(t.rawget(idx), t.rawget(idx + 1))) {
-				return null;
-			}
-		}
+    // check the remaining value pairs
+    for (long idx = firstIdx + 2; idx + 1 <= lastIdx; idx += 2) {
+      if (result != Ordering.of(t.rawget(idx), t.rawget(idx + 1))) {
+        return null;
+      }
+    }
 
-		return result;
-	}
+    return result;
+  }
 
 }

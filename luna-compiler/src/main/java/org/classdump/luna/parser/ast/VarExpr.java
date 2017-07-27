@@ -16,37 +16,36 @@
 
 package org.classdump.luna.parser.ast;
 
-import org.classdump.luna.parser.ast.Attributes;
-import org.classdump.luna.parser.ast.Name;
-import org.classdump.luna.parser.ast.Transformer;
-
 import java.util.Objects;
 
 public class VarExpr extends LValueExpr {
 
-	private final Name name;
+  private final Name name;
 
-	public VarExpr(Attributes attr, Name name) {
-		super(attr);
-		this.name = Objects.requireNonNull(name);
-	}
+  public VarExpr(Attributes attr, Name name) {
+    super(attr);
+    this.name = Objects.requireNonNull(name);
+  }
 
-	public Name name() {
-		return name;
-	}
+  public Name name() {
+    return name;
+  }
 
-	public VarExpr withAttributes(Attributes attr) {
-		if (attributes().equals(attr)) return this;
-		else return new VarExpr(attr, name);
-	}
+  public VarExpr withAttributes(Attributes attr) {
+    if (attributes().equals(attr)) {
+      return this;
+    } else {
+      return new VarExpr(attr, name);
+    }
+  }
 
-	public VarExpr with(Object o) {
-		return this.withAttributes(attributes().with(o));
-	}
+  public VarExpr with(Object o) {
+    return this.withAttributes(attributes().with(o));
+  }
 
-	@Override
-	public LValueExpr accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public LValueExpr accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

@@ -16,20 +16,16 @@
 
 package org.classdump.luna.parser.ast;
 
-import org.classdump.luna.parser.ast.Attributes;
-import org.classdump.luna.parser.ast.Expr;
-import org.classdump.luna.parser.ast.Transformer;
-
 /**
  * An expression that refers to a memory location, i.e. that can be assigned to.
  */
 public abstract class LValueExpr extends Expr {
 
-	protected LValueExpr(Attributes attr) {
-		super(attr);
-	}
+  protected LValueExpr(Attributes attr) {
+    super(attr);
+  }
 
-	@Override
-	public abstract LValueExpr accept(Transformer tf);
+  @Override
+  public abstract LValueExpr accept(Transformer tf);
 
 }

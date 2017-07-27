@@ -22,11 +22,11 @@ package org.classdump.luna;
  */
 public class NoIntegerRepresentationException extends ConversionException {
 
-	/**
-	 * Constructs a new instance of {@code NoIntegerRepresentationException}.
-	 */
-	public NoIntegerRepresentationException() {
-		super("number has no integer representation");
-	}
+  /**
+   * Constructs a new instance of {@code NoIntegerRepresentationException}.
+   */
+  public NoIntegerRepresentationException() {
+    super("number has no integer representation");
+  }
 
 }

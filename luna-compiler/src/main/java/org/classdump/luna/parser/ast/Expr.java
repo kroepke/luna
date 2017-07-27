@@ -18,10 +18,10 @@ package org.classdump.luna.parser.ast;
 
 public abstract class Expr extends SyntaxElement {
 
-	protected Expr(Attributes attr) {
-		super(attr);
-	}
+  protected Expr(Attributes attr) {
+    super(attr);
+  }
 
-	public abstract Expr accept(Transformer tf);
+  public abstract Expr accept(Transformer tf);
 
 }

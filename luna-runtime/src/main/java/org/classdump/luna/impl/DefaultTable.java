@@ -16,12 +16,11 @@
 
 package org.classdump.luna.impl;
 
+import java.util.NoSuchElementException;
 import org.classdump.luna.Conversions;
 import org.classdump.luna.Table;
 import org.classdump.luna.TableFactory;
 import org.classdump.luna.util.TraversableHashMap;
-
-import java.util.NoSuchElementException;
 
 /**
  * Default implementation of the Lua table storing all key-value pairs in a hashmap.
@@ -29,85 +28,83 @@ import java.util.NoSuchElementException;
  */
 public class DefaultTable extends Table {
 
-	private final TraversableHashMap<Object, Object> values;
+  private static final TableFactory FACTORY_INSTANCE = new Factory();
+  private final TraversableHashMap<Object, Object> values;
 
-	/**
-	 * Constructs a new empty table.
-	 */
-	public DefaultTable() {
-		this.values = new TraversableHashMap<>();
-	}
+  /**
+   * Constructs a new empty table.
+   */
+  public DefaultTable() {
+    this.values = new TraversableHashMap<>();
+  }
 
-	static class Factory implements TableFactory {
-		@Override
-		public Table newTable() {
-			return newTable(0, 0);
-		}
+  /**
+   * Returns the table factory for constructing instances of {@code DefaultTable}.
+   *
+   * @return the table factory for {@code DefaultTable}s
+   */
+  public static TableFactory factory() {
+    return FACTORY_INSTANCE;
+  }
 
-		@Override
-		public Table newTable(int array, int hash) {
-			return new DefaultTable();
-		}
-	}
+  @Override
+  public Object rawget(Object key) {
+    key = Conversions.normaliseKey(key);
+    return key != null ? values.get(key) : null;
+  }
 
-	private static final TableFactory FACTORY_INSTANCE = new Factory();
+  @Override
+  public void rawset(Object key, Object value) {
+    key = Conversions.normaliseKey(key);
 
-	/**
-	 * Returns the table factory for constructing instances of {@code DefaultTable}.
-	 *
-	 * @return  the table factory for {@code DefaultTable}s
-	 */
-	public static TableFactory factory() {
-		return FACTORY_INSTANCE;
-	}
+    if (key == null) {
+      throw new IllegalArgumentException("table index is nil");
+    }
+    if (key instanceof Double && Double.isNaN(((Double) key).doubleValue())) {
+      throw new IllegalArgumentException("table index is NaN");
+    }
 
-	@Override
-	public Object rawget(Object key) {
-		key = Conversions.normaliseKey(key);
-		return key != null ? values.get(key) : null;
-	}
+    value = Conversions.canonicalRepresentationOf(value);
 
-	@Override
-	public void rawset(Object key, Object value) {
-		key = Conversions.normaliseKey(key);
+    if (value == null) {
+      values.remove(key);
+    } else {
+      values.put(key, value);
+    }
 
-		if (key == null) {
-			throw new IllegalArgumentException("table index is nil");
-		}
-		if (key instanceof Double && Double.isNaN(((Double) key).doubleValue())) {
-			throw new IllegalArgumentException("table index is NaN");
-		}
+    updateBasetableModes(key, value);
+  }
 
-		value = Conversions.canonicalRepresentationOf(value);
+  @Override
+  public Object initialKey() {
+    return values.getFirstKey();
+  }
 
-		if (value == null) {
-			values.remove(key);
-		}
-		else {
-			values.put(key, value);
-		}
+  @Override
+  public Object successorKeyOf(Object key) {
+    try {
+      return values.getSuccessorOf(key);
+    } catch (NoSuchElementException | NullPointerException ex) {
+      throw new IllegalArgumentException("invalid key to 'next'", ex);
+    }
+  }
 
-		updateBasetableModes(key, value);
-	}
+  @Override
+  protected void setMode(boolean weakKeys, boolean weakValues) {
+    // TODO
+  }
 
-	@Override
-	public Object initialKey() {
-		return values.getFirstKey();
-	}
+  static class Factory implements TableFactory {
 
-	@Override
-	public Object successorKeyOf(Object key) {
-		try {
-			return values.getSuccessorOf(key);
-		}
-		catch (NoSuchElementException | NullPointerException ex) {
-			throw new IllegalArgumentException("invalid key to 'next'", ex);
-		}
-	}
+    @Override
+    public Table newTable() {
+      return newTable(0, 0);
+    }
 
-	@Override
-	protected void setMode(boolean weakKeys, boolean weakValues) {
-		// TODO
-	}
+    @Override
+    public Table newTable(int array, int hash) {
+      return new DefaultTable();
+    }
+  }
 
 }

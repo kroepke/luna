@@ -16,45 +16,44 @@
 
 package org.classdump.luna.lib;
 
+import java.util.Objects;
 import org.classdump.luna.ByteString;
 import org.classdump.luna.StateContext;
 import org.classdump.luna.Table;
 import org.classdump.luna.runtime.ExecutionContext;
 import org.classdump.luna.runtime.ResolvedControlThrowable;
 
-import java.util.Objects;
-
 public abstract class SimpleLoaderFunction extends AbstractLibFunction {
 
-	private final Table env;
+  private final Table env;
 
-	public SimpleLoaderFunction(Table env) {
-		this.env = Objects.requireNonNull(env);
-	}
+  public SimpleLoaderFunction(Table env) {
+    this.env = Objects.requireNonNull(env);
+  }
 
-	@Override
-	protected String name() {
-		return "(" + this.getClass().getName() + ")";
-	}
+  @Override
+  protected String name() {
+    return "(" + this.getClass().getName() + ")";
+  }
 
-	public abstract Object install(StateContext context, Table env, ByteString modName, ByteString origin);
+  public abstract Object install(StateContext context, Table env, ByteString modName,
+      ByteString origin);
 
-	@Override
-	protected void invoke(ExecutionContext context, ArgumentIterator args)
-			throws ResolvedControlThrowable {
+  @Override
+  protected void invoke(ExecutionContext context, ArgumentIterator args)
+      throws ResolvedControlThrowable {
 
-		ByteString modName = args.nextString();
-		ByteString origin = args.hasNext() && args.peek() != null ? args.nextString() : null;
+    ByteString modName = args.nextString();
+    ByteString origin = args.hasNext() && args.peek() != null ? args.nextString() : null;
 
-		Object result = install(context, env, modName, origin);
+    Object result = install(context, env, modName, origin);
 
-		if (result != null) {
-			context.getReturnBuffer().setTo(result);
-		}
-		else {
-			context.getReturnBuffer().setTo();
-		}
+    if (result != null) {
+      context.getReturnBuffer().setTo(result);
+    } else {
+      context.getReturnBuffer().setTo();
+    }
 
-	}
+  }
 
 }

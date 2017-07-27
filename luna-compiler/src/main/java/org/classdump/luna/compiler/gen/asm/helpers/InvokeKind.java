@@ -27,31 +27,39 @@ import org.classdump.luna.runtime.LuaFunction;
 
 public abstract class InvokeKind {
 
-	private InvokeKind() {
-		// not to be instantiated or extended
-	}
+  private InvokeKind() {
+    // not to be instantiated or extended
+  }
 
-	// 0 means variable number of parameters packed in an array
-	// n > 0 means exactly (n - 1) parameters
-	public static int encode(int numOfFixedArgs, boolean vararg) {
-		return vararg ? 0 : numOfFixedArgs + 1;
-	}
+  // 0 means variable number of parameters packed in an array
+  // n > 0 means exactly (n - 1) parameters
+  public static int encode(int numOfFixedArgs, boolean vararg) {
+    return vararg ? 0 : numOfFixedArgs + 1;
+  }
 
-	public static int adjust_nativeKind(int kind) {
-		return kind > 0 ? (nativeClassForKind(kind) != null ? kind : 0) : 0;
-	}
+  public static int adjust_nativeKind(int kind) {
+    return kind > 0 ? (nativeClassForKind(kind) != null ? kind : 0) : 0;
+  }
 
-	public static Class<? extends LuaFunction> nativeClassForKind(int kind) {
-		switch (kind) {
-			case 0:  return AbstractFunctionAnyArg.class;
-			case 1:  return AbstractFunction0.class;
-			case 2:  return AbstractFunction1.class;
-			case 3:  return AbstractFunction2.class;
-			case 4:  return AbstractFunction3.class;
-			case 5:  return AbstractFunction4.class;
-			case 6:  return AbstractFunction5.class;
-			default: return null;
-		}
-	}
+  public static Class<? extends LuaFunction> nativeClassForKind(int kind) {
+    switch (kind) {
+      case 0:
+        return AbstractFunctionAnyArg.class;
+      case 1:
+        return AbstractFunction0.class;
+      case 2:
+        return AbstractFunction1.class;
+      case 3:
+        return AbstractFunction2.class;
+      case 4:
+        return AbstractFunction3.class;
+      case 5:
+        return AbstractFunction4.class;
+      case 6:
+        return AbstractFunction5.class;
+      default:
+        return null;
+    }
+  }
 
 }

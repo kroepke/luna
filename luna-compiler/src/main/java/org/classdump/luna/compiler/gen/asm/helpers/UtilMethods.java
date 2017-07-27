@@ -16,48 +16,48 @@
 
 package org.classdump.luna.compiler.gen.asm.helpers;
 
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-
 public class UtilMethods {
 
-	private UtilMethods() {
-		// not to be instantiated
-	}
+  private UtilMethods() {
+    // not to be instantiated
+  }
 
-	public static AbstractInsnNode StringBuilder_append(Type t) {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(StringBuilder.class),
-				"append",
-				Type.getMethodDescriptor(
-						Type.getType(StringBuilder.class),
-						t),
-				false);
-	}
+  public static AbstractInsnNode StringBuilder_append(Type t) {
+    return new MethodInsnNode(
+        INVOKEVIRTUAL,
+        Type.getInternalName(StringBuilder.class),
+        "append",
+        Type.getMethodDescriptor(
+            Type.getType(StringBuilder.class),
+            t),
+        false);
+  }
 
-	public static AbstractInsnNode StringBuilder_toString() {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(StringBuilder.class),
-				"toString",
-				Type.getMethodDescriptor(
-						Type.getType(String.class)),
-				false);
-	}
+  public static AbstractInsnNode StringBuilder_toString() {
+    return new MethodInsnNode(
+        INVOKEVIRTUAL,
+        Type.getInternalName(StringBuilder.class),
+        "toString",
+        Type.getMethodDescriptor(
+            Type.getType(String.class)),
+        false);
+  }
 
-	public static AbstractInsnNode String_compareTo() {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(String.class),
-				"compareTo",
-				Type.getMethodDescriptor(
-						Type.INT_TYPE,
-						Type.getType(String.class)),
-				false);
-	}
+  public static AbstractInsnNode String_compareTo() {
+    return new MethodInsnNode(
+        INVOKEVIRTUAL,
+        Type.getInternalName(String.class),
+        "compareTo",
+        Type.getMethodDescriptor(
+            Type.INT_TYPE,
+            Type.getType(String.class)),
+        false);
+  }
 
 }

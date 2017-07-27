@@ -16,29 +16,28 @@
 
 package org.classdump.luna.compiler.analysis;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import org.classdump.luna.compiler.FunctionId;
 import org.classdump.luna.compiler.ir.Closure;
 import org.classdump.luna.compiler.ir.CodeVisitor;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 class NestedRefVisitor extends CodeVisitor {
 
-	private final Set<FunctionId> ids;
+  private final Set<FunctionId> ids;
 
-	public NestedRefVisitor() {
-		this.ids = new HashSet<>();
-	}
+  public NestedRefVisitor() {
+    this.ids = new HashSet<>();
+  }
 
-	public DependencyInfo dependencyInfo() {
-		return new DependencyInfo(Collections.unmodifiableSet(new HashSet<>(ids)));
-	}
+  public DependencyInfo dependencyInfo() {
+    return new DependencyInfo(Collections.unmodifiableSet(new HashSet<>(ids)));
+  }
 
-	@Override
-	public void visit(Closure node) {
-		ids.add(node.id());
-	}
+  @Override
+  public void visit(Closure node) {
+    ids.add(node.id());
+  }
 
 }

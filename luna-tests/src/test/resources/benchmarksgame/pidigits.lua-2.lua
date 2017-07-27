@@ -84,21 +84,21 @@ end)
 ]=] -- End of dynamically compiled chunk.
 
 local N = tonumber(arg and arg[1]) or 27
-local RADIX = N < 6500 and 2^36 or 2^32 -- Avoid overflow.
+local RADIX = N < 6500 and 2 ^ 36 or 2 ^ 32 -- Avoid overflow.
 
 -- Substitute radix and compile chunk.
 local pidigit = loadstring(string.gsub(chunk, "RADIX", tostring(RADIX)))()
 
 -- Print lines with 10 digits.
-for i=10,N,10 do
-  for j=1,10 do io.write(pidigit()) end
-  io.write("\t:", i, "\n")
+for i = 10, N, 10 do
+    for j = 1, 10 do io.write(pidigit()) end
+    io.write("\t:", i, "\n")
 end
 
 -- Print remaining digits (if any).
 local n10 = N % 10
 if n10 ~= 0 then
-  for i=1,n10 do io.write(pidigit()) end
-  io.write(string.rep(" ", 10-n10), "\t:", N, "\n")
+    for i = 1, n10 do io.write(pidigit()) end
+    io.write(string.rep(" ", 10 - n10), "\t:", N, "\n")
 end
 

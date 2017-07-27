@@ -16,6 +16,20 @@
 
 package org.classdump.luna.compiler.gen.asm;
 
+import static org.objectweb.asm.Opcodes.ACC_FINAL;
+import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
+import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
+import static org.objectweb.asm.Opcodes.ACC_SUPER;
+import static org.objectweb.asm.Opcodes.V1_7;
+
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 import org.classdump.luna.Variable;
 import org.classdump.luna.compiler.CompilerSettings;
 import org.classdump.luna.compiler.FunctionId;
@@ -26,11 +40,6 @@ import org.classdump.luna.compiler.analysis.TypeInfo;
 import org.classdump.luna.compiler.gen.BytecodeEmitter;
 import org.classdump.luna.compiler.gen.ClassNameTranslator;
 import org.classdump.luna.compiler.gen.CompiledClass;
-import org.classdump.luna.compiler.gen.asm.ConstructorMethod;
-import org.classdump.luna.compiler.gen.asm.InvokeMethod;
-import org.classdump.luna.compiler.gen.asm.ResumeMethod;
-import org.classdump.luna.compiler.gen.asm.RunMethod;
-import org.classdump.luna.compiler.gen.asm.StaticConstructorMethod;
 import org.classdump.luna.compiler.gen.asm.helpers.ASMUtils;
 import org.classdump.luna.compiler.gen.asm.helpers.InvokableMethods;
 import org.classdump.luna.compiler.gen.asm.helpers.InvokeKind;
@@ -49,296 +58,280 @@ import org.objectweb.asm.tree.InnerClassNode;
 import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-
-import static org.objectweb.asm.Opcodes.ACC_FINAL;
-import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ACC_STATIC;
-import static org.objectweb.asm.Opcodes.ACC_SUPER;
-import static org.objectweb.asm.Opcodes.V1_7;
-
 public class ASMBytecodeEmitter extends BytecodeEmitter {
 
-	public final IRFunc fn;
-	public final SlotAllocInfo slots;
-	public final TypeInfo types;
-	public final DependencyInfo deps;
+  public final IRFunc fn;
+  public final SlotAllocInfo slots;
+  public final TypeInfo types;
+  public final DependencyInfo deps;
 
-	public final CompilerSettings compilerSettings;
-	public final ClassNameTranslator classNameTranslator;
+  public final CompilerSettings compilerSettings;
+  public final ClassNameTranslator classNameTranslator;
 
-	private final String sourceFile;
+  private final String sourceFile;
 
-	private final ClassNode classNode;
+  private final ClassNode classNode;
 
-	private final HashMap<UpVar, String> upvalueFieldNames;
+  private final HashMap<UpVar, String> upvalueFieldNames;
 
-	private final List<FieldNode> fields;
+  private final List<FieldNode> fields;
 
-	private boolean verifyAndPrint;
+  private boolean verifyAndPrint;
 
-	public ASMBytecodeEmitter(
-			IRFunc fn,
-			SlotAllocInfo slots,
-			TypeInfo types,
-			DependencyInfo deps,
-			CompilerSettings compilerSettings,
-			ClassNameTranslator classNameTranslator,
-			String sourceFile) {
+  public ASMBytecodeEmitter(
+      IRFunc fn,
+      SlotAllocInfo slots,
+      TypeInfo types,
+      DependencyInfo deps,
+      CompilerSettings compilerSettings,
+      ClassNameTranslator classNameTranslator,
+      String sourceFile) {
 
-		this.fn = Objects.requireNonNull(fn);
-		this.slots = Objects.requireNonNull(slots);
-		this.types = Objects.requireNonNull(types);
-		this.deps = Objects.requireNonNull(deps);
+    this.fn = Objects.requireNonNull(fn);
+    this.slots = Objects.requireNonNull(slots);
+    this.types = Objects.requireNonNull(types);
+    this.deps = Objects.requireNonNull(deps);
 
-		this.compilerSettings = Objects.requireNonNull(compilerSettings);
-		this.classNameTranslator = Objects.requireNonNull(classNameTranslator);
-		this.sourceFile = Objects.requireNonNull(sourceFile);
+    this.compilerSettings = Objects.requireNonNull(compilerSettings);
+    this.classNameTranslator = Objects.requireNonNull(classNameTranslator);
+    this.sourceFile = Objects.requireNonNull(sourceFile);
 
-		classNode = new ClassNode();
+    classNode = new ClassNode();
 
-		this.fields = new ArrayList<>();
+    this.fields = new ArrayList<>();
 
-		upvalueFieldNames = new HashMap<>();
+    upvalueFieldNames = new HashMap<>();
 
-		String s = System.getProperty("org.classdump.luna.compiler.VerifyAndPrint");
-		verifyAndPrint = s != null && "true".equals(s.trim().toLowerCase());
-	}
+    String s = System.getProperty("org.classdump.luna.compiler.VerifyAndPrint");
+    verifyAndPrint = s != null && "true".equals(s.trim().toLowerCase());
+  }
 
-	int kind() {
-		return InvokeKind.adjust_nativeKind(InvokeKind.encode(fn.params().size(), fn.isVararg()));
-	}
+  protected static NestedInstanceKind functionKind(IRFunc fn) {
+    if (fn.upvals().isEmpty()) {
+      return NestedInstanceKind.Pure;
+    } else {
+      for (AbstractVar uv : fn.upvals()) {
+        if (uv instanceof Var) {
+          return NestedInstanceKind.Open;
+        }
+      }
+      return NestedInstanceKind.Closed;
+    }
+  }
 
-	String thisClassName() {
-		return fn.id().toClassName(classNameTranslator);
-	}
+  public static String instanceFieldName() {
+    return "INSTANCE";
+  }
 
-	Type thisClassType() {
-		return ASMUtils.typeForClassName(thisClassName());
-	}
+  private static String toFieldName(String n) {
+    return n;  // TODO
+  }
 
-	Type superClassType() {
-		return Type.getType(InvokeKind.nativeClassForKind(kind()));
-	}
+  private static String ensureUnique(Collection<String> ss, String s) {
+    int idx = 0;
+    String prefix = s;
 
-	Type parentClassType() {
-		FunctionId parentId = fn.id().parent();
-		return parentId != null
-				? ASMUtils.typeForClassName(parentId.toClassName(classNameTranslator))
-				: null;
-	}
+    while (ss.contains(s)) {
+      s = prefix + "_" + (idx++);
+    }
 
-	public Type savedStateClassType() {
-		return Type.getType(DefaultSavedState.class);
-	}
+    return s;
+  }
 
-	Type invokeMethodType() {
-		return InvokableMethods.invoke_method(kind()).getMethodType();
-	}
+  private static String preferredUpvalueName(UpVar uv) {
+    return uv.name().value();
+  }
 
-	public boolean hasUpvalues() {
-		return !fn.upvals().isEmpty();
-	}
+  int kind() {
+    return InvokeKind.adjust_nativeKind(InvokeKind.encode(fn.params().size(), fn.isVararg()));
+  }
 
-	public int numOfParameters() {
-		return fn.params().size();
-	}
+  String thisClassName() {
+    return fn.id().toClassName(classNameTranslator);
+  }
 
-	public boolean isVararg() {
-		return fn.isVararg();
-	}
+  Type thisClassType() {
+    return ASMUtils.typeForClassName(thisClassName());
+  }
 
-	public List<FieldNode> fields() {
-		return fields;
-	}
+  Type superClassType() {
+    return Type.getType(InvokeKind.nativeClassForKind(kind()));
+  }
 
-	private void addInnerClassLinks() {
-		String ownInternalName = thisClassType().getInternalName();
+  Type parentClassType() {
+    FunctionId parentId = fn.id().parent();
+    return parentId != null
+        ? ASMUtils.typeForClassName(parentId.toClassName(classNameTranslator))
+        : null;
+  }
 
-		// parent
-		if (parentClassType() != null) {
-			String parentInternalName = parentClassType().getInternalName();
+  public Type savedStateClassType() {
+    return Type.getType(DefaultSavedState.class);
+  }
 
-			// assume (parentInternalName + "$") is the prefix of ownInternalName
-			String suffix = ownInternalName.substring(parentInternalName.length() + 1);
+  Type invokeMethodType() {
+    return InvokableMethods.invoke_method(kind()).getMethodType();
+  }
 
-			classNode.innerClasses.add(new InnerClassNode(
-					ownInternalName,
-					parentInternalName,
-					suffix,
-					ACC_PUBLIC + ACC_STATIC));
-		}
+  public boolean hasUpvalues() {
+    return !fn.upvals().isEmpty();
+  }
 
-		List<FunctionId> nestedIds = new ArrayList<>(deps.nestedRefs());
-		Collections.sort(nestedIds, FunctionId.LEXICOGRAPHIC_COMPARATOR);
+  public int numOfParameters() {
+    return fn.params().size();
+  }
 
-		for (FunctionId childId : nestedIds) {
-			String childClassName = childId.toClassName(classNameTranslator);
-			String childInternalName = ASMUtils.typeForClassName(childClassName).getInternalName();
+  public boolean isVararg() {
+    return fn.isVararg();
+  }
 
-			// assume (ownInternalName + "$") is the prefix of childName
-			String suffix = childInternalName.substring(ownInternalName.length() + 1);
+  public List<FieldNode> fields() {
+    return fields;
+  }
 
-			classNode.innerClasses.add(new InnerClassNode(
-					childInternalName,
-					ownInternalName,
-					suffix,
-					ACC_PUBLIC + ACC_STATIC));
-		}
-	}
+  private void addInnerClassLinks() {
+    String ownInternalName = thisClassType().getInternalName();
 
-	enum NestedInstanceKind {
-		Pure,
-		Closed,
-		Open
-	}
+    // parent
+    if (parentClassType() != null) {
+      String parentInternalName = parentClassType().getInternalName();
 
-	protected static NestedInstanceKind functionKind(IRFunc fn) {
-		if (fn.upvals().isEmpty()) {
-			return NestedInstanceKind.Pure;
-		}
-		else {
-			for (AbstractVar uv : fn.upvals()) {
-				if (uv instanceof Var) {
-					return NestedInstanceKind.Open;
-				}
-			}
-			return NestedInstanceKind.Closed;
-		}
-	}
+      // assume (parentInternalName + "$") is the prefix of ownInternalName
+      String suffix = ownInternalName.substring(parentInternalName.length() + 1);
 
-	public static String instanceFieldName() {
-		return "INSTANCE";
-	}
+      classNode.innerClasses.add(new InnerClassNode(
+          ownInternalName,
+          parentInternalName,
+          suffix,
+          ACC_PUBLIC + ACC_STATIC));
+    }
 
-	private FieldNode instanceField() {
-		return new FieldNode(
-				ACC_PUBLIC + ACC_FINAL + ACC_STATIC,
-				instanceFieldName(),
-				thisClassType().getDescriptor(),
-				null,
-				null);
-	}
+    List<FunctionId> nestedIds = new ArrayList<>(deps.nestedRefs());
+    Collections.sort(nestedIds, FunctionId.LEXICOGRAPHIC_COMPARATOR);
 
-	String addFieldName(String n) {
-		// TODO
-		return n;
-	}
+    for (FunctionId childId : nestedIds) {
+      String childClassName = childId.toClassName(classNameTranslator);
+      String childInternalName = ASMUtils.typeForClassName(childClassName).getInternalName();
 
-	private static String toFieldName(String n) {
-		return n;  // TODO
-	}
+      // assume (ownInternalName + "$") is the prefix of childName
+      String suffix = childInternalName.substring(ownInternalName.length() + 1);
 
-	private static String ensureUnique(Collection<String> ss, String s) {
-		int idx = 0;
-		String prefix = s;
+      classNode.innerClasses.add(new InnerClassNode(
+          childInternalName,
+          ownInternalName,
+          suffix,
+          ACC_PUBLIC + ACC_STATIC));
+    }
+  }
 
-		while (ss.contains(s)) {
-			s = prefix + "_" + (idx++);
-		}
+  private FieldNode instanceField() {
+    return new FieldNode(
+        ACC_PUBLIC + ACC_FINAL + ACC_STATIC,
+        instanceFieldName(),
+        thisClassType().getDescriptor(),
+        null,
+        null);
+  }
 
-		return s;
-	}
+  String addFieldName(String n) {
+    // TODO
+    return n;
+  }
 
-	private static String preferredUpvalueName(UpVar uv) {
-		return uv.name().value();
-	}
+  private void addUpvalueFields() {
+    for (UpVar uv : fn.upvals()) {
+      String name = toFieldName(ensureUnique(upvalueFieldNames.values(), preferredUpvalueName(uv)));
+      upvalueFieldNames.put(uv, name);
 
-	private void addUpvalueFields() {
-		for (UpVar uv : fn.upvals()) {
-			String name = toFieldName(ensureUnique(upvalueFieldNames.values(), preferredUpvalueName(uv)));
-			upvalueFieldNames.put(uv, name);
+      FieldNode fieldNode = new FieldNode(
+          ACC_PROTECTED + ACC_FINAL,
+          name,
+          Type.getDescriptor(Variable.class),
+          null,
+          null);
 
-			FieldNode fieldNode = new FieldNode(
-					ACC_PROTECTED + ACC_FINAL,
-					name,
-					Type.getDescriptor(Variable.class),
-					null,
-					null);
+      classNode.fields.add(fieldNode);
+    }
+  }
 
-			classNode.fields.add(fieldNode);
-		}
-	}
+  public String getUpvalueFieldName(UpVar uv) {
+    String name = upvalueFieldNames.get(uv);
+    if (name == null) {
+      throw new IllegalArgumentException("upvalue field name is null for upvalue " + uv);
+    }
+    return name;
+  }
 
-	public String getUpvalueFieldName(UpVar uv) {
-		String name = upvalueFieldNames.get(uv);
-		if (name == null) {
-			throw new IllegalArgumentException("upvalue field name is null for upvalue " + uv);
-		}
-		return name;
-	}
+  public ClassNode classNode() {
+    classNode.version = V1_7;
+    classNode.access = ACC_PUBLIC + ACC_SUPER;
+    classNode.name = thisClassType().getInternalName();
+    classNode.superName = superClassType().getInternalName();
+    classNode.sourceFile = sourceFile;
 
-	public ClassNode classNode() {
-		classNode.version = V1_7;
-		classNode.access = ACC_PUBLIC + ACC_SUPER;
-		classNode.name = thisClassType().getInternalName();
-		classNode.superName = superClassType().getInternalName();
-		classNode.sourceFile = sourceFile;
+    addInnerClassLinks();
 
-		addInnerClassLinks();
+    if (!hasUpvalues()) {
+      classNode.fields.add(instanceField());
+    }
 
-		if (!hasUpvalues()) {
-			classNode.fields.add(instanceField());
-		}
+    addUpvalueFields();
 
-		addUpvalueFields();
+    RunMethod runMethod = new RunMethod(this);
 
-		RunMethod runMethod = new RunMethod(this);
+    for (RunMethod.ConstFieldInstance cfi : runMethod.constFields()) {
+      classNode.fields.add(cfi.fieldNode());
+    }
 
-		for (RunMethod.ConstFieldInstance cfi : runMethod.constFields()) {
-			classNode.fields.add(cfi.fieldNode());
-		}
+    ConstructorMethod ctor = new ConstructorMethod(this, runMethod);
 
-		ConstructorMethod ctor = new ConstructorMethod(this, runMethod);
+    classNode.methods.add(ctor.methodNode());
+    classNode.methods.add(new InvokeMethod(this, runMethod).methodNode());
+    classNode.methods.add(new ResumeMethod(this, runMethod).methodNode());
+    classNode.methods.addAll(runMethod.methodNodes());
 
-		classNode.methods.add(ctor.methodNode());
-		classNode.methods.add(new InvokeMethod(this, runMethod).methodNode());
-		classNode.methods.add(new ResumeMethod(this, runMethod).methodNode());
-		classNode.methods.addAll(runMethod.methodNodes());
+    if (runMethod.usesSnapshotMethod()) {
+      classNode.methods.add(runMethod.snapshotMethodNode());
+    }
 
-		if (runMethod.usesSnapshotMethod()) {
-			classNode.methods.add(runMethod.snapshotMethodNode());
-		}
+    StaticConstructorMethod staticCtor = new StaticConstructorMethod(this, ctor, runMethod);
+    if (!staticCtor.isEmpty()) {
+      classNode.methods.add(staticCtor.methodNode());
+    }
 
-		StaticConstructorMethod staticCtor = new StaticConstructorMethod(this, ctor, runMethod);
-		if (!staticCtor.isEmpty()) {
-			classNode.methods.add(staticCtor.methodNode());
-		}
+    classNode.fields.addAll(fields);
 
-		classNode.fields.addAll(fields);
+    return classNode;
+  }
 
-		return classNode;
-	}
+  private byte[] classNodeToBytes(ClassNode classNode) {
+    ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+    classNode.accept(writer);
+    byte[] bytes = writer.toByteArray();
 
-	private byte[] classNodeToBytes(ClassNode classNode) {
-		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-		classNode.accept(writer);
-		byte[] bytes = writer.toByteArray();
+    // verify bytecode
 
-		// verify bytecode
+    if (verifyAndPrint) {
+      ClassReader reader = new ClassReader(bytes);
+      ClassVisitor tracer = new TraceClassVisitor(new PrintWriter(System.out));
+      ClassVisitor checker = new CheckClassAdapter(tracer, true);
+      reader.accept(checker, 0);
+    }
 
-		if (verifyAndPrint) {
-			ClassReader reader = new ClassReader(bytes);
-			ClassVisitor tracer = new TraceClassVisitor(new PrintWriter(System.out));
-			ClassVisitor checker = new CheckClassAdapter(tracer, true);
-			reader.accept(checker, 0);
-		}
+    return bytes;
+  }
 
-		return bytes;
-	}
+  @Override
+  public CompiledClass emit() {
+    ClassNode classNode = classNode();
+    byte[] bytes = classNodeToBytes(classNode);
+    return new CompiledClass(thisClassName(), ByteVector.wrap(bytes));
+  }
 
-	@Override
-	public CompiledClass emit() {
-		ClassNode classNode = classNode();
-		byte[] bytes = classNodeToBytes(classNode);
-		return new CompiledClass(thisClassName(), ByteVector.wrap(bytes));
-	}
+  enum NestedInstanceKind {
+    Pure,
+    Closed,
+    Open
+  }
 
 }

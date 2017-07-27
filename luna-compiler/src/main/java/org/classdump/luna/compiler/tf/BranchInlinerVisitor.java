@@ -16,6 +16,7 @@
 
 package org.classdump.luna.compiler.tf;
 
+import java.util.Objects;
 import org.classdump.luna.compiler.analysis.TypeInfo;
 import org.classdump.luna.compiler.analysis.types.LuaTypes;
 import org.classdump.luna.compiler.analysis.types.Type;
@@ -23,69 +24,62 @@ import org.classdump.luna.compiler.ir.Branch;
 import org.classdump.luna.compiler.ir.Jmp;
 import org.classdump.luna.compiler.ir.ToNext;
 
-import java.util.Objects;
-
 class BranchInlinerVisitor extends CodeTransformerVisitor {
 
-	private final TypeInfo types;
-	private Boolean inline;
+  private final TypeInfo types;
+  private Boolean inline;
 
-	public BranchInlinerVisitor(TypeInfo types) {
-		this.types = Objects.requireNonNull(types);
-	}
+  public BranchInlinerVisitor(TypeInfo types) {
+    this.types = Objects.requireNonNull(types);
+  }
 
-	@Override
-	public void visit(Branch branch) {
-		try {
-			inline = null;
-			branch.condition().accept(this);
-			if (inline != null) {
-				if (inline) {
-					setEnd(new Jmp(branch.jmpDest()));
-				}
-				else {
-					setEnd(new ToNext(branch.next()));
-				}
-			}
-		}
-		finally {
-			inline = null;
-		}
-	}
+  @Override
+  public void visit(Branch branch) {
+    try {
+      inline = null;
+      branch.condition().accept(this);
+      if (inline != null) {
+        if (inline) {
+          setEnd(new Jmp(branch.jmpDest()));
+        } else {
+          setEnd(new ToNext(branch.next()));
+        }
+      }
+    } finally {
+      inline = null;
+    }
+  }
 
-	@Override
-	public void visit(Branch.Condition.Nil cond) {
-		Type t = types.typeOf(cond.addr());
-		if (t.isSubtypeOf(LuaTypes.NIL)) {
-			inline = Boolean.TRUE;
-		}
-		else if (t.isSubtypeOf(LuaTypes.ANY) && !t.equals(LuaTypes.ANY)) {
-			inline = Boolean.FALSE;
-		}
-		else {
-			inline = null;
-		}
-	}
+  @Override
+  public void visit(Branch.Condition.Nil cond) {
+    Type t = types.typeOf(cond.addr());
+    if (t.isSubtypeOf(LuaTypes.NIL)) {
+      inline = Boolean.TRUE;
+    } else if (t.isSubtypeOf(LuaTypes.ANY) && !t.equals(LuaTypes.ANY)) {
+      inline = Boolean.FALSE;
+    } else {
+      inline = null;
+    }
+  }
 
-	@Override
-	public void visit(Branch.Condition.Bool cond) {
-		Type t = types.typeOf(cond.addr());
-		if (t.isSubtypeOf(LuaTypes.NIL)) {
-			// t evaluates to false
-			inline = !cond.expected();
-		}
-		else if (t.isSubtypeOf(LuaTypes.ANY) && !t.equals(LuaTypes.ANY) && !t.isSubtypeOf(LuaTypes.BOOLEAN)) {
-			// t evaluates to true
-			inline = cond.expected();
-		}
-		else {
-			inline = null;
-		}
-	}
+  @Override
+  public void visit(Branch.Condition.Bool cond) {
+    Type t = types.typeOf(cond.addr());
+    if (t.isSubtypeOf(LuaTypes.NIL)) {
+      // t evaluates to false
+      inline = !cond.expected();
+    } else if (t.isSubtypeOf(LuaTypes.ANY) && !t.equals(LuaTypes.ANY) && !t
+        .isSubtypeOf(LuaTypes.BOOLEAN)) {
+      // t evaluates to true
+      inline = cond.expected();
+    } else {
+      inline = null;
+    }
+  }
 
-	@Override
-	public void visit(Branch.Condition.NumLoopEnd cond) {
-		inline = null;
-	}
+  @Override
+  public void visit(Branch.Condition.NumLoopEnd cond) {
+    inline = null;
+  }
 
 }

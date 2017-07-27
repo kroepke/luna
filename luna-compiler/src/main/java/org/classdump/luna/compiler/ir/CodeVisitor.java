@@ -16,39 +16,37 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.IRFunc;
-import org.classdump.luna.compiler.ir.IRVisitor;
-
 import java.util.Iterator;
+import org.classdump.luna.compiler.IRFunc;
 
 public class CodeVisitor extends IRVisitor {
 
-	public CodeVisitor(IRVisitor visitor) {
-		super(visitor);
-	}
+  public CodeVisitor(IRVisitor visitor) {
+    super(visitor);
+  }
 
-	public CodeVisitor() {
-		super();
-	}
+  public CodeVisitor() {
+    super();
+  }
 
-	public void visit(IRFunc func) {
-		visit(func.code());
-	}
+  public void visit(IRFunc func) {
+    visit(func.code());
+  }
 
-	public void visit(Code code) {
-		Iterator<BasicBlock> it = code.blockIterator();
-		while (it.hasNext()) {
-			BasicBlock b = it.next();
-			visit(b);
-		}
-	}
+  public void visit(Code code) {
+    Iterator<BasicBlock> it = code.blockIterator();
+    while (it.hasNext()) {
+      BasicBlock b = it.next();
+      visit(b);
+    }
+  }
 
-	public void visit(BasicBlock block) {
-		visit(block.label());
-		for (IRNode n : block.body()) {
-			n.accept(this);
-		}
-		block.end().accept(this);
-	}
+  public void visit(BasicBlock block) {
+    visit(block.label());
+    for (IRNode n : block.body()) {
+      n.accept(this);
+    }
+    block.end().accept(this);
+  }
 
 }

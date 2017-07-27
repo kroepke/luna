@@ -24,73 +24,73 @@ package org.classdump.luna;
  */
 public class LuaRuntimeException extends RuntimeException {
 
-	private final Object errorObject;
+  private final Object errorObject;
 
-	private LuaRuntimeException(Throwable cause, Object errorObject) {
-		super(cause);
-		this.errorObject = errorObject;
-	}
+  private LuaRuntimeException(Throwable cause, Object errorObject) {
+    super(cause);
+    this.errorObject = errorObject;
+  }
 
-	/**
-	 * Constructs a new {@code LuaRuntimeException} with {@code errorObject} as its
-	 * error object. {@code errorObject} may be {@code null}.
-	 *
-	 * @param errorObject  the error object, may be {@code null}
-	 */
-	public LuaRuntimeException(Object errorObject) {
-		this(null, errorObject);
-	}
+  /**
+   * Constructs a new {@code LuaRuntimeException} with {@code errorObject} as its
+   * error object. {@code errorObject} may be {@code null}.
+   *
+   * @param errorObject the error object, may be {@code null}
+   */
+  public LuaRuntimeException(Object errorObject) {
+    this(null, errorObject);
+  }
 
-	/**
-	 * Constructs a new {@code LuaRuntimeException} with {@code cause} as its cause.
-	 *
-	 * <p>When queried for the error object, invokes {@link Conversions#toErrorObject(Throwable)}
-	 * on {@code cause}; when {@code cause} is {@code null}, then the error object
-	 * is {@code null}.</p>
-	 *
-	 * @param cause  the cause of this error, may be {@code null}
-	 */
-	public LuaRuntimeException(Throwable cause) {
-		this(cause, null);
-	}
+  /**
+   * Constructs a new {@code LuaRuntimeException} with {@code cause} as its cause.
+   *
+   * <p>When queried for the error object, invokes {@link Conversions#toErrorObject(Throwable)}
+   * on {@code cause}; when {@code cause} is {@code null}, then the error object
+   * is {@code null}.</p>
+   *
+   * @param cause the cause of this error, may be {@code null}
+   */
+  public LuaRuntimeException(Throwable cause) {
+    this(cause, null);
+  }
 
-	/**
-	 * Returns the error object attached to this exception converted to a string.
-	 *
-	 * @return  error object converted to a string
-	 */
-	@Override
-	public String getMessage() {
-		return getErrorLocation() + Conversions.toHumanReadableString(getErrorObject()).toString();
-	}
+  /**
+   * Returns the error object attached to this exception converted to a string.
+   *
+   * @return error object converted to a string
+   */
+  @Override
+  public String getMessage() {
+    return getErrorLocation() + Conversions.toHumanReadableString(getErrorObject()).toString();
+  }
 
-	/**
-	 * Returns the error object attached to this exception. The error object may be {@code null}.
-	 *
-	 * @return  the error object attached to this exception (possibly {@code null})
-	 */
-	public Object getErrorObject() {
-		Throwable cause = getCause();
-		if (cause != null) {
-			return Conversions.toErrorObject(cause);
-		}
-		else {
-			return errorObject;
-		}
-	}
+  /**
+   * Returns the error object attached to this exception. The error object may be {@code null}.
+   *
+   * @return the error object attached to this exception (possibly {@code null})
+   */
+  public Object getErrorObject() {
+    Throwable cause = getCause();
+    if (cause != null) {
+      return Conversions.toErrorObject(cause);
+    } else {
+      return errorObject;
+    }
+  }
 
-	/**
-	 * Returns the closest location in the Lua code when this exception was triggered.
-	 *
-	 * @return the location of this error in the Lua code, @{code file:line} or @{code unknown:-1} if it could not be determined
-	 */
-	public String getErrorLocation() {
-		for (StackTraceElement stackTraceElement : getStackTrace()) {
-			if (stackTraceElement.getClassName().startsWith("luna_dynamic")) {
-				return stackTraceElement.getFileName() + ":" + stackTraceElement.getLineNumber() + ": ";
-			}
-		}
-		return "";
-	}
+  /**
+   * Returns the closest location in the Lua code when this exception was triggered.
+   *
+   * @return the location of this error in the Lua code, @{code file:line} or @{code unknown:-1} if
+   * it could not be determined
+   */
+  public String getErrorLocation() {
+    for (StackTraceElement stackTraceElement : getStackTrace()) {
+      if (stackTraceElement.getClassName().startsWith("luna_dynamic")) {
+        return stackTraceElement.getFileName() + ":" + stackTraceElement.getLineNumber() + ": ";
+      }
+    }
+    return "";
+  }
 
 }

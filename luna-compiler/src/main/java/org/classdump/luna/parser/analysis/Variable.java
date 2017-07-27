@@ -16,43 +16,42 @@
 
 package org.classdump.luna.parser.analysis;
 
-import org.classdump.luna.parser.ast.Name;
-
 import java.util.Objects;
+import org.classdump.luna.parser.ast.Name;
 
 public class Variable {
 
-	public static final Name ENV_NAME = Name.fromString("_ENV");
-	public static final Variable ENV = new Variable(ENV_NAME);
+  public static final Name ENV_NAME = Name.fromString("_ENV");
+  public static final Variable ENV = new Variable(ENV_NAME);
 
-	private final Name name;
-	private final Ref ref;
+  private final Name name;
+  private final Ref ref;
 
-	public Variable(Name name) {
-		this.name = Objects.requireNonNull(name);
-		this.ref = new Ref(this);
-	}
+  public Variable(Name name) {
+    this.name = Objects.requireNonNull(name);
+    this.ref = new Ref(this);
+  }
 
-	public Name name() {
-		return name;
-	}
+  public Name name() {
+    return name;
+  }
 
-	public Ref ref() {
-		return ref;
-	}
+  public Ref ref() {
+    return ref;
+  }
 
-	public static class Ref {
+  public static class Ref {
 
-		private final Variable var;
+    private final Variable var;
 
-		public Ref(Variable var) {
-			this.var = Objects.requireNonNull(var);
-		}
+    public Ref(Variable var) {
+      this.var = Objects.requireNonNull(var);
+    }
 
-		public Variable var() {
-			return var;
-		}
+    public Variable var() {
+      return var;
+    }
 
-	}
+  }
 
 }

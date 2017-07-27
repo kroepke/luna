@@ -21,47 +21,49 @@ import java.util.Objects;
 
 public class LocalDeclStatement extends BodyStatement {
 
-	private final List<Name> names;
-	private final List<Expr> initialisers;
+  private final List<Name> names;
+  private final List<Expr> initialisers;
 
-	public LocalDeclStatement(Attributes attr, List<Name> names, List<Expr> initialisers) {
-		super(attr);
-		this.names = Objects.requireNonNull(names);
-		if (names.isEmpty()) {
-			throw new IllegalArgumentException("name list must not be empty");
-		}
-		this.initialisers = Objects.requireNonNull(initialisers);
-	}
+  public LocalDeclStatement(Attributes attr, List<Name> names, List<Expr> initialisers) {
+    super(attr);
+    this.names = Objects.requireNonNull(names);
+    if (names.isEmpty()) {
+      throw new IllegalArgumentException("name list must not be empty");
+    }
+    this.initialisers = Objects.requireNonNull(initialisers);
+  }
 
-	public List<Name> names() {
-		return names;
-	}
+  public List<Name> names() {
+    return names;
+  }
 
-	public List<Expr> initialisers() {
-		return initialisers;
-	}
+  public List<Expr> initialisers() {
+    return initialisers;
+  }
 
-	public LocalDeclStatement update(List<Name> names, List<Expr> initialisers) {
-		if (this.names.equals(names) && this.initialisers.equals(initialisers)) {
-			return this;
-		}
-		else {
-			return new LocalDeclStatement(attributes(), names, initialisers);
-		}
-	}
+  public LocalDeclStatement update(List<Name> names, List<Expr> initialisers) {
+    if (this.names.equals(names) && this.initialisers.equals(initialisers)) {
+      return this;
+    } else {
+      return new LocalDeclStatement(attributes(), names, initialisers);
+    }
+  }
 
-	public LocalDeclStatement withAttributes(Attributes attr) {
-		if (attributes().equals(attr)) return this;
-		else return new LocalDeclStatement(attr, names, initialisers);
-	}
+  public LocalDeclStatement withAttributes(Attributes attr) {
+    if (attributes().equals(attr)) {
+      return this;
+    } else {
+      return new LocalDeclStatement(attr, names, initialisers);
+    }
+  }
 
-	public LocalDeclStatement with(Object o) {
-		return this.withAttributes(attributes().with(o));
-	}
+  public LocalDeclStatement with(Object o) {
+    return this.withAttributes(attributes().with(o));
+  }
 
-	@Override
-	public BodyStatement accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public BodyStatement accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

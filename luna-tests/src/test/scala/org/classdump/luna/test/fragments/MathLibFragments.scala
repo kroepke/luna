@@ -20,55 +20,55 @@ import org.classdump.luna.test.{FragmentBundle, FragmentExpectations, OneLiners}
 
 object MathLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
-  in (MathContext) {
+  in(MathContext) {
 
-    about ("floor") {
-      program ("return math.floor(3.0), math.floor(3.1)") succeedsWith (3, 3)
+    about("floor") {
+      program("return math.floor(3.0), math.floor(3.1)") succeedsWith(3, 3)
     }
 
-    about ("modf") {
-      program ("return math.modf(3.5)") succeedsWith (3, 0.5)
-      program ("return math.modf(-2.5)") succeedsWith (-2, -0.5)
-      program ("return math.modf(-3e23)") succeedsWith (-3e23, 0.0)
-      program ("return math.modf(3e35)") succeedsWith (3e35, 0.0)
-      program ("return math.modf(-1/0)") succeedsWith (Double.NegativeInfinity, 0.0)
-      program ("return math.modf(1/0)") succeedsWith (Double.PositiveInfinity, 0.0)
-      program ("return math.modf(0/0)") succeedsWith (NaN, NaN)
-      program ("return math.modf(3)") succeedsWith (3, 0.0)
-      program ("return math.modf(math.mininteger)") succeedsWith (Long.MinValue, 0.0)
+    about("modf") {
+      program("return math.modf(3.5)") succeedsWith(3, 0.5)
+      program("return math.modf(-2.5)") succeedsWith(-2, -0.5)
+      program("return math.modf(-3e23)") succeedsWith(-3e23, 0.0)
+      program("return math.modf(3e35)") succeedsWith(3e35, 0.0)
+      program("return math.modf(-1/0)") succeedsWith(Double.NegativeInfinity, 0.0)
+      program("return math.modf(1/0)") succeedsWith(Double.PositiveInfinity, 0.0)
+      program("return math.modf(0/0)") succeedsWith(NaN, NaN)
+      program("return math.modf(3)") succeedsWith(3, 0.0)
+      program("return math.modf(math.mininteger)") succeedsWith(Long.MinValue, 0.0)
     }
 
-    about ("huge") {
-      program ("return math.huge") succeedsWith Double.PositiveInfinity
+    about("huge") {
+      program("return math.huge") succeedsWith Double.PositiveInfinity
     }
 
-    about ("maxinteger") {
-      program ("return math.maxinteger") succeedsWith Long.MaxValue
+    about("maxinteger") {
+      program("return math.maxinteger") succeedsWith Long.MaxValue
     }
 
-    about ("mininteger") {
-      program ("return math.mininteger") succeedsWith Long.MinValue
+    about("mininteger") {
+      program("return math.mininteger") succeedsWith Long.MinValue
     }
 
-    about ("random") {
-      program ("math.random(0)") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'random' (interval is empty)")
-      program ("math.random(1, 0)") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'random' (interval is empty)")
+    about("random") {
+      program("math.random(0)") failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'random' (interval is empty)")
+      program("math.random(1, 0)") failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'random' (interval is empty)")
 
-      program ("return math.random(0, 0)") succeedsWith (0)
+      program("return math.random(0, 0)") succeedsWith (0)
 
-      program ("return math.random(-10000000000000000000, 10000000000000000000)") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'random' (number has no integer representation)")
+      program("return math.random(-10000000000000000000, 10000000000000000000)") failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'random' (number has no integer representation)")
 
-      program ("math.random(1 << 63, (1 << 63) - 1)") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'random' (interval too large)")
+      program("math.random(1 << 63, (1 << 63) - 1)") failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'random' (interval too large)")
     }
 
-    about ("randomseed") {
-      program ("math.randomseed(1)") succeedsWith ()
-      program ("math.randomseed(1.0)") succeedsWith ()
-      program ("""math.randomseed("1")""") succeedsWith ()
+    about("randomseed") {
+      program("math.randomseed(1)") succeedsWith()
+      program("math.randomseed(1.0)") succeedsWith()
+      program("""math.randomseed("1")""") succeedsWith()
 
-      program ("math.randomseed()") failsWith (classOf[IllegalArgumentException], ""<<"bad argument #1 to 'randomseed' (number expected, got no value)")
+      program("math.randomseed()") failsWith(classOf[IllegalArgumentException], "" << "bad argument #1 to 'randomseed' (number expected, got no value)")
 
-      program (
+      program(
         """math.randomseed(0)
           |local x = math.random()
           |math.randomseed(0)

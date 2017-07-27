@@ -18,12 +18,12 @@ package org.classdump.luna.lib.luajava;
 
 public class MethodSelectionException extends Exception {
 
-	public MethodSelectionException(String message) {
-		super(message);
-	}
+  public MethodSelectionException(String message) {
+    super(message);
+  }
 
-	public MethodSelectionException(Throwable cause) {
-		super(cause);
-	}
+  public MethodSelectionException(Throwable cause) {
+    super(cause);
+  }
 
 }

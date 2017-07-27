@@ -23,163 +23,177 @@ import org.classdump.luna.Table;
 
 class DefaultMetatableAccessor implements MetatableAccessor {
 
-	/**
-	 * The {@code nil} metatable.
-	 */
-	protected Table nilMetatable;
+  /**
+   * The {@code nil} metatable.
+   */
+  protected Table nilMetatable;
 
-	/**
-	 * The {@code boolean} metatable.
-	 */
-	protected Table booleanMetatable;
+  /**
+   * The {@code boolean} metatable.
+   */
+  protected Table booleanMetatable;
 
-	/**
-	 * The {@code number} metatable.
-	 */
-	protected Table numberMetatable;
+  /**
+   * The {@code number} metatable.
+   */
+  protected Table numberMetatable;
 
-	/**
-	 * The {@code string} metatable.
-	 */
-	protected Table stringMetatable;
+  /**
+   * The {@code string} metatable.
+   */
+  protected Table stringMetatable;
 
-	/**
-	 * The {@code function} metatable.
-	 */
-	protected Table functionMetatable;
+  /**
+   * The {@code function} metatable.
+   */
+  protected Table functionMetatable;
 
-	/**
-	 * The {@code thread} metatable.
-	 */
-	protected Table threadMetatable;
+  /**
+   * The {@code thread} metatable.
+   */
+  protected Table threadMetatable;
 
-	/**
-	 * The light userdata metatable.
-	 */
-	protected Table lightuserdataMetatable;
+  /**
+   * The light userdata metatable.
+   */
+  protected Table lightuserdataMetatable;
 
-	@Override
-	public Table getNilMetatable() {
-		return nilMetatable;
-	}
+  @Override
+  public Table getNilMetatable() {
+    return nilMetatable;
+  }
 
-	@Override
-	public Table getBooleanMetatable() {
-		return booleanMetatable;
-	}
+  @Override
+  public Table getBooleanMetatable() {
+    return booleanMetatable;
+  }
 
-	@Override
-	public Table getNumberMetatable() {
-		return numberMetatable;
-	}
+  @Override
+  public Table getNumberMetatable() {
+    return numberMetatable;
+  }
 
-	@Override
-	public Table getStringMetatable() {
-		return stringMetatable;
-	}
+  @Override
+  public Table getStringMetatable() {
+    return stringMetatable;
+  }
 
-	@Override
-	public Table getFunctionMetatable() {
-		return functionMetatable;
-	}
+  @Override
+  public Table getFunctionMetatable() {
+    return functionMetatable;
+  }
 
-	@Override
-	public Table getThreadMetatable() {
-		return threadMetatable;
-	}
+  @Override
+  public Table getThreadMetatable() {
+    return threadMetatable;
+  }
 
-	@Override
-	public Table getLightUserdataMetatable() {
-		return lightuserdataMetatable;
-	}
+  @Override
+  public Table getLightUserdataMetatable() {
+    return lightuserdataMetatable;
+  }
 
-	@Override
-	public Table getMetatable(Object o) {
-		if (o instanceof LuaObject) {
-			return ((LuaObject) o).getMetatable();
-		}
-		else {
-			LuaType type = LuaType.typeOf(o);
-			switch (type) {
-				case NIL: return getNilMetatable();
-				case BOOLEAN: return getBooleanMetatable();
-				case NUMBER: return getNumberMetatable();
-				case STRING: return getStringMetatable();
-				case FUNCTION: return getFunctionMetatable();
-				case THREAD: return getThreadMetatable();
-				case USERDATA: return getLightUserdataMetatable();
-				default: throw new IllegalStateException("Illegal type: " + type);
-			}
-		}
-	}
+  @Override
+  public Table getMetatable(Object o) {
+    if (o instanceof LuaObject) {
+      return ((LuaObject) o).getMetatable();
+    } else {
+      LuaType type = LuaType.typeOf(o);
+      switch (type) {
+        case NIL:
+          return getNilMetatable();
+        case BOOLEAN:
+          return getBooleanMetatable();
+        case NUMBER:
+          return getNumberMetatable();
+        case STRING:
+          return getStringMetatable();
+        case FUNCTION:
+          return getFunctionMetatable();
+        case THREAD:
+          return getThreadMetatable();
+        case USERDATA:
+          return getLightUserdataMetatable();
+        default:
+          throw new IllegalStateException("Illegal type: " + type);
+      }
+    }
+  }
 
-	@Override
-	public Table setNilMetatable(Table table) {
-		Table old = nilMetatable;
-		nilMetatable = table;
-		return old;
-	}
+  @Override
+  public Table setNilMetatable(Table table) {
+    Table old = nilMetatable;
+    nilMetatable = table;
+    return old;
+  }
 
-	@Override
-	public Table setBooleanMetatable(Table table) {
-		Table old = booleanMetatable;
-		booleanMetatable = table;
-		return old;
-	}
+  @Override
+  public Table setBooleanMetatable(Table table) {
+    Table old = booleanMetatable;
+    booleanMetatable = table;
+    return old;
+  }
 
-	@Override
-	public Table setNumberMetatable(Table table) {
-		Table old = numberMetatable;
-		numberMetatable = table;
-		return old;
-	}
+  @Override
+  public Table setNumberMetatable(Table table) {
+    Table old = numberMetatable;
+    numberMetatable = table;
+    return old;
+  }
 
-	@Override
-	public Table setStringMetatable(Table table) {
-		Table old = stringMetatable;
-		stringMetatable = table;
-		return old;
-	}
+  @Override
+  public Table setStringMetatable(Table table) {
+    Table old = stringMetatable;
+    stringMetatable = table;
+    return old;
+  }
 
-	@Override
-	public Table setFunctionMetatable(Table table) {
-		Table old = functionMetatable;
-		functionMetatable = table;
-		return old;
-	}
+  @Override
+  public Table setFunctionMetatable(Table table) {
+    Table old = functionMetatable;
+    functionMetatable = table;
+    return old;
+  }
 
-	@Override
-	public Table setThreadMetatable(Table table) {
-		Table old = threadMetatable;
-		threadMetatable = table;
-		return old;
-	}
+  @Override
+  public Table setThreadMetatable(Table table) {
+    Table old = threadMetatable;
+    threadMetatable = table;
+    return old;
+  }
 
-	@Override
-	public Table setLightUserdataMetatable(Table table) {
-		Table old = lightuserdataMetatable;
-		lightuserdataMetatable = table;
-		return old;
-	}
+  @Override
+  public Table setLightUserdataMetatable(Table table) {
+    Table old = lightuserdataMetatable;
+    lightuserdataMetatable = table;
+    return old;
+  }
 
-	@Override
-	public Table setMetatable(Object o, Table table) {
-		if (o instanceof LuaObject) {
-			return ((LuaObject) o).setMetatable(table);
-		}
-		else {
-			LuaType type = LuaType.typeOf(o);
-			switch (type) {
-				case NIL: return setNilMetatable(table);
-				case BOOLEAN: return setBooleanMetatable(table);
-				case NUMBER: return setNumberMetatable(table);
-				case STRING: return setStringMetatable(table);
-				case FUNCTION: return setFunctionMetatable(table);
-				case THREAD: return setThreadMetatable(table);
-				case USERDATA: return setLightUserdataMetatable(table);
-				default: throw new IllegalStateException("Illegal type: " + type);
-			}
-		}
-	}
+  @Override
+  public Table setMetatable(Object o, Table table) {
+    if (o instanceof LuaObject) {
+      return ((LuaObject) o).setMetatable(table);
+    } else {
+      LuaType type = LuaType.typeOf(o);
+      switch (type) {
+        case NIL:
+          return setNilMetatable(table);
+        case BOOLEAN:
+          return setBooleanMetatable(table);
+        case NUMBER:
+          return setNumberMetatable(table);
+        case STRING:
+          return setStringMetatable(table);
+        case FUNCTION:
+          return setFunctionMetatable(table);
+        case THREAD:
+          return setThreadMetatable(table);
+        case USERDATA:
+          return setLightUserdataMetatable(table);
+        default:
+          throw new IllegalStateException("Illegal type: " + type);
+      }
+    }
+  }
 
 }

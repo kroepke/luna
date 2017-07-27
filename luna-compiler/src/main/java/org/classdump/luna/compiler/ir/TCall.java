@@ -16,38 +16,35 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.IRVisitor;
-import org.classdump.luna.compiler.ir.Label;
-
 import java.util.Collections;
 import java.util.Objects;
 
 public class TCall extends BlockTermNode {
 
-	private final Val target;
-	private final VList args;
+  private final Val target;
+  private final VList args;
 
-	public TCall(Val target, VList args) {
-		this.target = Objects.requireNonNull(target);
-		this.args = Objects.requireNonNull(args);
-	}
+  public TCall(Val target, VList args) {
+    this.target = Objects.requireNonNull(target);
+    this.args = Objects.requireNonNull(args);
+  }
 
-	public Val target() {
-		return target;
-	}
+  public Val target() {
+    return target;
+  }
 
-	public VList args() {
-		return args;
-	}
+  public VList args() {
+    return args;
+  }
 
-	@Override
-	public Iterable<Label> nextLabels() {
-		return Collections.emptyList();
-	}
+  @Override
+  public Iterable<Label> nextLabels() {
+    return Collections.emptyList();
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

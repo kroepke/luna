@@ -18,26 +18,26 @@ package org.classdump.luna.parser.ast;
 
 public class BooleanLiteral extends Literal {
 
-	public static final BooleanLiteral TRUE = new BooleanLiteral(true);
-	public static final BooleanLiteral FALSE = new BooleanLiteral(false);
+  public static final BooleanLiteral TRUE = new BooleanLiteral(true);
+  public static final BooleanLiteral FALSE = new BooleanLiteral(false);
 
-	private final boolean value;
+  private final boolean value;
 
-	private BooleanLiteral(boolean value) {
-		this.value = value;
-	}
+  private BooleanLiteral(boolean value) {
+    this.value = value;
+  }
 
-	public BooleanLiteral fromBoolean(boolean b) {
-		return b ? TRUE : FALSE;
-	}
+  public BooleanLiteral fromBoolean(boolean b) {
+    return b ? TRUE : FALSE;
+  }
 
-	public boolean value() {
-		return value;
-	}
+  public boolean value() {
+    return value;
+  }
 
-	@Override
-	public Literal accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public Literal accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

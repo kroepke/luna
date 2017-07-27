@@ -16,73 +16,74 @@
 
 package org.classdump.luna.compiler;
 
+import java.util.List;
+import java.util.Objects;
 import org.classdump.luna.compiler.ir.Code;
 import org.classdump.luna.compiler.ir.UpVar;
 import org.classdump.luna.compiler.ir.Var;
-import org.classdump.luna.compiler.FunctionId;
-
-import java.util.List;
-import java.util.Objects;
 
 public class IRFunc {
 
-	private final FunctionId id;
-	private final List<Var> params;
-	private final boolean vararg;
-	private final List<UpVar> upvals;
-	private final Code code;
+  private final FunctionId id;
+  private final List<Var> params;
+  private final boolean vararg;
+  private final List<UpVar> upvals;
+  private final Code code;
 
-	public IRFunc(FunctionId id, List<Var> params, boolean vararg, List<UpVar> upvals, Code code) {
-		this.id = Objects.requireNonNull(id);
-		this.params = Objects.requireNonNull(params);
-		this.vararg = vararg;
-		this.upvals = Objects.requireNonNull(upvals);
-		this.code = Objects.requireNonNull(code);
-	}
+  public IRFunc(FunctionId id, List<Var> params, boolean vararg, List<UpVar> upvals, Code code) {
+    this.id = Objects.requireNonNull(id);
+    this.params = Objects.requireNonNull(params);
+    this.vararg = vararg;
+    this.upvals = Objects.requireNonNull(upvals);
+    this.code = Objects.requireNonNull(code);
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		IRFunc that = (IRFunc) o;
-		return id.equals(that.id)
-				&& params.equals(that.params)
-				&& upvals.equals(that.upvals)
-				&& code.equals(that.code);
-	}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    IRFunc that = (IRFunc) o;
+    return id.equals(that.id)
+        && params.equals(that.params)
+        && upvals.equals(that.upvals)
+        && code.equals(that.code);
+  }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, params, code);
-	}
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, params, code);
+  }
 
-	public FunctionId id() {
-		return id;
-	}
+  public FunctionId id() {
+    return id;
+  }
 
-	public List<Var> params() {
-		return params;
-	}
+  public List<Var> params() {
+    return params;
+  }
 
-	public boolean isVararg() {
-		return vararg;
-	}
+  public boolean isVararg() {
+    return vararg;
+  }
 
-	public List<UpVar> upvals() {
-		return upvals;
-	}
+  public List<UpVar> upvals() {
+    return upvals;
+  }
 
-	public Code code() {
-		return code;
-	}
+  public Code code() {
+    return code;
+  }
 
-	public IRFunc update(Code code) {
-		if (this.code.equals(code)) {
-			return this;
-		}
-		else {
-			return new IRFunc(id, params, vararg, upvals, code);
-		}
-	}
+  public IRFunc update(Code code) {
+    if (this.code.equals(code)) {
+      return this;
+    } else {
+      return new IRFunc(id, params, vararg, upvals, code);
+    }
+  }
 
 }

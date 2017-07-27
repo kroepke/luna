@@ -22,10 +22,7 @@ import org.classdump.luna.parser.analysis.{FunctionVarInfo, NameResolver, Variab
 import org.classdump.luna.parser.ast._
 import org.classdump.luna.parser.util.FormattingPrinterVisitor
 import org.classdump.luna.test.Util
-import org.classdump.luna.test.fragments._
-import org.classdump.luna.parser.analysis.FunctionVarInfo
-import org.classdump.luna.test.Util
-import org.classdump.luna.test.fragments.BasicFragments
+import org.classdump.luna.test.fragments.{BasicFragments, _}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
@@ -86,15 +83,17 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
     val visitor = new FormattingPrinterVisitor(pw, resolved)
     visitor.visit(chunk.block())
     pw.flush()
-    String.valueOf(bais.toByteArray map { _.toChar })
+    String.valueOf(bais.toByteArray map {
+      _.toChar
+    })
   }
 
   for (b <- bundles) {
-    describe ("from " + b.name + " :") {
+    describe("from " + b.name + " :") {
       for (f <- b.all) {
-        describe (f.description) {
+        describe(f.description) {
 
-          it ("can be parsed") {
+          it("can be parsed") {
             Util.silenced {
               val code = f.code
 
@@ -112,16 +111,16 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
 
               println("---RESULT-END---")
 
-              chunk mustNot be (null)
+              chunk mustNot be(null)
             }
           }
 
-          it ("pretty-printed is parsable") {
+          it("pretty-printed is parsable") {
             Util.silenced {
               val prettyPrinted = prettyPrint(tryParseChunk(f.code), false)
               try {
                 val reparsed = tryParseChunk(prettyPrinted)
-                reparsed mustNot be (null)
+                reparsed mustNot be(null)
               }
               catch {
                 case ex: Throwable =>
@@ -131,7 +130,7 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
             }
           }
 
-          it ("resolves names") {
+          it("resolves names") {
             Util.silenced {
               val parsedChunk = tryParseChunk(f.code)
               val resolvedChunk = resolveNames(parsedChunk)
@@ -168,8 +167,12 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
                 println(o + lineSuffix)
                 println("--> %d params, %d locals, %d upvals, vararg:%s/%s (declared/actual)".format(
                   numParams, numLocals, numUpvals, declaredVararg, actualVararg))
-                println("\tparams: " + (params.names().asScala map { _.value }).mkString("(", ", ", ")"))
-                println("\tlocals: " + (varInfo.locals().asScala map { varToString }).mkString("(", ", ", ")"))
+                println("\tparams: " + (params.names().asScala map {
+                  _.value
+                }).mkString("(", ", ", ")"))
+                println("\tlocals: " + (varInfo.locals().asScala map {
+                  varToString
+                }).mkString("(", ", ", ")"))
                 println("\tupvals: " + (varInfo.upvalues().asScala map { uv => varToString(uv.`var`()) }).mkString("(", ", ", ")"))
                 println()
               }

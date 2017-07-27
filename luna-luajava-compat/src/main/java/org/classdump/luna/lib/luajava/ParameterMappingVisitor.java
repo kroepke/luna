@@ -18,17 +18,22 @@ package org.classdump.luna.lib.luajava;
 
 interface ParameterMappingVisitor<T> {
 
-	T visitReferenceParameter(Class<?> clazz, Object arg);
+  T visitReferenceParameter(Class<?> clazz, Object arg);
 
-	T visitLongParameter(Object arg);
-	T visitIntParameter(Object arg);
-	T visitShortParameter(Object arg);
-	T visitByteParameter(Object arg);
-	T visitCharParameter(Object arg);
+  T visitLongParameter(Object arg);
 
-	T visitDoubleParameter(Object arg);
-	T visitFloatParameter(Object arg);
+  T visitIntParameter(Object arg);
 
-	T visitBooleanParameter(Object arg);
+  T visitShortParameter(Object arg);
+
+  T visitByteParameter(Object arg);
+
+  T visitCharParameter(Object arg);
+
+  T visitDoubleParameter(Object arg);
+
+  T visitFloatParameter(Object arg);
+
+  T visitBooleanParameter(Object arg);
 
 }

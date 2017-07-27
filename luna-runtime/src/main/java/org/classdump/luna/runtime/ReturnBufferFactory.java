@@ -21,11 +21,11 @@ package org.classdump.luna.runtime;
  */
 public interface ReturnBufferFactory {
 
-	/**
-	 * Returns a new {@link ReturnBuffer} instance.
-	 *
-	 * @return  a new return buffer
-	 */
-	ReturnBuffer newInstance();
+  /**
+   * Returns a new {@link ReturnBuffer} instance.
+   *
+   * @return a new return buffer
+   */
+  ReturnBuffer newInstance();
 
 }

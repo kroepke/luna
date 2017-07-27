@@ -20,29 +20,28 @@ import java.util.Objects;
 
 public class DoStatement extends BodyStatement {
 
-	private final Block block;
+  private final Block block;
 
-	public DoStatement(Attributes attr, Block block) {
-		super(attr);
-		this.block = Objects.requireNonNull(block);
-	}
+  public DoStatement(Attributes attr, Block block) {
+    super(attr);
+    this.block = Objects.requireNonNull(block);
+  }
 
-	public Block block() {
-		return block;
-	}
+  public Block block() {
+    return block;
+  }
 
-	public DoStatement update(Block block) {
-		if (this.block.equals(block)) {
-			return this;
-		}
-		else {
-			return new DoStatement(attributes(), block);
-		}
-	}
+  public DoStatement update(Block block) {
+    if (this.block.equals(block)) {
+      return this;
+    } else {
+      return new DoStatement(attributes(), block);
+    }
+  }
 
-	@Override
-	public BodyStatement accept(Transformer tf) {
-		return tf.transform(this);
-	}
+  @Override
+  public BodyStatement accept(Transformer tf) {
+    return tf.transform(this);
+  }
 
 }

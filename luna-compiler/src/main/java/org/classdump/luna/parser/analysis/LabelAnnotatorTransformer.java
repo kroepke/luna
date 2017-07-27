@@ -25,24 +25,24 @@ import org.classdump.luna.parser.ast.Transformer;
 
 public abstract class LabelAnnotatorTransformer extends Transformer {
 
-	protected abstract Object annotation(LabelStatement node);
+  protected abstract Object annotation(LabelStatement node);
 
-	protected abstract Object annotation(GotoStatement node);
+  protected abstract Object annotation(GotoStatement node);
 
-	@Override
-	public BodyStatement transform(LabelStatement node) {
-		return node.with(annotation(node));
-	}
+  @Override
+  public BodyStatement transform(LabelStatement node) {
+    return node.with(annotation(node));
+  }
 
-	@Override
-	public BodyStatement transform(GotoStatement node) {
-		return node.with(annotation(node));
-	}
+  @Override
+  public BodyStatement transform(GotoStatement node) {
+    return node.with(annotation(node));
+  }
 
-	@Override
-	public Expr transform(FunctionDefExpr e) {
-		// don't descend into function literals
-		return e;
-	}
+  @Override
+  public Expr transform(FunctionDefExpr e) {
+    // don't descend into function literals
+    return e;
+  }
 
 }

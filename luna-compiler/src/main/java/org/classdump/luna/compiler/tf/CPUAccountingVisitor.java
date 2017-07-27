@@ -16,6 +16,10 @@
 
 package org.classdump.luna.compiler.tf;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.Set;
 import org.classdump.luna.compiler.ir.BasicBlock;
 import org.classdump.luna.compiler.ir.BinOp;
 import org.classdump.luna.compiler.ir.BodyNode;
@@ -39,224 +43,216 @@ import org.classdump.luna.compiler.ir.UnOp;
 import org.classdump.luna.compiler.util.DefaultNodeActionVisitor;
 import org.classdump.luna.util.Check;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.Set;
-
 class CPUAccountingVisitor extends CodeTransformerVisitor {
 
-	private final Account acc;
+  public static final Account INITIALISE = new Account() {
+    @Override
+    public void cpuNode(CPUWithdraw node) {
+      // no-op
+    }
 
-	public static abstract class Account {
+    @Override
+    public void noCost() {
+      // no-op
+    }
 
-		private int cost;
+    @Override
+    public void staticCost(int c) {
+      add(c);
+    }
 
-		public int get() {
-			return cost;
-		}
+    @Override
+    public void dynamicCost() {
+      // no-op
+    }
 
-		public void reset() {
-			cost = 0;
-		}
+  };
+  public static final Account COLLECT = new Account() {
+    @Override
+    public void cpuNode(CPUWithdraw node) {
+      add(node.cost());
+    }
 
-		protected void add(int c) {
-			cost += Check.nonNegative(c);
-		}
+    @Override
+    public void noCost() {
+      // no-op
+    }
 
-		public abstract void cpuNode(CPUWithdraw node);
+    @Override
+    public void staticCost(int c) {
+      // no-op
+    }
 
-		public abstract void noCost();
+    @Override
+    public void dynamicCost() {
+      // no-op
+    }
 
-		public abstract void staticCost(int c);
+  };
+  private final Account acc;
 
-		public void staticCost() {
-			staticCost(1);
-		}
+  public CPUAccountingVisitor(Account acc) {
+    super(new Visitor(acc));
+    this.acc = Objects.requireNonNull(acc);
+  }
 
-		public abstract void dynamicCost();
+  private static void removeCPUNodes(Iterable<BodyNode> nodes) {
+    Iterator<BodyNode> it = nodes.iterator();
+    while (it.hasNext()) {
+      BodyNode n = it.next();
+      if (n instanceof CPUWithdraw) {
+        it.remove();
+      }
+    }
+  }
 
-	}
+  @Override
+  public void postVisit(BasicBlock block) {
+    try {
+      int cost = acc.get();
+      removeCPUNodes(currentBody());
+      if (cost > 0) {
+        currentBody().add(0, new CPUWithdraw(cost));
+      }
+    } finally {
+      acc.reset();
+    }
+  }
 
-	public static final Account INITIALISE = new Account() {
-		@Override
-		public void cpuNode(CPUWithdraw node) {
-			// no-op
-		}
+  public static abstract class Account {
 
-		@Override
-		public void noCost() {
-			// no-op
-		}
+    private int cost;
 
-		@Override
-		public void staticCost(int c) {
-			add(c);
-		}
+    public int get() {
+      return cost;
+    }
 
-		@Override
-		public void dynamicCost() {
-			// no-op
-		}
+    public void reset() {
+      cost = 0;
+    }
 
-	};
+    protected void add(int c) {
+      cost += Check.nonNegative(c);
+    }
 
-	public static final Account COLLECT = new Account() {
-		@Override
-		public void cpuNode(CPUWithdraw node) {
-			add(node.cost());
-		}
+    public abstract void cpuNode(CPUWithdraw node);
 
-		@Override
-		public void noCost() {
-			// no-op
-		}
+    public abstract void noCost();
 
-		@Override
-		public void staticCost(int c) {
-			// no-op
-		}
+    public abstract void staticCost(int c);
 
-		@Override
-		public void dynamicCost() {
-			// no-op
-		}
+    public void staticCost() {
+      staticCost(1);
+    }
 
-	};
+    public abstract void dynamicCost();
 
-	private static class Visitor extends DefaultNodeActionVisitor {
+  }
 
-		private final Account account;
-		private final Set<Label> visitedLabels;
+  private static class Visitor extends DefaultNodeActionVisitor {
 
-		public Visitor(Account account) {
-			this.account = Objects.requireNonNull(account);
-			this.visitedLabels = new HashSet<>();
-		}
+    private final Account account;
+    private final Set<Label> visitedLabels;
 
-		// the default action
-		@Override
-		protected void action(IRNode node) {
-			account.noCost();
-		}
+    public Visitor(Account account) {
+      this.account = Objects.requireNonNull(account);
+      this.visitedLabels = new HashSet<>();
+    }
 
-		@Override
-		public void visit(CPUWithdraw node) {
-			account.cpuNode(node);
-		}
+    // the default action
+    @Override
+    protected void action(IRNode node) {
+      account.noCost();
+    }
 
-		@Override
-		public void visit(Label label) {
-			visitedLabels.add(label);
-		}
+    @Override
+    public void visit(CPUWithdraw node) {
+      account.cpuNode(node);
+    }
 
-		@Override
-		public void visit(BinOp node) {
-			account.staticCost();
-		}
+    @Override
+    public void visit(Label label) {
+      visitedLabels.add(label);
+    }
 
-		@Override
-		public void visit(UnOp node) {
-			account.staticCost();
-		}
+    @Override
+    public void visit(BinOp node) {
+      account.staticCost();
+    }
 
-		@Override
-		public void visit(TabNew node) {
-			account.staticCost();
-		}
+    @Override
+    public void visit(UnOp node) {
+      account.staticCost();
+    }
 
-		@Override
-		public void visit(TabGet node) {
-			account.staticCost();
-		}
+    @Override
+    public void visit(TabNew node) {
+      account.staticCost();
+    }
 
-		@Override
-		public void visit(TabSet node) {
-			account.staticCost();
-		}
+    @Override
+    public void visit(TabGet node) {
+      account.staticCost();
+    }
 
-		@Override
-		public void visit(TabRawSet node) {
-			account.staticCost();
-		}
+    @Override
+    public void visit(TabSet node) {
+      account.staticCost();
+    }
 
-		@Override
-		public void visit(TabRawSetInt node) {
-			account.staticCost();
-		}
+    @Override
+    public void visit(TabRawSet node) {
+      account.staticCost();
+    }
 
-		@Override
-		public void visit(TabRawAppendMulti node) {
-			account.dynamicCost();
-		}
+    @Override
+    public void visit(TabRawSetInt node) {
+      account.staticCost();
+    }
 
-		@Override
-		public void visit(Ret node) {
-			account.staticCost();
-		}
+    @Override
+    public void visit(TabRawAppendMulti node) {
+      account.dynamicCost();
+    }
 
-		@Override
-		public void visit(TCall node) {
-			account.staticCost();
-		}
+    @Override
+    public void visit(Ret node) {
+      account.staticCost();
+    }
 
-		@Override
-		public void visit(Call node) {
-			account.staticCost();
-		}
+    @Override
+    public void visit(TCall node) {
+      account.staticCost();
+    }
 
-		@Override
-		public void visit(Closure node) {
-			account.staticCost();
-		}
+    @Override
+    public void visit(Call node) {
+      account.staticCost();
+    }
 
-		@Override
-		public void visit(ToNumber node) {
-			account.staticCost();
-		}
+    @Override
+    public void visit(Closure node) {
+      account.staticCost();
+    }
 
-		@Override
-		public void visit(Branch node) {
-			account.staticCost();
-		}
+    @Override
+    public void visit(ToNumber node) {
+      account.staticCost();
+    }
 
-		@Override
-		public void visit(Jmp node) {
-			if (visitedLabels.contains(node.jmpDest())) {
-				// count in backward jumps only
-				account.staticCost();
-			}
-		}
+    @Override
+    public void visit(Branch node) {
+      account.staticCost();
+    }
 
-	}
+    @Override
+    public void visit(Jmp node) {
+      if (visitedLabels.contains(node.jmpDest())) {
+        // count in backward jumps only
+        account.staticCost();
+      }
+    }
 
-	public CPUAccountingVisitor(Account acc) {
-		super(new Visitor(acc));
-		this.acc = Objects.requireNonNull(acc);
-	}
-
-	private static void removeCPUNodes(Iterable<BodyNode> nodes) {
-		Iterator<BodyNode> it = nodes.iterator();
-		while (it.hasNext()) {
-			BodyNode n = it.next();
-			if (n instanceof CPUWithdraw) {
-				it.remove();
-			}
-		}
-	}
-
-	@Override
-	public void postVisit(BasicBlock block) {
-		try {
-			int cost = acc.get();
-			removeCPUNodes(currentBody());
-			if (cost > 0) {
-				currentBody().add(0, new CPUWithdraw(cost));
-			}
-		}
-		finally {
-			acc.reset();
-		}
-	}
+  }
 
 }

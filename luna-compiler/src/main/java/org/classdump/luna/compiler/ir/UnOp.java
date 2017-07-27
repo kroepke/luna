@@ -16,44 +16,41 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.IRVisitor;
-
 import java.util.Objects;
 
 public class UnOp extends BodyNode {
 
-	public enum Op {
-		UNM,
-		BNOT,
-		NOT,
-		LEN
-	}
+  private final Op op;
+  private final Val dest;
+  private final Val arg;
+  public UnOp(Op op, Val dest, Val arg) {
+    this.op = Objects.requireNonNull(op);
+    this.dest = Objects.requireNonNull(dest);
+    this.arg = Objects.requireNonNull(arg);
+  }
 
-	private final Op op;
-	private final Val dest;
-	private final Val arg;
+  public Op op() {
+    return op;
+  }
 
-	public UnOp(Op op, Val dest, Val arg) {
-		this.op = Objects.requireNonNull(op);
-		this.dest = Objects.requireNonNull(dest);
-		this.arg = Objects.requireNonNull(arg);
-	}
+  public Val dest() {
+    return dest;
+  }
 
-	public Op op() {
-		return op;
-	}
+  public Val arg() {
+    return arg;
+  }
 
-	public Val dest() {
-		return dest;
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
-	public Val arg() {
-		return arg;
-	}
-
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  public enum Op {
+    UNM,
+    BNOT,
+    NOT,
+    LEN
+  }
 
 }

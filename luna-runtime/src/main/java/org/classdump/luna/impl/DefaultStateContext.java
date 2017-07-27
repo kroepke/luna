@@ -18,12 +18,11 @@ package org.classdump.luna.impl;
 
 import org.classdump.luna.MetatableAccessor;
 import org.classdump.luna.TableFactory;
-import org.classdump.luna.impl.AbstractStateContext;
 
 class DefaultStateContext extends AbstractStateContext {
 
-	protected DefaultStateContext(TableFactory tableFactory, MetatableAccessor metatableAccessor) {
-		super(tableFactory, metatableAccessor);
-	}
+  protected DefaultStateContext(TableFactory tableFactory, MetatableAccessor metatableAccessor) {
+    super(tableFactory, metatableAccessor);
+  }
 
 }

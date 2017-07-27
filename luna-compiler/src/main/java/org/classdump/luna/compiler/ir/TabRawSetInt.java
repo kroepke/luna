@@ -16,39 +16,36 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.BodyNode;
-import org.classdump.luna.compiler.ir.Val;
-import org.classdump.luna.util.Check;
-
 import java.util.Objects;
+import org.classdump.luna.util.Check;
 
 public class TabRawSetInt extends BodyNode {
 
-	private final Val obj;
-	private final long idx;
-	private final Val value;
+  private final Val obj;
+  private final long idx;
+  private final Val value;
 
-	public TabRawSetInt(Val obj, long idx, Val value) {
-		this.obj = Objects.requireNonNull(obj);
-		this.idx = Check.positive(idx);
-		this.value = Objects.requireNonNull(value);
-	}
+  public TabRawSetInt(Val obj, long idx, Val value) {
+    this.obj = Objects.requireNonNull(obj);
+    this.idx = Check.positive(idx);
+    this.value = Objects.requireNonNull(value);
+  }
 
-	public Val obj() {
-		return obj;
-	}
+  public Val obj() {
+    return obj;
+  }
 
-	public long idx() {
-		return idx;
-	}
+  public long idx() {
+    return idx;
+  }
 
-	public Val value() {
-		return value;
-	}
+  public Val value() {
+    return value;
+  }
 
-	@Override
-	public void accept(IRVisitor visitor) {
-		visitor.visit(this);
-	}
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 
 }

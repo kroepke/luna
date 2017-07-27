@@ -16,10 +16,8 @@
 
 package org.classdump.luna.compiler.ir;
 
-import org.classdump.luna.compiler.ir.IRVisitor;
-
 public abstract class IRNode {
 
-	public abstract void accept(IRVisitor visitor);
+  public abstract void accept(IRVisitor visitor);
 
 }

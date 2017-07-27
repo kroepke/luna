@@ -18,36 +18,31 @@ package org.classdump.luna.lib.luajava;
 
 import org.classdump.luna.Conversions;
 import org.classdump.luna.LuaObject;
-import org.classdump.luna.lib.luajava.ClassWrapper;
-import org.classdump.luna.lib.luajava.ObjectWrapper;
 import org.classdump.luna.runtime.Coroutine;
 import org.classdump.luna.runtime.LuaFunction;
 
 final class Unmapper {
 
-	private Unmapper() {
-		// not to be instantiated
-	}
+  private Unmapper() {
+    // not to be instantiated
+  }
 
-	public static Object unmapFrom(Object o) {
-		if (o instanceof Class) {
-			return ClassWrapper.of((Class<?>) o);
-		}
-		else {
-			if (o == null || o instanceof Boolean || o instanceof String) {
-				return o;
-			}
-			else if (o instanceof Number) {
-				return Conversions.toCanonicalNumber((Number) o);
-			}
-			else if (o instanceof Character) {
-				return Long.valueOf(((Character) o).charValue());
-			}
-			else if (o instanceof LuaFunction || o instanceof Coroutine || o instanceof LuaObject) {
-				return o;
-			}
-			else return ObjectWrapper.of(o);
-		}
-	}
+  public static Object unmapFrom(Object o) {
+    if (o instanceof Class) {
+      return ClassWrapper.of((Class<?>) o);
+    } else {
+      if (o == null || o instanceof Boolean || o instanceof String) {
+        return o;
+      } else if (o instanceof Number) {
+        return Conversions.toCanonicalNumber((Number) o);
+      } else if (o instanceof Character) {
+        return Long.valueOf(((Character) o).charValue());
+      } else if (o instanceof LuaFunction || o instanceof Coroutine || o instanceof LuaObject) {
+        return o;
+      } else {
+        return ObjectWrapper.of(o);
+      }
+    }
+  }
 
 }

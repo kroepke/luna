@@ -21,10 +21,10 @@ import org.classdump.luna.compiler.analysis.TypeInfo;
 
 public class ConstFolder {
 
-	public static IRFunc replaceConstOperations(IRFunc fn, TypeInfo typeInfo) {
-		ConstFolderVisitor visitor = new ConstFolderVisitor(typeInfo);
-		visitor.visit(fn);
-		return fn.update(visitor.result());
-	}
+  public static IRFunc replaceConstOperations(IRFunc fn, TypeInfo typeInfo) {
+    ConstFolderVisitor visitor = new ConstFolderVisitor(typeInfo);
+    visitor.visit(fn);
+    return fn.update(visitor.result());
+  }
 
 }

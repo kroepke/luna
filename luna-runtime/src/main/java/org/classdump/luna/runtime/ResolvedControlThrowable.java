@@ -16,12 +16,9 @@
 
 package org.classdump.luna.runtime;
 
-import org.classdump.luna.runtime.ControlThrowablePayload;
-import org.classdump.luna.runtime.ResumeInfo;
-import org.classdump.luna.util.Cons;
-
 import java.util.Iterator;
 import java.util.Objects;
+import org.classdump.luna.util.Cons;
 
 /**
  * A throwable used for non-local control flow changes, containing a complete
@@ -44,26 +41,26 @@ import java.util.Objects;
  */
 public final class ResolvedControlThrowable extends Throwable {
 
-	private final ControlThrowablePayload payload;
-	private final Cons<ResumeInfo> resumeStack;
+  private final ControlThrowablePayload payload;
+  private final Cons<ResumeInfo> resumeStack;
 
-	ResolvedControlThrowable(ControlThrowablePayload payload, Cons<ResumeInfo> resumeStack) {
-		super(null, null, true, false);
-		this.payload = Objects.requireNonNull(payload);
-		this.resumeStack = resumeStack;
-	}
+  ResolvedControlThrowable(ControlThrowablePayload payload, Cons<ResumeInfo> resumeStack) {
+    super(null, null, true, false);
+    this.payload = Objects.requireNonNull(payload);
+    this.resumeStack = resumeStack;
+  }
 
-	ControlThrowablePayload payload() {
-		return payload;
-	}
+  ControlThrowablePayload payload() {
+    return payload;
+  }
 
-	// LIFO iterator
-	Iterator<ResumeInfo> frames() {
-		return Cons.newIterator(resumeStack);
-	}
+  // LIFO iterator
+  Iterator<ResumeInfo> frames() {
+    return Cons.newIterator(resumeStack);
+  }
 
-	UnresolvedControlThrowable unresolve() {
-		return new UnresolvedControlThrowable(payload, resumeStack);
-	}
+  UnresolvedControlThrowable unresolve() {
+    return new UnresolvedControlThrowable(payload, resumeStack);
+  }
 
 }

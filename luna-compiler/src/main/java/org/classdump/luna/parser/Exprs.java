@@ -16,6 +16,7 @@
 
 package org.classdump.luna.parser;
 
+import java.util.List;
 import org.classdump.luna.parser.ast.Attributes;
 import org.classdump.luna.parser.ast.BinaryOperationExpr;
 import org.classdump.luna.parser.ast.Block;
@@ -35,69 +36,71 @@ import org.classdump.luna.parser.ast.UnaryOperationExpr;
 import org.classdump.luna.parser.ast.VarExpr;
 import org.classdump.luna.parser.ast.VarargsExpr;
 
-import java.util.List;
-
 public abstract class Exprs {
 
-	private Exprs() {
-		// not to be instantiated
-	}
+  private Exprs() {
+    // not to be instantiated
+  }
 
-	private static Attributes attr(SourceInfo src) {
-		return Attributes.of(src);
-	}
+  private static Attributes attr(SourceInfo src) {
+    return Attributes.of(src);
+  }
 
-	public static LiteralExpr literal(SourceInfo src, Literal value) {
-		return new LiteralExpr(attr(src), value);
-	}
+  public static LiteralExpr literal(SourceInfo src, Literal value) {
+    return new LiteralExpr(attr(src), value);
+  }
 
-	public static FunctionDefExpr functionDef(SourceInfo src, FunctionDefExpr.Params params, Block block) {
-		return new FunctionDefExpr(attr(src), params, block);
-	}
+  public static FunctionDefExpr functionDef(SourceInfo src, FunctionDefExpr.Params params,
+      Block block) {
+    return new FunctionDefExpr(attr(src), params, block);
+  }
 
-	public static TableConstructorExpr tableConstructor(SourceInfo src, List<TableConstructorExpr.FieldInitialiser> fields) {
-		return new TableConstructorExpr(attr(src), fields);
-	}
+  public static TableConstructorExpr tableConstructor(SourceInfo src,
+      List<TableConstructorExpr.FieldInitialiser> fields) {
+    return new TableConstructorExpr(attr(src), fields);
+  }
 
-	public static TableConstructorExpr.FieldInitialiser fieldInitialiser(Expr keyExpr, Expr valueExpr) {
-		return new TableConstructorExpr.FieldInitialiser(keyExpr, valueExpr);
-	}
+  public static TableConstructorExpr.FieldInitialiser fieldInitialiser(Expr keyExpr,
+      Expr valueExpr) {
+    return new TableConstructorExpr.FieldInitialiser(keyExpr, valueExpr);
+  }
 
-	public static IndexExpr index(SourceInfo src, Expr object, Expr key) {
-		return new IndexExpr(attr(src), object, key);
-	}
+  public static IndexExpr index(SourceInfo src, Expr object, Expr key) {
+    return new IndexExpr(attr(src), object, key);
+  }
 
-	public static VarExpr var(SourceInfo src, Name name) {
-		return new VarExpr(attr(src), name);
-	}
+  public static VarExpr var(SourceInfo src, Name name) {
+    return new VarExpr(attr(src), name);
+  }
 
-	public static VarargsExpr varargs(SourceInfo src) {
-		return new VarargsExpr(attr(src));
-	}
+  public static VarargsExpr varargs(SourceInfo src) {
+    return new VarargsExpr(attr(src));
+  }
 
-	public static CallExpr.FunctionCallExpr functionCall(SourceInfo src, Expr fn, List<Expr> args) {
-		return new CallExpr.FunctionCallExpr(attr(src), fn, args);
-	}
+  public static CallExpr.FunctionCallExpr functionCall(SourceInfo src, Expr fn, List<Expr> args) {
+    return new CallExpr.FunctionCallExpr(attr(src), fn, args);
+  }
 
-	public static CallExpr.MethodCallExpr methodCall(SourceInfo src, Expr target, Name methodName, List<Expr> args) {
-		return new CallExpr.MethodCallExpr(attr(src), target, methodName, args);
-	}
+  public static CallExpr.MethodCallExpr methodCall(SourceInfo src, Expr target, Name methodName,
+      List<Expr> args) {
+    return new CallExpr.MethodCallExpr(attr(src), target, methodName, args);
+  }
 
-	public static Expr paren(Expr expr) {
-		if (expr instanceof MultiExpr) {
-			return new ParenExpr(expr.attributes(), (MultiExpr) expr);
-		}
-		else {
-			return expr;
-		}
-	}
+  public static Expr paren(Expr expr) {
+    if (expr instanceof MultiExpr) {
+      return new ParenExpr(expr.attributes(), (MultiExpr) expr);
+    } else {
+      return expr;
+    }
+  }
 
-	public static BinaryOperationExpr binaryOperation(SourceInfo src, Operator.Binary op, Expr left, Expr right) {
-		return new BinaryOperationExpr(attr(src), op, left,right);
-	}
+  public static BinaryOperationExpr binaryOperation(SourceInfo src, Operator.Binary op, Expr left,
+      Expr right) {
+    return new BinaryOperationExpr(attr(src), op, left, right);
+  }
 
-	public static UnaryOperationExpr unaryOperation(SourceInfo src, Operator.Unary op, Expr arg) {
-		return new UnaryOperationExpr(attr(src), op, arg);
-	}
+  public static UnaryOperationExpr unaryOperation(SourceInfo src, Operator.Unary op, Expr arg) {
+    return new UnaryOperationExpr(attr(src), op, arg);
+  }
 
 }

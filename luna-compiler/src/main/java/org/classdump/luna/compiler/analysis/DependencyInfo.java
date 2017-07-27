@@ -16,21 +16,20 @@
 
 package org.classdump.luna.compiler.analysis;
 
-import org.classdump.luna.compiler.FunctionId;
-
 import java.util.Objects;
 import java.util.Set;
+import org.classdump.luna.compiler.FunctionId;
 
 public class DependencyInfo {
 
-	private final Set<FunctionId> nestedRefs;
+  private final Set<FunctionId> nestedRefs;
 
-	public DependencyInfo(Set<FunctionId> nestedRefs) {
-		this.nestedRefs = Objects.requireNonNull(nestedRefs);
-	}
+  public DependencyInfo(Set<FunctionId> nestedRefs) {
+    this.nestedRefs = Objects.requireNonNull(nestedRefs);
+  }
 
-	public Set<FunctionId> nestedRefs() {
-		return nestedRefs;
-	}
+  public Set<FunctionId> nestedRefs() {
+    return nestedRefs;
+  }
 
 }

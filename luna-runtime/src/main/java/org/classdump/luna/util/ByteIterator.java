@@ -28,16 +28,15 @@ import java.util.NoSuchElementException;
  */
 public interface ByteIterator extends Iterator<Byte> {
 
-	/**
-	 * Returns the next byte from the sequence and increments the byte position.
-	 *
-	 * <p>When there is no next byte to be read from the stream, this method throws
-	 * a {@link NoSuchElementException}. Use {@link #hasNext()} to detect this condition.</p>
-	 *
-	 * @return  the next byte from the byte stream
-	 *
-	 * @throws NoSuchElementException  if there are no more bytes in the stream
-	 */
-	byte nextByte();
+  /**
+   * Returns the next byte from the sequence and increments the byte position.
+   *
+   * <p>When there is no next byte to be read from the stream, this method throws
+   * a {@link NoSuchElementException}. Use {@link #hasNext()} to detect this condition.</p>
+   *
+   * @return the next byte from the byte stream
+   * @throws NoSuchElementException if there are no more bytes in the stream
+   */
+  byte nextByte();
 
 }

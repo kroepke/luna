@@ -16,31 +16,30 @@
 
 package org.classdump.luna.load;
 
-import org.classdump.luna.util.ByteVector;
-
 import java.util.Map;
+import org.classdump.luna.util.ByteVector;
 
 /**
  * A compiled chunk, consisting of at least one Java class file.
  */
 public interface CompiledChunk {
 
-	/**
-	 * Returns the contents of this chunk as a map from class names to class files
-	 * (as byte vectors). To access the main class, use {@link #mainClassName()}.
-	 *
-	 * @return  a map from class names to class files (as byte vectors)
-	 */
-	Map<String, ByteVector> classMap();
+  /**
+   * Returns the contents of this chunk as a map from class names to class files
+   * (as byte vectors). To access the main class, use {@link #mainClassName()}.
+   *
+   * @return a map from class names to class files (as byte vectors)
+   */
+  Map<String, ByteVector> classMap();
 
-	/**
-	 * Returns the name of the main class of this compiled chunk.
-	 *
-	 * <p>The class name may be used as a key in the map obtained by {@link #classMap()};
-	 * the map must contain an element with this key.</p>
-	 *
-	 * @return  the class name of the main class of this chunk
-	 */
-	String mainClassName();
+  /**
+   * Returns the name of the main class of this compiled chunk.
+   *
+   * <p>The class name may be used as a key in the map obtained by {@link #classMap()};
+   * the map must contain an element with this key.</p>
+   *
+   * @return the class name of the main class of this chunk
+   */
+  String mainClassName();
 
 }

@@ -22,60 +22,20 @@ import scala.util.control.NonFatal
 
 object Util {
 
-  def fillStr(pattern: String, width: Int): String = {
-    val bld = new StringBuilder()
-    while (bld.length < width) {
-      val rem = width - bld.length
-      bld.append(pattern.substring(0, math.min(rem, pattern.length)))
-    }
-    bld.toString()
-  }
-
-  def padRight(s: String, width: Int, pattern: String = " "): String = {
-    if (s.length >= width) s else s + fillStr(pattern, width - s.length)
-  }
-
   def tabulate(lines: Seq[String], tab: String, separator: String): Seq[String] = {
     val tabbedLines = for (l <- lines) yield l.split(separator).toSeq
-    val numCols = (tabbedLines map { _.size }).max
+    val numCols = (tabbedLines map {
+      _.size
+    }).max
     val matrix = tabbedLines map { tl => tl ++ Seq.fill[String](numCols - tl.size)("") }
 
     val cols = matrix.transpose
-    val colWidths = for (col <- cols) yield (col map { _.length }).max
+    val colWidths = for (col <- cols) yield (col map {
+      _.length
+    }).max
 
     val padded = for (row <- matrix) yield for ((cell, width) <- row zip colWidths) yield padRight(cell, width)
     for (row <- padded) yield row.mkString(tab)
-  }
-
-  trait Printer {
-
-    def out: OutputStream
-    def err: OutputStream
-
-    def println(x: Any): Unit
-
-  }
-
-  object ConsolePrinter extends Printer {
-    override def out = System.out
-    override def err = System.err
-    override def println(x: Any) = scala.Predef.println(x)
-  }
-
-  class BufferPrinter extends Printer {
-
-    private val baos = new ByteArrayOutputStream()
-    private val printer = new PrintStream(baos)
-
-    def out = baos
-    def err = baos
-
-    def get = baos.toString()
-
-    def println(x: Any): Unit = {
-      printer.println(x)
-    }
-
   }
 
   def silenced(body: => Unit): Unit = {
@@ -97,6 +57,10 @@ object Util {
 
   }
 
+  def timed[A](name: String)(body: => A): A = {
+    timed(ConsolePrinter, name)(body)
+  }
+
   def timed[A](printer: Printer, name: String)(body: => A): A = {
     val before = System.nanoTime()
     val result = body
@@ -105,22 +69,66 @@ object Util {
     result
   }
 
-  def timed[A](name: String)(body: => A): A = {
-    timed(ConsolePrinter, name)(body)
-  }
-
   def separator: String = {
     Util.fillStr("- ", 76)
   }
 
-  def header(text: String): String = {
-    Util.padRight("-- " + text + " ", 76, "-") + "\n"
+  def fillStr(pattern: String, width: Int): String = {
+    val bld = new StringBuilder()
+    while (bld.length < width) {
+      val rem = width - bld.length
+      bld.append(pattern.substring(0, math.min(rem, pattern.length)))
+    }
+    bld.toString()
   }
 
   def section(title: String)(body: => Unit): Unit = {
     println(header(title))
     body
     println()
+  }
+
+  def header(text: String): String = {
+    Util.padRight("-- " + text + " ", 76, "-") + "\n"
+  }
+
+  def padRight(s: String, width: Int, pattern: String = " "): String = {
+    if (s.length >= width) s else s + fillStr(pattern, width - s.length)
+  }
+
+  trait Printer {
+
+    def out: OutputStream
+
+    def err: OutputStream
+
+    def println(x: Any): Unit
+
+  }
+
+  class BufferPrinter extends Printer {
+
+    private val baos = new ByteArrayOutputStream()
+    private val printer = new PrintStream(baos)
+
+    def out = baos
+
+    def err = baos
+
+    def get = baos.toString()
+
+    def println(x: Any): Unit = {
+      printer.println(x)
+    }
+
+  }
+
+  object ConsolePrinter extends Printer {
+    override def out = System.out
+
+    override def err = System.err
+
+    override def println(x: Any) = scala.Predef.println(x)
   }
 
 }

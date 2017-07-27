@@ -17,15 +17,14 @@
 package org.classdump.luna.compiler;
 
 import org.classdump.luna.parser.ast.Chunk;
-import org.classdump.luna.compiler.ModuleBuilder;
 
 public class IRTranslator {
 
-	public static Module translate(Chunk chunk) {
-		ModuleBuilder moduleBuilder = new ModuleBuilder();
-		IRTranslatorTransformer translator = new IRTranslatorTransformer(moduleBuilder);
-		translator.transform(chunk);
-		return moduleBuilder.build();
-	}
+  public static Module translate(Chunk chunk) {
+    ModuleBuilder moduleBuilder = new ModuleBuilder();
+    IRTranslatorTransformer translator = new IRTranslatorTransformer(moduleBuilder);
+    translator.transform(chunk);
+    return moduleBuilder.build();
+  }
 
 }

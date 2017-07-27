@@ -16,160 +16,165 @@
 
 package org.classdump.luna.compiler.util;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
 import org.classdump.luna.compiler.ir.BasicBlock;
 import org.classdump.luna.compiler.ir.Code;
 import org.classdump.luna.compiler.ir.IRNode;
 import org.classdump.luna.compiler.ir.Label;
 
-import java.util.*;
-
 public abstract class CodeUtils {
 
-	private CodeUtils() {
-		// not to be instantiated or extended
-	}
+  private CodeUtils() {
+    // not to be instantiated or extended
+  }
 
-	public static Iterator<IRNode> nodeIterator(Code code) {
-		return new NodeIterator(code.blockIterator());
-	}
+  public static Iterator<IRNode> nodeIterator(Code code) {
+    return new NodeIterator(code.blockIterator());
+  }
 
-	private static class NodeIterator implements Iterator<IRNode> {
+  public static Iterable<Label> labelsBreadthFirst(Code code) {
+    Objects.requireNonNull(code);
 
-		private final Iterator<BasicBlock> blockIterator;
-		private Iterator<IRNode> blockNodeIterator;
+    ArrayList<Label> result = new ArrayList<>();
+    Set<Label> visited = new HashSet<>();
+    Queue<Label> open = new ArrayDeque<>();
 
-		public NodeIterator(Iterator<BasicBlock> blockIterator) {
-			this.blockIterator = Objects.requireNonNull(blockIterator);
-			this.blockNodeIterator = null;
-		}
+    open.add(code.entryLabel());
 
-		@Override
-		public boolean hasNext() {
-			if (blockNodeIterator != null && blockNodeIterator.hasNext()) {
-				return true;
-			}
-			else {
-				if (blockIterator.hasNext()) {
-					blockNodeIterator = new BlockNodeIterator(blockIterator.next());
-					return this.hasNext();
-				}
-				else {
-					return false;
-				}
-			}
-		}
+    while (!open.isEmpty()) {
+      Label l = open.poll();
+      BasicBlock bb = code.block(l);
+      if (visited.add(l)) {
+        result.add(l);
+        for (Label nxt : bb.end().nextLabels()) {
+          open.add(nxt);
+        }
+      }
+    }
 
-		@Override
-		public IRNode next() {
-			if (!hasNext()) {
-				throw new NoSuchElementException();
-			}
-			else {
-				return blockNodeIterator.next();
-			}
-		}
+    result.trimToSize();
+    return result;
+  }
 
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
+  public static Map<Label, Set<Label>> inLabels(Code code) {
+    Objects.requireNonNull(code);
 
-	}
+    Map<Label, Set<Label>> result = new HashMap<>();
 
-	private static class BlockNodeIterator implements Iterator<IRNode> {
+    // initialise
+    for (Label l : code.labels()) {
+      result.put(l, new HashSet<Label>());
+    }
 
-		private final BasicBlock block;
-		private int idx;
+    Set<Label> visited = new HashSet<>();
+    Deque<Label> open = new ArrayDeque<>();
 
-		public BlockNodeIterator(BasicBlock block) {
-			this.block = Objects.requireNonNull(block);
-			this.idx = 0;
-		}
+    open.add(code.entryLabel());
 
-		@Override
-		public boolean hasNext() {
-			return idx <= block.body().size();
-		}
+    while (!open.isEmpty()) {
+      Label l = open.pop();
 
-		@Override
-		public IRNode next() {
-			int i = idx++;
+      // have we seen this block?
+      boolean cont = visited.add(l);
 
-			if (i == block.body().size()) {
-				return block.end();
-			}
-			else if (i < block.body().size()) {
-				return block.body().get(i);
-			}
-			else {
-				throw new NoSuchElementException();
-			}
-		}
+      // add all incoming edges (m -> l)
+      for (Label m : code.block(l).end().nextLabels()) {
+        result.get(m).add(l);
 
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
+        // continue to that block?
+        if (cont) {
+          open.add(m);
+        }
+      }
+    }
 
-	}
+    return Collections.unmodifiableMap(result);
+  }
 
-	public static Iterable<Label> labelsBreadthFirst(Code code) {
-		Objects.requireNonNull(code);
+  private static class NodeIterator implements Iterator<IRNode> {
 
-		ArrayList<Label> result = new ArrayList<>();
-		Set<Label> visited = new HashSet<>();
-		Queue<Label> open = new ArrayDeque<>();
+    private final Iterator<BasicBlock> blockIterator;
+    private Iterator<IRNode> blockNodeIterator;
 
-		open.add(code.entryLabel());
+    public NodeIterator(Iterator<BasicBlock> blockIterator) {
+      this.blockIterator = Objects.requireNonNull(blockIterator);
+      this.blockNodeIterator = null;
+    }
 
-		while (!open.isEmpty()) {
-			Label l = open.poll();
-			BasicBlock bb = code.block(l);
-			if (visited.add(l)) {
-				result.add(l);
-				for (Label nxt : bb.end().nextLabels()) {
-					open.add(nxt);
-				}
-			}
-		}
+    @Override
+    public boolean hasNext() {
+      if (blockNodeIterator != null && blockNodeIterator.hasNext()) {
+        return true;
+      } else {
+        if (blockIterator.hasNext()) {
+          blockNodeIterator = new BlockNodeIterator(blockIterator.next());
+          return this.hasNext();
+        } else {
+          return false;
+        }
+      }
+    }
 
-		result.trimToSize();
-		return result;
-	}
+    @Override
+    public IRNode next() {
+      if (!hasNext()) {
+        throw new NoSuchElementException();
+      } else {
+        return blockNodeIterator.next();
+      }
+    }
 
-	public static Map<Label, Set<Label>> inLabels(Code code) {
-		Objects.requireNonNull(code);
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
 
-		Map<Label, Set<Label>> result = new HashMap<>();
+  }
 
-		// initialise
-		for (Label l : code.labels()) {
-			result.put(l, new HashSet<Label>());
-		}
+  private static class BlockNodeIterator implements Iterator<IRNode> {
 
-		Set<Label> visited = new HashSet<>();
-		Deque<Label> open = new ArrayDeque<>();
+    private final BasicBlock block;
+    private int idx;
 
-		open.add(code.entryLabel());
+    public BlockNodeIterator(BasicBlock block) {
+      this.block = Objects.requireNonNull(block);
+      this.idx = 0;
+    }
 
-		while (!open.isEmpty()) {
-			Label l = open.pop();
+    @Override
+    public boolean hasNext() {
+      return idx <= block.body().size();
+    }
 
-			// have we seen this block?
-			boolean cont = visited.add(l);
+    @Override
+    public IRNode next() {
+      int i = idx++;
 
-			// add all incoming edges (m -> l)
-			for (Label m : code.block(l).end().nextLabels()) {
-				result.get(m).add(l);
+      if (i == block.body().size()) {
+        return block.end();
+      } else if (i < block.body().size()) {
+        return block.body().get(i);
+      } else {
+        throw new NoSuchElementException();
+      }
+    }
 
-				// continue to that block?
-				if (cont) {
-					open.add(m);
-				}
-			}
-		}
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
 
-		return Collections.unmodifiableMap(result);
-	}
+  }
 
 }

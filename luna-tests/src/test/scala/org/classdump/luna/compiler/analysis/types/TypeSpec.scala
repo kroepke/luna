@@ -27,6 +27,28 @@ class TypeSpec extends FunSpec with MustMatchers {
 
   import LuaTypes._
 
+  val D_D = T(DYNAMIC) -> T(DYNAMIC)
+  val DD_D = T(DYNAMIC, DYNAMIC) -> T(DYNAMIC)
+  val Dv_D = T(DYNAMIC).+ -> T(DYNAMIC)
+  val A_A = T(ANY) -> T(ANY)
+  val DDv_D = T(DYNAMIC, DYNAMIC).+ -> T(DYNAMIC)
+
+  implicit class RichType(val self: Type) extends Gradual[Type] with Subtypable
+
+  implicit class RichTypeSeq(val self: TypeSeq) extends Gradual[TypeSeq] {
+    def + = self.withVararg()
+
+    def ->(that: TypeSeq) = LuaTypes.functionType(self, that)
+  }
+  val NNv_N = T(NUMBER, NUMBER).+ -> T(NUMBER)
+  val v_A = T().+ -> T(ANY)
+  val v_v = T().+ -> T().+
+  val AA_A = T(ANY, ANY) -> T(ANY)
+  val NN_N = T(NUMBER, NUMBER) -> T(NUMBER)
+  val NN_A = T(NUMBER, NUMBER) -> T(ANY)
+  val ii_i = T(NUMBER_INTEGER, NUMBER_INTEGER) -> T(NUMBER_INTEGER)
+  val ff_f = T(NUMBER_FLOAT, NUMBER_FLOAT) -> T(NUMBER_FLOAT)
+
   def consistency[T <: GradualTypeLike[T]](l: T, r: T, expected: Boolean) {
 
     it(l + " is " + (if (!expected) "NOT " else "") + "consistent with " + r) {
@@ -34,8 +56,8 @@ class TypeSpec extends FunSpec with MustMatchers {
         val lr = l isConsistentWith r
         val rl = r isConsistentWith l
 
-        lr mustEqual rl  // symmetry
-        lr mustBe expected  // correct result
+        lr mustEqual rl // symmetry
+        lr mustBe expected // correct result
       }
       else {
         (l isConsistentWith r) mustBe expected
@@ -54,38 +76,6 @@ class TypeSpec extends FunSpec with MustMatchers {
     it(l + " is " + (if (!expected) "NOT " else "") + "a consistent subtype of " + r) {
       l.isConsistentSubtypeOf(r) mustBe expected
     }
-  }
-
-  trait Gradual[T <: GradualTypeLike[T]] {
-
-    protected def self: T
-
-    def ~(r: T) = consistency(self, r, true)
-    def !~(r: T) = consistency(self, r, false)
-
-    def ~<(r: T) = consistentSubtype(self, r, true)
-    def !~<(r: T) = consistentSubtype(self, r, false)
-
-  }
-
-  trait Subtypable {
-
-    protected def self: Type
-
-    def =<(r: Type) = subtype(self, r, true)
-    def !=<(r: Type) = subtype(self, r, false)
-
-  }
-
-  implicit class RichType(val self: Type) extends Gradual[Type] with Subtypable
-
-  implicit class RichTypeSeq(val self: TypeSeq) extends Gradual[TypeSeq] {
-    def + = self.withVararg()
-    def ->(that: TypeSeq) = LuaTypes.functionType(self, that)
-  }
-
-  object T {
-    def apply(ts: Type*): TypeSeq = TypeSeq.of(ts.asJava, false)
   }
 
   def equivalent(l: Type, r: Type) {
@@ -107,21 +97,21 @@ class TypeSpec extends FunSpec with MustMatchers {
   }
 
   def union(l: Type, r: Type, expected: Type) {
-    describe ("union of " + l + " and " + r) {
+    describe("union of " + l + " and " + r) {
 
       if (l == r) {
-        val t = l unionWith  r
+        val t = l unionWith r
 
-        it ("exists") {
+        it("exists") {
           t must not be null
         }
 
-        describe ("correctness:") {
+        describe("correctness:") {
           l ~< t
           r ~< t
         }
 
-        it ("is equal to " + expected) {
+        it("is equal to " + expected) {
           t mustEqual expected
         }
 
@@ -130,24 +120,24 @@ class TypeSpec extends FunSpec with MustMatchers {
         val lr = l unionWith r
         val rl = r unionWith l
 
-        it ("exists") {
+        it("exists") {
           lr must not be null
           rl must not be null
         }
 
-        it ("is symmetric") {
+        it("is symmetric") {
           lr mustEqual rl
           rl mustEqual lr
         }
 
         val t = lr
 
-        describe ("correctness:") {
+        describe("correctness:") {
           l ~< t
           r ~< t
         }
 
-        it ("is equal to " + expected) {
+        it("is equal to " + expected) {
           t mustEqual expected
         }
 
@@ -155,24 +145,37 @@ class TypeSpec extends FunSpec with MustMatchers {
     }
   }
 
-  val D_D = T(DYNAMIC) -> T(DYNAMIC)
-  val DD_D = T(DYNAMIC, DYNAMIC) -> T(DYNAMIC)
-  val Dv_D = T(DYNAMIC).+ -> T(DYNAMIC)
-  val A_A = T(ANY) -> T(ANY)
-  val DDv_D = T(DYNAMIC, DYNAMIC).+ -> T(DYNAMIC)
-  val NNv_N = T(NUMBER, NUMBER).+ -> T(NUMBER)
+  trait Gradual[T <: GradualTypeLike[T]] {
 
-  val v_A = T().+ -> T(ANY)
-  val v_v = T().+ -> T().+
-  val AA_A = T(ANY, ANY) -> T(ANY)
-  val NN_N = T(NUMBER, NUMBER) -> T(NUMBER)
-  val NN_A = T(NUMBER, NUMBER) -> T(ANY)
-  val ii_i = T(NUMBER_INTEGER, NUMBER_INTEGER) -> T(NUMBER_INTEGER)
-  val ff_f = T(NUMBER_FLOAT, NUMBER_FLOAT) -> T(NUMBER_FLOAT)
+    def ~(r: T) = consistency(self, r, true)
 
-  describe ("consistency:") {
+    def !~(r: T) = consistency(self, r, false)
 
-    describe ("simple type") {
+    def ~<(r: T) = consistentSubtype(self, r, true)
+
+    def !~<(r: T) = consistentSubtype(self, r, false)
+
+    protected def self: T
+
+  }
+
+  trait Subtypable {
+
+    def =<(r: Type) = subtype(self, r, true)
+
+    def !=<(r: Type) = subtype(self, r, false)
+
+    protected def self: Type
+
+  }
+
+  object T {
+    def apply(ts: Type*): TypeSeq = TypeSeq.of(ts.asJava, false)
+  }
+
+  describe("consistency:") {
+
+    describe("simple type") {
 
       ANY ~ DYNAMIC
       ANY !~ NIL
@@ -195,7 +198,7 @@ class TypeSpec extends FunSpec with MustMatchers {
 
     }
 
-    describe ("type sequence") {
+    describe("type sequence") {
 
       TypeSeq.empty() ~ TypeSeq.empty()
       TypeSeq.empty() !~ TypeSeq.vararg()
@@ -212,9 +215,9 @@ class TypeSpec extends FunSpec with MustMatchers {
 
   }
 
-  describe ("subtyping:") {
+  describe("subtyping:") {
 
-    describe ("simple type") {
+    describe("simple type") {
 
       ANY !=< DYNAMIC
       DYNAMIC !=< ANY
@@ -234,9 +237,9 @@ class TypeSpec extends FunSpec with MustMatchers {
 
   }
 
-  describe ("consistent subtyping:") {
+  describe("consistent subtyping:") {
 
-    describe ("simple type") {
+    describe("simple type") {
 
       ANY ~< DYNAMIC
       DYNAMIC ~< ANY
@@ -267,7 +270,7 @@ class TypeSpec extends FunSpec with MustMatchers {
 
     }
 
-    describe ("type sequence") {
+    describe("type sequence") {
 
       TypeSeq.empty() ~< TypeSeq.empty()
       TypeSeq.empty() ~< TypeSeq.vararg()
@@ -287,7 +290,7 @@ class TypeSpec extends FunSpec with MustMatchers {
 
   }
 
-  describe ("type union:") {
+  describe("type union:") {
 
     union(ANY, DYNAMIC, DYNAMIC)
     union(NIL, DYNAMIC, DYNAMIC)

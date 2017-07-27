@@ -17,49 +17,48 @@
 package org.classdump.luna.exec;
 
 import org.classdump.luna.runtime.AsyncTask;
-import org.classdump.luna.exec.Continuation;
 
 /**
  * A callback object used to process control-related events during call execution.
  */
 public interface CallEventHandler {
 
-	/**
-	 * Callback triggered by the normal termination of the main function of the call
-	 * with the identifier {@code id}.
-	 *
-	 * @param id  the call identifier, must not be {@code null}
-	 * @param result  the return values, must not be {@code null}
-	 */
-	void returned(Object id, Object[] result);
+  /**
+   * Callback triggered by the normal termination of the main function of the call
+   * with the identifier {@code id}.
+   *
+   * @param id the call identifier, must not be {@code null}
+   * @param result the return values, must not be {@code null}
+   */
+  void returned(Object id, Object[] result);
 
-	/**
-	 * Callback triggered by an abnormal (error) termination of the main function of
-	 * the call with the identifier {@code id}.
-	 *
-	 * @param id  the call identifier, must not be {@code null}
-	 * @param error  the error that caused the abnormal termination, must not be {@code null}
-	 */
-	void failed(Object id, Throwable error);
+  /**
+   * Callback triggered by an abnormal (error) termination of the main function of
+   * the call with the identifier {@code id}.
+   *
+   * @param id the call identifier, must not be {@code null}
+   * @param error the error that caused the abnormal termination, must not be {@code null}
+   */
+  void failed(Object id, Throwable error);
 
-	/**
-	 * Callback triggered when the execution of the call with the identifier {@code id}
-	 * is paused.
-	 *
-	 * @param id  the call identifier, must not be {@code null}
-	 * @param cont  the call continuation, must not be {@code null}
-	 */
-	void paused(Object id, Continuation cont);
+  /**
+   * Callback triggered when the execution of the call with the identifier {@code id}
+   * is paused.
+   *
+   * @param id the call identifier, must not be {@code null}
+   * @param cont the call continuation, must not be {@code null}
+   */
+  void paused(Object id, Continuation cont);
 
-	/**
-	 * Callback triggered by a request by the call with the identifier {@code id} to be
-	 * resumed after the task {@code task} has been completed.
-	 *
-	 * @param id  the call identifier, must not be {@code null}
-	 * @param cont  the call continuation, must not be {@code null}
-	 * @param task  the task, must not be {@code null}
-	 */
-	void async(Object id, Continuation cont, AsyncTask task);
+  /**
+   * Callback triggered by a request by the call with the identifier {@code id} to be
+   * resumed after the task {@code task} has been completed.
+   *
+   * @param id the call identifier, must not be {@code null}
+   * @param cont the call continuation, must not be {@code null}
+   * @param task the task, must not be {@code null}
+   */
+  void async(Object id, Continuation cont, AsyncTask task);
 
 }
 

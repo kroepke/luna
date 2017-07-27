@@ -16,118 +16,118 @@
 
 package org.classdump.luna.compiler;
 
-import org.classdump.luna.compiler.gen.ClassNameTranslator;
-import org.classdump.luna.util.Check;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import org.classdump.luna.compiler.gen.ClassNameTranslator;
+import org.classdump.luna.util.Check;
 
 public class FunctionId {
 
-	private final List<Integer> indices;
+  public static final Comparator<FunctionId> LEXICOGRAPHIC_COMPARATOR = new Comparator<FunctionId>() {
+    @Override
+    public int compare(FunctionId a, FunctionId b) {
+      int la = a.indices.size();
+      int lb = b.indices.size();
 
-	public static final Comparator<FunctionId> LEXICOGRAPHIC_COMPARATOR = new Comparator<FunctionId>() {
-		@Override
-		public int compare(FunctionId a, FunctionId b) {
-			int la = a.indices.size();
-			int lb = b.indices.size();
+      int len = Math.min(la, lb);
+      for (int i = 0; i < len; i++) {
+        int ai = a.indices.get(i);
+        int bi = b.indices.get(i);
 
-			int len = Math.min(la, lb);
-			for (int i = 0; i < len; i++) {
-				int ai = a.indices.get(i);
-				int bi = b.indices.get(i);
+        int diff = ai - bi;
+        if (diff != 0) {
+          return diff;
+        }
+      }
 
-				int diff = ai - bi;
-				if (diff != 0) {
-					return diff;
-				}
-			}
+      return la - lb;
+    }
+  };
+  private final static FunctionId ROOT = new FunctionId(Collections.<Integer>emptyList());
+  private final List<Integer> indices;
 
-			return la - lb;
-		}
-	};
+  private FunctionId(List<Integer> indices) {
+    this.indices = Objects.requireNonNull(indices);
+  }
 
-	private FunctionId(List<Integer> indices) {
-		this.indices = Objects.requireNonNull(indices);
-	}
+  public static FunctionId root() {
+    return ROOT;
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+  public static FunctionId fromIndices(List<Integer> indices) {
+    Objects.requireNonNull(indices);  // FIXME: make a copy?
+    return indices.isEmpty() ? root() : new FunctionId(indices);
+  }
 
-		FunctionId that = (FunctionId) o;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
-		return this.indices.equals(that.indices);
-	}
+    FunctionId that = (FunctionId) o;
 
-	@Override
-	public int hashCode() {
-		return indices.hashCode();
-	}
+    return this.indices.equals(that.indices);
+  }
 
-	private final static FunctionId ROOT = new FunctionId(Collections.<Integer>emptyList());
+  @Override
+  public int hashCode() {
+    return indices.hashCode();
+  }
 
-	public static FunctionId root() {
-		return ROOT;
-	}
+  @Override
+  public String toString() {
+    StringBuilder bld = new StringBuilder();
+    Iterator<Integer> it = indices.iterator();
+    bld.append("/");
+    while (it.hasNext()) {
+      int i = it.next();
+      bld.append(i);
+      if (it.hasNext()) {
+        bld.append("/");
+      }
+    }
+    return bld.toString();
+  }
 
-	public static FunctionId fromIndices(List<Integer> indices) {
-		Objects.requireNonNull(indices);  // FIXME: make a copy?
-		return indices.isEmpty() ? root() : new FunctionId(indices);
-	}
+  public List<Integer> indices() {
+    return indices;
+  }
 
-	@Override
-	public String toString() {
-		StringBuilder bld = new StringBuilder();
-		Iterator<Integer> it = indices.iterator();
-		bld.append("/");
-		while (it.hasNext()) {
-			int i = it.next();
-			bld.append(i);
-			if (it.hasNext()) {
-				bld.append("/");
-			}
-		}
-		return bld.toString();
-	}
+  public boolean isRoot() {
+    return indices.isEmpty();
+  }
 
-	public List<Integer> indices() {
-		return indices;
-	}
+  public FunctionId child(int index) {
+    Check.nonNegative(index);
+    List<Integer> childIndices = new ArrayList<>(indices.size() + 1);
+    childIndices.addAll(indices);
+    childIndices.add(index);
+    return new FunctionId(Collections.unmodifiableList(childIndices));
+  }
 
-	public boolean isRoot() {
-		return indices.isEmpty();
-	}
+  public FunctionId parent() {
+    if (isRoot()) {
+      return null;
+    } else {
+      List<Integer> subIndices = indices.subList(0, indices.size() - 1);
+      return new FunctionId(subIndices);
+    }
+  }
 
-	public FunctionId child(int index) {
-		Check.nonNegative(index);
-		List<Integer> childIndices = new ArrayList<>(indices.size() + 1);
-		childIndices.addAll(indices);
-		childIndices.add(index);
-		return new FunctionId(Collections.unmodifiableList(childIndices));
-	}
-
-	public FunctionId parent() {
-		if (isRoot()) {
-			return null;
-		}
-		else {
-			List<Integer> subIndices = indices.subList(0, indices.size() - 1);
-			return new FunctionId(subIndices);
-		}
-	}
-
-	public String toClassName(ClassNameTranslator tr) {
-		Objects.requireNonNull(tr);
-		for (Integer index : indices) {
-			tr = tr.child(index);
-		}
-		return tr.className();
-	}
+  public String toClassName(ClassNameTranslator tr) {
+    Objects.requireNonNull(tr);
+    for (Integer index : indices) {
+      tr = tr.child(index);
+    }
+    return tr.className();
+  }
 
 }

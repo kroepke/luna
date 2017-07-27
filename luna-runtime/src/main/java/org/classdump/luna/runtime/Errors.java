@@ -24,99 +24,100 @@ import org.classdump.luna.Table;
 
 final class Errors {
 
-	private Errors() {
-		// not to be instantiated
-	}
+  private Errors() {
+    // not to be instantiated
+  }
 
-	static NoIntegerRepresentationException noIntegerRepresentation() {
-		return new NoIntegerRepresentationException();
-	}
+  static NoIntegerRepresentationException noIntegerRepresentation() {
+    return new NoIntegerRepresentationException();
+  }
 
-	private static String attemptTemplateMessage(String opName, String target) {
-		return "attempt to " + opName + " a " + target + " value";
-	}
+  private static String attemptTemplateMessage(String opName, String target) {
+    return "attempt to " + opName + " a " + target + " value";
+  }
 
-	static IllegalOperationAttemptException illegalArithmeticAttempt(Object a, Object b) {
-		ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(Conversions.numericalValueOf(a) == null ? a : b);
-		return new IllegalOperationAttemptException(
-				attemptTemplateMessage("perform arithmetic on", typeName.toString()));
-	}
+  static IllegalOperationAttemptException illegalArithmeticAttempt(Object a, Object b) {
+    ByteString typeName = PlainValueTypeNamer.INSTANCE
+        .typeNameOf(Conversions.numericalValueOf(a) == null ? a : b);
+    return new IllegalOperationAttemptException(
+        attemptTemplateMessage("perform arithmetic on", typeName.toString()));
+  }
 
-	static IllegalOperationAttemptException illegalArithmeticAttempt(Object o) {
-		ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
-		return new IllegalOperationAttemptException(
-				attemptTemplateMessage("perform arithmetic on", typeName.toString()));
-	}
+  static IllegalOperationAttemptException illegalArithmeticAttempt(Object o) {
+    ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
+    return new IllegalOperationAttemptException(
+        attemptTemplateMessage("perform arithmetic on", typeName.toString()));
+  }
 
-	static IllegalOperationAttemptException illegalComparisonAttempt(Object a, Object b) {
-		ByteString ta = PlainValueTypeNamer.INSTANCE.typeNameOf(a);
-		ByteString tb = PlainValueTypeNamer.INSTANCE.typeNameOf(b);
-		String message = ta.equals(tb)
-				? "attempt to compare two " + ta + " values"
-				: "attempt to compare " + ta + " with " + tb;
-		return new IllegalOperationAttemptException(message);
-	}
+  static IllegalOperationAttemptException illegalComparisonAttempt(Object a, Object b) {
+    ByteString ta = PlainValueTypeNamer.INSTANCE.typeNameOf(a);
+    ByteString tb = PlainValueTypeNamer.INSTANCE.typeNameOf(b);
+    String message = ta.equals(tb)
+        ? "attempt to compare two " + ta + " values"
+        : "attempt to compare " + ta + " with " + tb;
+    return new IllegalOperationAttemptException(message);
+  }
 
-	static IllegalOperationAttemptException illegalCallAttempt(Object o) {
-		ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
-		return new IllegalOperationAttemptException(
-				attemptTemplateMessage("call", typeName.toString()));
-	}
+  static IllegalOperationAttemptException illegalCallAttempt(Object o) {
+    ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
+    return new IllegalOperationAttemptException(
+        attemptTemplateMessage("call", typeName.toString()));
+  }
 
-	static IllegalOperationAttemptException illegalIndexAttempt(Object table, Object key) {
-		Object o = table instanceof Table ? key : table;
-		ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
-		return new IllegalOperationAttemptException(
-				attemptTemplateMessage("index", typeName.toString()));
-	}
+  static IllegalOperationAttemptException illegalIndexAttempt(Object table, Object key) {
+    Object o = table instanceof Table ? key : table;
+    ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
+    return new IllegalOperationAttemptException(
+        attemptTemplateMessage("index", typeName.toString()));
+  }
 
-	static IllegalOperationAttemptException illegalBitwiseOperationAttempt(Object a, Object b) {
-		Object nonNumeric = Conversions.numericalValueOf(a) == null ? a : b;
+  static IllegalOperationAttemptException illegalBitwiseOperationAttempt(Object a, Object b) {
+    Object nonNumeric = Conversions.numericalValueOf(a) == null ? a : b;
 
-		if (Conversions.numericalValueOf(nonNumeric) == null) {
-			// indeed it's not a number
-			ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(nonNumeric);
-			return new IllegalOperationAttemptException(
-					attemptTemplateMessage("perform bitwise operation on", typeName.toString()));
-		}
-		else {
-			return new IllegalOperationAttemptException(Errors.noIntegerRepresentation());
-		}
-	}
+    if (Conversions.numericalValueOf(nonNumeric) == null) {
+      // indeed it's not a number
+      ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(nonNumeric);
+      return new IllegalOperationAttemptException(
+          attemptTemplateMessage("perform bitwise operation on", typeName.toString()));
+    } else {
+      return new IllegalOperationAttemptException(Errors.noIntegerRepresentation());
+    }
+  }
 
-	static IllegalOperationAttemptException illegalBitwiseOperationAttempt(Object o) {
-		if (Conversions.numericalValueOf(o) == null) {
-			// indeed it's not a number
-			ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
-			return new IllegalOperationAttemptException(
-					attemptTemplateMessage("perform bitwise operation on", typeName.toString()));
-		}
-		else {
-			return new IllegalOperationAttemptException(Errors.noIntegerRepresentation());
-		}
-	}
+  static IllegalOperationAttemptException illegalBitwiseOperationAttempt(Object o) {
+    if (Conversions.numericalValueOf(o) == null) {
+      // indeed it's not a number
+      ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
+      return new IllegalOperationAttemptException(
+          attemptTemplateMessage("perform bitwise operation on", typeName.toString()));
+    } else {
+      return new IllegalOperationAttemptException(Errors.noIntegerRepresentation());
+    }
+  }
 
-	static IllegalOperationAttemptException illegalGetLengthAttempt(Object o) {
-		ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
-		return new IllegalOperationAttemptException("attempt to get length of a " + typeName + " value");
-	}
+  static IllegalOperationAttemptException illegalGetLengthAttempt(Object o) {
+    ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
+    return new IllegalOperationAttemptException(
+        "attempt to get length of a " + typeName + " value");
+  }
 
-	static IllegalOperationAttemptException illegalConcatenationAttempt(Object a, Object b) {
-		ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(Conversions.stringValueOf(a) == null ? a : b);
-		return new IllegalOperationAttemptException(
-				attemptTemplateMessage("concatenate", typeName.toString()));
-	}
+  static IllegalOperationAttemptException illegalConcatenationAttempt(Object a, Object b) {
+    ByteString typeName = PlainValueTypeNamer.INSTANCE
+        .typeNameOf(Conversions.stringValueOf(a) == null ? a : b);
+    return new IllegalOperationAttemptException(
+        attemptTemplateMessage("concatenate", typeName.toString()));
+  }
 
-	static IllegalCoroutineStateException illegalYieldAttempt() {
-		return new IllegalCoroutineStateException("attempt to yield from outside a coroutine");
-	}
+  static IllegalCoroutineStateException illegalYieldAttempt() {
+    return new IllegalCoroutineStateException("attempt to yield from outside a coroutine");
+  }
 
-	static IllegalCoroutineStateException resumeDeadCoroutine() {
-		return new IllegalCoroutineStateException("cannot resume dead coroutine");
-	}
+  static IllegalCoroutineStateException resumeDeadCoroutine() {
+    return new IllegalCoroutineStateException("cannot resume dead coroutine");
+  }
 
-	static IllegalCoroutineStateException resumeNonSuspendedCoroutine() {
-		return new IllegalCoroutineStateException("cannot resume non-suspended coroutine");
-	}
+  static IllegalCoroutineStateException resumeNonSuspendedCoroutine() {
+    return new IllegalCoroutineStateException("cannot resume non-suspended coroutine");
+  }
 
 }

@@ -16,10 +16,9 @@
 
 package org.classdump.luna.impl;
 
-import org.classdump.luna.runtime.ReturnBuffer;
-
 import java.util.Arrays;
 import java.util.Collection;
+import org.classdump.luna.runtime.ReturnBuffer;
 
 /**
  * A return buffer implementation that stores values in an array freshly reallocated
@@ -27,165 +26,165 @@ import java.util.Collection;
  */
 class SimpleReturnBuffer implements ReturnBuffer {
 
-	private static final Object[] EMPTY_ARRAY = new Object[0];
+  private static final Object[] EMPTY_ARRAY = new Object[0];
 
-	private Object[] values;
-	private Object tailCallTarget;
-	private boolean tailCall;
+  private Object[] values;
+  private Object tailCallTarget;
+  private boolean tailCall;
 
-	public SimpleReturnBuffer() {
-		this.values = EMPTY_ARRAY;
-		this.tailCallTarget = null;
-		this.tailCall = false;
-	}
+  public SimpleReturnBuffer() {
+    this.values = EMPTY_ARRAY;
+    this.tailCallTarget = null;
+    this.tailCall = false;
+  }
 
-	@Override
-	public int size() {
-		return values.length;
-	}
+  @Override
+  public int size() {
+    return values.length;
+  }
 
-	@Override
-	public boolean isCall() {
-		return tailCall;
-	}
+  @Override
+  public boolean isCall() {
+    return tailCall;
+  }
 
-	@Override
-	public Object getCallTarget() {
-		if (!tailCall) {
-			throw new IllegalStateException("Not a tail call");
-		}
-		else {
-			return tailCallTarget;
-		}
-	}
+  @Override
+  public Object getCallTarget() {
+    if (!tailCall) {
+      throw new IllegalStateException("Not a tail call");
+    } else {
+      return tailCallTarget;
+    }
+  }
 
-	private void update(Object[] values, boolean tailCall, Object tailCallTarget) {
-		this.values = values;
-		this.tailCall = tailCall;
-		this.tailCallTarget = tailCallTarget;
-	}
+  private void update(Object[] values, boolean tailCall, Object tailCallTarget) {
+    this.values = values;
+    this.tailCall = tailCall;
+    this.tailCallTarget = tailCallTarget;
+  }
 
-	private void setReturn(Object[] values) {
-		update(values, false, null);
-	}
+  private void setReturn(Object[] values) {
+    update(values, false, null);
+  }
 
-	private void setToTailCall(Object target, Object[] args) {
-		update(args, true, target);
-	}
+  private void setToTailCall(Object target, Object[] args) {
+    update(args, true, target);
+  }
 
-	@Override
-	public void setTo() {
-		setReturn(EMPTY_ARRAY);
-	}
+  @Override
+  public void setTo() {
+    setReturn(EMPTY_ARRAY);
+  }
 
-	@Override
-	public void setTo(Object a) {
-		setReturn(new Object[] {a});
-	}
+  @Override
+  public void setTo(Object a) {
+    setReturn(new Object[]{a});
+  }
 
-	@Override
-	public void setTo(Object a, Object b) {
-		setReturn(new Object[] {a, b});
-	}
+  @Override
+  public void setTo(Object a, Object b) {
+    setReturn(new Object[]{a, b});
+  }
 
-	@Override
-	public void setTo(Object a, Object b, Object c) {
-		setReturn(new Object[] {a, b, c});
-	}
+  @Override
+  public void setTo(Object a, Object b, Object c) {
+    setReturn(new Object[]{a, b, c});
+  }
 
-	@Override
-	public void setTo(Object a, Object b, Object c, Object d) {
-		setReturn(new Object[] {a, b, c, d});
-	}
+  @Override
+  public void setTo(Object a, Object b, Object c, Object d) {
+    setReturn(new Object[]{a, b, c, d});
+  }
 
-	@Override
-	public void setTo(Object a, Object b, Object c, Object d, Object e) {
-		setReturn(new Object[] {a, b, c, d, e});
-	}
+  @Override
+  public void setTo(Object a, Object b, Object c, Object d, Object e) {
+    setReturn(new Object[]{a, b, c, d, e});
+  }
 
-	@Override
-	public void setToContentsOf(Object[] a) {
-		setReturn(Arrays.copyOf(a, a.length));
-	}
+  @Override
+  public void setToContentsOf(Object[] a) {
+    setReturn(Arrays.copyOf(a, a.length));
+  }
 
-	@Override
-	public void setToContentsOf(Collection<?> collection) {
-		setReturn(collection.toArray());
-	}
+  @Override
+  public void setToContentsOf(Collection<?> collection) {
+    setReturn(collection.toArray());
+  }
 
-	@Override
-	public void setToCall(Object target) {
-		setToTailCall(target, EMPTY_ARRAY);
-	}
+  @Override
+  public void setToCall(Object target) {
+    setToTailCall(target, EMPTY_ARRAY);
+  }
 
-	@Override
-	public void setToCall(Object target, Object arg1) {
-		setToTailCall(target, new Object[] { arg1 });
-	}
+  @Override
+  public void setToCall(Object target, Object arg1) {
+    setToTailCall(target, new Object[]{arg1});
+  }
 
-	@Override
-	public void setToCall(Object target, Object arg1, Object arg2) {
-		setToTailCall(target, new Object[] { arg1, arg2 });
-	}
+  @Override
+  public void setToCall(Object target, Object arg1, Object arg2) {
+    setToTailCall(target, new Object[]{arg1, arg2});
+  }
 
-	@Override
-	public void setToCall(Object target, Object arg1, Object arg2, Object arg3) {
-		setToTailCall(target, new Object[] { arg1, arg2, arg3 });
-	}
+  @Override
+  public void setToCall(Object target, Object arg1, Object arg2, Object arg3) {
+    setToTailCall(target, new Object[]{arg1, arg2, arg3});
+  }
 
-	@Override
-	public void setToCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4) {
-		setToTailCall(target, new Object[] { arg1, arg2, arg3, arg4 });
-	}
+  @Override
+  public void setToCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4) {
+    setToTailCall(target, new Object[]{arg1, arg2, arg3, arg4});
+  }
 
-	@Override
-	public void setToCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
-		setToTailCall(target, new Object[] { arg1, arg2, arg3, arg4, arg5 });
-	}
+  @Override
+  public void setToCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4,
+      Object arg5) {
+    setToTailCall(target, new Object[]{arg1, arg2, arg3, arg4, arg5});
+  }
 
-	@Override
-	public void setToCallWithContentsOf(Object target, Object[] args) {
-		setToTailCall(target, Arrays.copyOf(args, args.length));
-	}
+  @Override
+  public void setToCallWithContentsOf(Object target, Object[] args) {
+    setToTailCall(target, Arrays.copyOf(args, args.length));
+  }
 
-	@Override
-	public void setToCallWithContentsOf(Object target, Collection<?> args) {
-		setToTailCall(target, args.toArray());
-	}
+  @Override
+  public void setToCallWithContentsOf(Object target, Collection<?> args) {
+    setToTailCall(target, args.toArray());
+  }
 
-	@Override
-	public Object[] getAsArray() {
-		return Arrays.copyOf(values, values.length);
-	}
+  @Override
+  public Object[] getAsArray() {
+    return Arrays.copyOf(values, values.length);
+  }
 
-	@Override
-	public Object get(int idx) {
-		return idx < values.length ? values[idx] : null;
-	}
+  @Override
+  public Object get(int idx) {
+    return idx < values.length ? values[idx] : null;
+  }
 
-	@Override
-	public Object get0() {
-		return get(0);
-	}
+  @Override
+  public Object get0() {
+    return get(0);
+  }
 
-	@Override
-	public Object get1() {
-		return get(1);
-	}
+  @Override
+  public Object get1() {
+    return get(1);
+  }
 
-	@Override
-	public Object get2() {
-		return get(2);
-	}
+  @Override
+  public Object get2() {
+    return get(2);
+  }
 
-	@Override
-	public Object get3() {
-		return get(3);
-	}
+  @Override
+  public Object get3() {
+    return get(3);
+  }
 
-	@Override
-	public Object get4() {
-		return get(4);
-	}
+  @Override
+  public Object get4() {
+    return get(4);
+  }
 
 }
